@@ -11,7 +11,7 @@
   --blk-blue: #3D70D9;
   --blk-green: #4DB06E;
   --blk-yellow: #F2B03B;
-  --blk-purple: #A854C9;
+  --blk-purple: #A854CA;
   --blk-cyan: #2EB5C4;
   /* HUD — AccentPalette */
   --acc-cyan: #22D3EE;
@@ -370,6 +370,15 @@ a:focus-visible {
 
 .stack .iso { transform: translate(-50%, -30%) rotateX(58deg) rotateZ(45deg); }
 
+.stack .cube > i {
+  border-radius: 3%;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .22);
+}
+
+.stack .cube .t { background: color-mix(in srgb, var(--c) 78%, #fff); }
+.stack .cube .y { background: var(--c); }
+.stack .cube .x { background: color-mix(in srgb, var(--c) 62%, #000); }
+
 .cube.k-pulse { animation: k-pulse 2.4s ease-in-out infinite alternate; }
 .cube.k-pulse > i { animation: k-glow 2.4s ease-in-out infinite alternate; }
 
@@ -410,6 +419,15 @@ a:focus-visible {
 }
 
 .stage .iso { transform: translate(-50%, -38%) rotateX(58deg) rotateZ(45deg); }
+
+.stage .cube > i {
+  border-radius: 3%;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .22);
+}
+
+.stage .cube .t { background: color-mix(in srgb, var(--c) 78%, #fff); }
+.stage .cube .y { background: var(--c); }
+.stage .cube .x { background: color-mix(in srgb, var(--c) 62%, #000); }
 
 .cube.k-piece      { animation: k-piece var(--cycle) infinite; }
 .cube.k-bluefloor  { animation: k-bluefloor var(--cycle) infinite; }
