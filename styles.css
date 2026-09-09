@@ -1,0 +1,474 @@
+@font-face {
+  font-family: "Nippo";
+  src: url("assets/fonts/Nippo-Variable.ttf") format("truetype");
+  font-weight: 200 700;
+  font-display: swap;
+}
+
+:root {
+  /* Block palette — Theme.standardBlockPalette / BlockColor.uiColor */
+  --blk-red: #E84D3D;
+  --blk-blue: #3D70D9;
+  --blk-green: #4DB06E;
+  --blk-yellow: #F2B03B;
+  --blk-purple: #A854C9;
+  --blk-cyan: #2EB5C4;
+  /* HUD accents — AccentPalette */
+  --acc-cyan: #22D3EE;
+  --acc-coral: #FF4D5E;
+  --acc-amber: #FFB020;
+  --acc-violet: #A855F7;
+  --acc-navy: #0A1A3D;
+  /* Sky gradients — Theme.skyGradient, top stop first, exactly as makeSkyImage draws them */
+  --ds-0: #000000; --ds-1: #0A1A3D; --ds-2: #1A0D33;
+  --tw-0: #120F2E; --tw-1: #331F4D; --tw-2: #573361;
+  --su-0: #47296B; --su-1: #D9616B; --su-2: #FA944D;
+  --cu-0: #2A4C94; --cu-1: #4A7FC0; --cu-2: #8FB8DC; --cu-3: #E8B77A; --cu-4: #F2A24E;
+  --da-0: #4E8AD0; --da-1: #6FA0D4; --da-2: #A8BCC4; --da-3: #7E9C58; --da-4: #4E6B30;
+
+  --ink: #fff;
+  --ink-dim: rgba(255, 255, 255, .74);
+  --glass: rgba(0, 0, 0, .38);
+  --glass-line: rgba(255, 255, 255, .14);
+  --heading: "Nippo", -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
+  --body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  --col: 46rem;
+}
+
+* { box-sizing: border-box; }
+
+html {
+  background: var(--ds-0);
+  color: var(--ink);
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: var(--body);
+  line-height: 1.55;
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  overflow-x: hidden;
+  isolation: isolate;
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- The journey: deepspace at the top, dawn's ground at the bottom.
+   One gradient spanning the whole document; it scrolls with the page, so
+   scroll position IS the position in the sky. Each theme keeps its own
+   evenly spaced stops (as in-game); adjacent themes meet across a blend gap. */
+.sky {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  background: linear-gradient(
+    to bottom,
+    var(--ds-0) 0%,   var(--ds-1) 10%,   var(--ds-2) 20%,
+    var(--tw-0) 23%,  var(--tw-1) 30.5%, var(--tw-2) 38%,
+    var(--su-0) 41%,  var(--su-1) 48.5%, var(--su-2) 56%,
+    var(--cu-0) 64%,  var(--cu-1) 68%,   var(--cu-2) 72%,  var(--cu-3) 76%,   var(--cu-4) 80%,
+    var(--da-0) 85%,  var(--da-1) 88.5%, var(--da-2) 92%,  var(--da-3) 95.5%, var(--da-4) 100%
+  );
+}
+
+.stars {
+  position: absolute;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  background-repeat: repeat;
+  background-size: min(100vw, 640px) auto;
+}
+
+.stars--deep {
+  top: 0;
+  height: 27%;
+  background-image: url("assets/img/stars-deepspace.svg");
+  -webkit-mask-image: linear-gradient(to bottom, #000 62%, transparent);
+  mask-image: linear-gradient(to bottom, #000 62%, transparent);
+}
+
+.stars--twilight {
+  top: 19%;
+  height: 23%;
+  background-image: url("assets/img/stars-twilight.svg");
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 35%, #000 65%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, #000 35%, #000 65%, transparent);
+}
+
+/* ---------- Layout */
+.wrap {
+  width: min(100% - 2.5rem, var(--col));
+  margin-inline: auto;
+}
+
+a:focus-visible {
+  outline: 2px solid var(--acc-cyan);
+  outline-offset: 3px;
+  border-radius: .2rem;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.1rem 0;
+}
+
+.wordmark {
+  font-family: var(--heading);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .14em;
+  font-size: .82rem;
+  color: var(--ink);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+}
+
+.wordmark img {
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: .45rem;
+}
+
+.top nav {
+  display: flex;
+  gap: 1.4rem;
+}
+
+.top nav a {
+  color: var(--ink-dim);
+  text-decoration: none;
+  font-size: .9rem;
+}
+
+.top nav a:hover { color: var(--ink); }
+
+/* ---------- Hero */
+.hero {
+  min-height: calc(100vh - 4.5rem);
+  min-height: calc(100svh - 4.5rem);
+  display: grid;
+  place-content: center;
+  text-align: center;
+  padding: 3rem 0 6rem;
+}
+
+.hero .icon {
+  width: clamp(72px, 18vw, 108px);
+  height: auto;
+  margin: 0 auto 1.7rem;
+  border-radius: 22%;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .6);
+}
+
+/* In-game title: Nippo heavy (clamps to the axis max, 700), uppercase,
+   tracking 4 at 55pt ≈ .075em, four hard black offset shadows. */
+.title {
+  font-family: var(--heading);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .075em;
+  font-size: clamp(2.7rem, 12vw, 5.2rem);
+  line-height: 1;
+  margin: 0 0 0 .075em;
+  text-shadow:
+    .05em 0 0 #000,
+    -.05em 0 0 #000,
+    0 .05em 0 #000,
+    0 -.05em 0 #000;
+}
+
+.tagline {
+  font-size: clamp(1.05rem, 3.8vw, 1.4rem);
+  color: var(--ink-dim);
+  margin: 1.3rem 0 2.1rem;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, .5);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .6rem;
+  padding: .62rem 1.05rem;
+  border: 1px solid rgba(255, 255, 255, .3);
+  border-radius: 999px;
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  font-family: var(--heading);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  font-size: .72rem;
+  color: var(--ink);
+}
+
+.badge::before {
+  content: "";
+  width: .5rem;
+  height: .5rem;
+  border-radius: 50%;
+  background: var(--acc-cyan);
+  box-shadow: 0 0 12px var(--acc-cyan);
+}
+
+/* ---------- Sections */
+.section { padding: 5rem 0; }
+
+.h2 {
+  font-family: var(--heading);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  font-size: clamp(1.35rem, 5vw, 1.95rem);
+  margin: 0 0 .5rem;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, .5);
+}
+
+.lead {
+  color: var(--ink-dim);
+  margin: 0 0 2.2rem;
+  max-width: 34rem;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, .4);
+}
+
+.card {
+  background: var(--glass);
+  border: 1px solid var(--glass-line);
+  border-radius: 1.25rem;
+  padding: 1.4rem;
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+
+.steps {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 720px) {
+  .steps { grid-template-columns: repeat(3, 1fr); }
+}
+
+.step-n {
+  font-family: var(--heading);
+  font-weight: 700;
+  letter-spacing: .12em;
+  font-size: .72rem;
+  color: var(--acc-cyan);
+}
+
+.step h3 {
+  font-family: var(--heading);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-size: 1.05rem;
+  margin: .35rem 0 .5rem;
+}
+
+.step p {
+  margin: 0;
+  color: var(--ink-dim);
+  font-size: .95rem;
+}
+
+.glyph {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: .3rem;
+  width: 7.4rem;
+  margin-bottom: 1.3rem;
+}
+
+.b {
+  aspect-ratio: 1;
+  border-radius: 22%;
+  box-shadow:
+    inset 0 .3em 0 rgba(255, 255, 255, .26),
+    inset 0 -.28em 0 rgba(0, 0, 0, .2);
+}
+
+.b-red    { background: var(--blk-red); }
+.b-blue   { background: var(--blk-blue); }
+.b-green  { background: var(--blk-green); }
+.b-yellow { background: var(--blk-yellow); }
+.b-purple { background: var(--blk-purple); }
+.b-cyan   { background: var(--blk-cyan); }
+.b-empty  { background: rgba(255, 255, 255, .07); box-shadow: none; }
+.b-hot    { box-shadow: inset 0 .3em 0 rgba(255, 255, 255, .4), 0 0 .9em rgba(255, 255, 255, .55); }
+.b-drop   { transform: translateY(-.15rem); }
+
+/* ---------- Gallery */
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: .9rem;
+}
+
+@media (min-width: 640px) {
+  .gallery { grid-template-columns: repeat(3, 1fr); }
+}
+
+.shot {
+  position: relative;
+  aspect-ratio: 1179 / 2556;
+  border-radius: 12% / 5.5%;
+  overflow: hidden;
+  margin: 0;
+  background: var(--glass);
+  border: 1px solid var(--glass-line);
+}
+
+.shot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.shot .fill {
+  position: absolute;
+  inset: 0;
+  opacity: .9;
+}
+
+.fill-red    { background: var(--blk-red); }
+.fill-blue   { background: var(--blk-blue); }
+.fill-yellow { background: var(--blk-yellow); }
+.fill-purple { background: var(--blk-purple); }
+
+.chip {
+  position: absolute;
+  left: .6rem;
+  bottom: .6rem;
+  font-family: var(--heading);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  font-size: .58rem;
+  padding: .38rem .58rem;
+  border-radius: 999px;
+  color: var(--ink);
+  background: rgba(0, 0, 0, .58);
+  border: 1px solid rgba(255, 255, 255, .22);
+}
+
+/* ---------- Footer (sits on dawn's ground) */
+.foot {
+  padding: 4rem 0 3rem;
+  text-align: center;
+}
+
+.foot nav {
+  display: flex;
+  justify-content: center;
+  gap: 1.6rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.foot a {
+  color: var(--ink);
+  text-decoration: none;
+  font-family: var(--heading);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  font-size: .72rem;
+}
+
+.foot a:hover { text-decoration: underline; text-underline-offset: .25em; }
+
+.foot small {
+  color: var(--ink-dim);
+  font-size: .8rem;
+}
+
+/* ---------- Document pages (privacy, contact) */
+.doc { margin: 1rem 0 5rem; }
+
+.doc .card { padding: clamp(1.4rem, 5vw, 2.6rem); }
+
+.doc h1 {
+  font-family: var(--heading);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-size: clamp(1.6rem, 6vw, 2.4rem);
+  line-height: 1.1;
+  margin: 0 0 .5rem;
+}
+
+.doc .meta {
+  color: var(--ink-dim);
+  font-size: .9rem;
+  margin: 0 0 2rem;
+}
+
+.doc h2 {
+  font-family: var(--heading);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-size: 1rem;
+  margin: 2.3rem 0 .6rem;
+}
+
+.doc p, .doc li {
+  color: rgba(255, 255, 255, .88);
+}
+
+.doc ul { padding-left: 1.2rem; }
+.doc li { margin: .3rem 0; }
+
+.doc a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: .15em;
+}
+
+.note {
+  border-left: 3px solid var(--acc-amber);
+  padding: .65rem .95rem;
+  background: rgba(255, 176, 32, .09);
+  border-radius: .45rem;
+  font-size: .9rem;
+}
+
+.contact .card { text-align: center; }
+
+.contact .big {
+  display: inline-block;
+  font-family: var(--heading);
+  font-weight: 700;
+  font-size: clamp(1.2rem, 5.5vw, 1.8rem);
+  letter-spacing: .02em;
+  margin: .5rem 0 1.6rem;
+  text-decoration: none;
+  color: var(--ink);
+  word-break: break-all;
+}
+
+.contact .big:hover { text-decoration: underline; text-underline-offset: .2em; }
+
+.contact .links {
+  display: flex;
+  justify-content: center;
+  gap: 1.4rem;
+  flex-wrap: wrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
