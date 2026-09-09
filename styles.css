@@ -6,20 +6,25 @@
 }
 
 :root {
-  /* Block palette — Theme.standardBlockPalette / BlockColor.uiColor */
+  /* Block palette — Theme.standardBlockPalette */
   --blk-red: #E84D3D;
   --blk-blue: #3D70D9;
   --blk-green: #4DB06E;
   --blk-yellow: #F2B03B;
   --blk-purple: #A854C9;
   --blk-cyan: #2EB5C4;
-  /* HUD accents — AccentPalette */
+  /* HUD — AccentPalette */
   --acc-cyan: #22D3EE;
+  --acc-violet: #A855F7;
   --acc-coral: #FF4D5E;
   --acc-amber: #FFB020;
-  --acc-violet: #A855F7;
   --acc-navy: #0A1A3D;
-  /* Sky gradients — Theme.skyGradient, top stop first, exactly as makeSkyImage draws them */
+  --score-orange: #F97316;
+  --score-gold: #F4B942;
+  --popup-points: #FF8C1A;
+  --pit-rim: #F28C6B;
+  --pit-frame: #5C4733;
+  /* Sky gradients — Theme.skyGradient, top stop first */
   --ds-0: #000000; --ds-1: #0A1A3D; --ds-2: #1A0D33;
   --tw-0: #120F2E; --tw-1: #331F4D; --tw-2: #573361;
   --su-0: #47296B; --su-1: #D9616B; --su-2: #FA944D;
@@ -27,12 +32,14 @@
   --da-0: #4E8AD0; --da-1: #6FA0D4; --da-2: #A8BCC4; --da-3: #7E9C58; --da-4: #4E6B30;
 
   --ink: #fff;
-  --ink-dim: rgba(255, 255, 255, .74);
-  --glass: rgba(0, 0, 0, .38);
-  --glass-line: rgba(255, 255, 255, .14);
+  --ink-dim: rgba(255, 255, 255, .72);
+  --glass-tint: rgba(0, 0, 0, .34);
   --heading: "Nippo", -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
   --body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
-  --col: 46rem;
+  --col: 62rem;
+  --sp: clamp(3rem, 8vw, 5.5rem);
+  --S: 40px;
+  --cycle: 7.2s;
 }
 
 * { box-sizing: border-box; }
@@ -41,13 +48,12 @@ html {
   background: var(--ds-0);
   color: var(--ink);
   -webkit-text-size-adjust: 100%;
-  scroll-behavior: smooth;
 }
 
 body {
   margin: 0;
   font-family: var(--body);
-  line-height: 1.55;
+  line-height: 1.5;
   position: relative;
   min-height: 100vh;
   min-height: 100svh;
@@ -57,10 +63,11 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ---------- The journey: deepspace at the top, dawn's ground at the bottom.
-   One gradient spanning the whole document; it scrolls with the page, so
-   scroll position IS the position in the sky. Each theme keeps its own
-   evenly spaced stops (as in-game); adjacent themes meet across a blend gap. */
+/* =========================================================
+   THE JOURNEY — one gradient across the whole document,
+   deepspace at the top down to dawn's ground. Scroll position
+   is sky position; nothing listens to scroll.
+   ========================================================= */
 .sky {
   position: absolute;
   inset: 0;
@@ -69,44 +76,78 @@ body {
   overflow: hidden;
   background: linear-gradient(
     to bottom,
-    var(--ds-0) 0%,   var(--ds-1) 10%,   var(--ds-2) 20%,
-    var(--tw-0) 23%,  var(--tw-1) 30.5%, var(--tw-2) 38%,
-    var(--su-0) 41%,  var(--su-1) 48.5%, var(--su-2) 56%,
-    var(--cu-0) 64%,  var(--cu-1) 68%,   var(--cu-2) 72%,  var(--cu-3) 76%,   var(--cu-4) 80%,
-    var(--da-0) 85%,  var(--da-1) 88.5%, var(--da-2) 92%,  var(--da-3) 95.5%, var(--da-4) 100%
+    var(--ds-0) 0%,   var(--ds-1) 14%,   var(--ds-2) 28%,
+    var(--tw-0) 31%,  var(--tw-1) 38%,   var(--tw-2) 45%,
+    var(--su-0) 48%,  var(--su-1) 54%,   var(--su-2) 60%,
+    var(--cu-0) 66%,  var(--cu-1) 69.5%, var(--cu-2) 73%,  var(--cu-3) 76.5%, var(--cu-4) 80%,
+    var(--da-0) 84%,  var(--da-1) 87.5%, var(--da-2) 91%,  var(--da-3) 94.5%, var(--da-4) 100%
   );
 }
 
+/* Star field: four interleaved groups of the same seeded field,
+   each twinkling and drifting on its own phase. Tiles render 1:1
+   so every star stays a sharp point. */
 .stars {
   position: absolute;
   left: 0;
   right: 0;
   pointer-events: none;
-  background-repeat: repeat;
-  background-size: min(100vw, 640px) auto;
+  overflow: hidden;
 }
 
 .stars--deep {
   top: 0;
-  height: 27%;
-  background-image: url("assets/img/stars-deepspace.svg");
-  -webkit-mask-image: linear-gradient(to bottom, #000 62%, transparent);
-  mask-image: linear-gradient(to bottom, #000 62%, transparent);
+  height: 38%;
+  -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent);
+  mask-image: linear-gradient(to bottom, #000 55%, transparent);
 }
 
 .stars--twilight {
-  top: 19%;
-  height: 23%;
-  background-image: url("assets/img/stars-twilight.svg");
+  top: 26%;
+  height: 26%;
   -webkit-mask-image: linear-gradient(to bottom, transparent, #000 35%, #000 65%, transparent);
   mask-image: linear-gradient(to bottom, transparent, #000 35%, #000 65%, transparent);
 }
 
-/* ---------- Layout */
+.sg {
+  position: absolute;
+  inset: -6% 0;
+  display: block;
+  background-repeat: repeat;
+  background-size: 512px 1024px;
+  will-change: opacity, transform;
+  animation:
+    twinkle var(--tw) ease-in-out infinite alternate,
+    drift var(--dr) ease-in-out infinite alternate;
+  animation-delay: var(--ph), calc(var(--ph) * 3);
+}
+
+.sg1 { background-image: url("assets/img/stars-deep-1.svg"); --tw: 3.1s; --dr: 90s; --ph: -0.4s; }
+.sg2 { background-image: url("assets/img/stars-deep-2.svg"); --tw: 4.7s; --dr: 120s; --ph: -2.1s; background-position: 37px 111px; }
+.sg3 { background-image: url("assets/img/stars-deep-3.svg"); --tw: 5.9s; --dr: 150s; --ph: -1.3s; background-position: 140px 61px; }
+.sg4 { background-image: url("assets/img/stars-deep-4.svg"); --tw: 7.3s; --dr: 200s; --ph: -3.7s; background-position: 259px 233px; }
+.sg5 { background-image: url("assets/img/stars-twi-1.svg"); --tw: 5.3s; --dr: 130s; --ph: -1.9s; }
+.sg6 { background-image: url("assets/img/stars-twi-2.svg"); --tw: 6.8s; --dr: 170s; --ph: -4.2s; background-position: 90px 180px; }
+
+@keyframes twinkle {
+  from { opacity: 1; }
+  to   { opacity: .42; }
+}
+
+@keyframes drift {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(0, -3%, 0); }
+}
+
+/* =========================================================
+   Layout + type
+   ========================================================= */
 .wrap {
   width: min(100% - 2.5rem, var(--col));
   margin-inline: auto;
 }
+
+.narrow { --col: 46rem; }
 
 a:focus-visible {
   outline: 2px solid var(--acc-cyan);
@@ -153,32 +194,199 @@ a:focus-visible {
 
 .top nav a:hover { color: var(--ink); }
 
-/* ---------- Hero */
+.eyebrow {
+  font-family: var(--heading);
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  font-size: .7rem;
+  color: var(--acc-cyan);
+  margin: 0 0 .6rem;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, .5);
+}
+
+.h2 {
+  font-family: var(--heading);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-size: clamp(1.7rem, 6vw, 2.6rem);
+  line-height: 1;
+  margin: 0 0 .7rem;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, .5);
+}
+
+.lead {
+  color: var(--ink-dim);
+  margin: 0;
+  max-width: 34rem;
+  font-size: 1.02rem;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, .45);
+}
+
+.section { padding: var(--sp) 0; }
+
+.section-head { margin-bottom: clamp(1.6rem, 4vw, 2.4rem); }
+
+/* In-game GlassPanel: ultra-thin material, black tint, 1px cyan→violet
+   hairline, soft drop shadow. */
+.glass {
+  position: relative;
+  border-radius: 18px;
+  background: var(--glass-tint);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  backdrop-filter: blur(16px) saturate(1.2);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, .28);
+}
+
+.glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(34, 211, 238, .5), rgba(168, 85, 247, .18));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* =========================================================
+   Cube — makeCube's chamfered, glossy block, three visible faces
+   ========================================================= */
+.scene {
+  position: relative;
+  perspective: 1400px;
+  perspective-origin: 50% 35%;
+}
+
+.iso {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform-style: preserve-3d;
+  transform: translate(-50%, -50%) rotateX(58deg) rotateZ(45deg);
+}
+
+.cube {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--S);
+  height: var(--S);
+  transform-style: preserve-3d;
+  transform-origin: 50% 50% calc(var(--S) / 2);
+  transform: translate3d(calc(var(--i) * var(--S)), calc(var(--j) * var(--S)), calc(var(--l) * var(--S)));
+}
+
+.cube > i {
+  position: absolute;
+  inset: 0;
+  display: block;
+  border-radius: 17%;
+  backface-visibility: hidden;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .16);
+  background: var(--c);
+}
+
+.cube .t {
+  transform: translateZ(var(--S));
+  background:
+    radial-gradient(85% 65% at 36% 26%, rgba(255, 255, 255, .58), rgba(255, 255, 255, 0) 62%),
+    color-mix(in srgb, var(--c) 74%, #fff);
+}
+
+.cube .y {
+  transform: translateY(calc(var(--S) / 2)) translateZ(calc(var(--S) / 2)) rotateX(-90deg);
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--c) 96%, #fff), color-mix(in srgb, var(--c) 78%, #000));
+}
+
+.cube .x {
+  transform: translateX(calc(var(--S) / 2)) translateZ(calc(var(--S) / 2)) rotateY(90deg);
+  background: linear-gradient(to right, color-mix(in srgb, var(--c) 80%, #000), color-mix(in srgb, var(--c) 58%, #000));
+}
+
+.c-red    { --c: var(--blk-red); }
+.c-blue   { --c: var(--blk-blue); }
+.c-green  { --c: var(--blk-green); }
+.c-yellow { --c: var(--blk-yellow); }
+.c-purple { --c: var(--blk-purple); }
+.c-cyan   { --c: var(--blk-cyan); }
+
+/* The pit: 4×4 floor with the game's warm rim */
+.pit {
+  width: calc(var(--S) * 4);
+  height: calc(var(--S) * 4);
+}
+
+.floor {
+  position: absolute;
+  inset: 0;
+  transform: translateZ(0);
+  background:
+    linear-gradient(to right, rgba(255, 255, 255, .12) 1px, transparent 1px) 0 0 / var(--S) var(--S),
+    linear-gradient(to bottom, rgba(255, 255, 255, .12) 1px, transparent 1px) 0 0 / var(--S) var(--S),
+    rgba(0, 0, 0, .42);
+  box-shadow:
+    0 0 0 3px rgba(242, 140, 107, .75),
+    0 0 0 4px rgba(92, 71, 51, .9),
+    0 0 40px rgba(0, 0, 0, .55);
+  border-radius: 2px;
+}
+
+/* =========================================================
+   Hero
+   ========================================================= */
 .hero {
   min-height: calc(100vh - 4.5rem);
   min-height: calc(100svh - 4.5rem);
   display: grid;
-  place-content: center;
+  align-content: center;
+  justify-items: center;
   text-align: center;
-  padding: 3rem 0 6rem;
+  padding: 2rem 0 3rem;
+  position: relative;
+}
+
+.hero-pieces {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(1.2rem, 6vw, 3.4rem);
+  margin-bottom: 1.4rem;
 }
 
 .hero .icon {
-  width: clamp(72px, 18vw, 108px);
+  width: clamp(76px, 18vw, 112px);
   height: auto;
-  margin: 0 auto 1.7rem;
   border-radius: 22%;
   box-shadow: 0 18px 50px rgba(0, 0, 0, .6);
 }
 
-/* In-game title: Nippo heavy (clamps to the axis max, 700), uppercase,
-   tracking 4 at 55pt ≈ .075em, four hard black offset shadows. */
+.float {
+  --S: clamp(18px, 4.6vw, 26px);
+  width: calc(var(--S) * 5);
+  height: calc(var(--S) * 4.2);
+  animation: bob 6s ease-in-out infinite alternate;
+}
+
+.float--b { animation-delay: -2.7s; animation-duration: 7s; }
+
+@keyframes bob {
+  from { transform: translateY(-5px); }
+  to   { transform: translateY(6px); }
+}
+
+/* BlockPitTitleText: Nippo heavy (axis max 700), uppercase, tracking 4/55,
+   four hard black offsets. */
 .title {
   font-family: var(--heading);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .075em;
-  font-size: clamp(2.7rem, 12vw, 5.2rem);
+  font-size: clamp(2.9rem, 13vw, 5.6rem);
   line-height: 1;
   margin: 0 0 0 .075em;
   text-shadow:
@@ -191,7 +399,7 @@ a:focus-visible {
 .tagline {
   font-size: clamp(1.05rem, 3.8vw, 1.4rem);
   color: var(--ink-dim);
-  margin: 1.3rem 0 2.1rem;
+  margin: 1.1rem 0 1.7rem;
   text-shadow: 0 1px 10px rgba(0, 0, 0, .5);
 }
 
@@ -200,11 +408,7 @@ a:focus-visible {
   align-items: center;
   gap: .6rem;
   padding: .62rem 1.05rem;
-  border: 1px solid rgba(255, 255, 255, .3);
   border-radius: 999px;
-  background: var(--glass);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
   font-family: var(--heading);
   font-weight: 700;
   text-transform: uppercase;
@@ -213,59 +417,235 @@ a:focus-visible {
   color: var(--ink);
 }
 
-.badge::before {
+.badge::after {
   content: "";
   width: .5rem;
   height: .5rem;
   border-radius: 50%;
   background: var(--acc-cyan);
   box-shadow: 0 0 12px var(--acc-cyan);
+  order: -1;
 }
 
-/* ---------- Sections */
-.section { padding: 5rem 0; }
+/* HUD cards, as laid out in-game: score left, level right */
+.hud {
+  display: flex;
+  gap: .8rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 2.2rem;
+}
 
-.h2 {
+.hud-card {
+  padding: .7rem 1rem;
+  min-width: 6.4rem;
+  text-align: center;
+}
+
+.hud-label {
   font-family: var(--heading);
   font-weight: 700;
+  letter-spacing: .18em;
+  font-size: .58rem;
   text-transform: uppercase;
-  letter-spacing: .1em;
-  font-size: clamp(1.35rem, 5vw, 1.95rem);
-  margin: 0 0 .5rem;
-  text-shadow: 0 2px 14px rgba(0, 0, 0, .5);
+  color: var(--acc-cyan);
 }
 
-.lead {
-  color: var(--ink-dim);
-  margin: 0 0 2.2rem;
-  max-width: 34rem;
-  text-shadow: 0 1px 10px rgba(0, 0, 0, .4);
+.hud-num {
+  font-family: var(--heading);
+  font-weight: 700;
+  font-size: 1.7rem;
+  line-height: 1.1;
+  background: linear-gradient(to bottom, var(--acc-cyan), var(--acc-violet));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
-.card {
-  background: var(--glass);
-  border: 1px solid var(--glass-line);
-  border-radius: 1.25rem;
-  padding: 1.4rem;
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
+.hud-sub {
+  font-size: .7rem;
+  color: var(--score-gold);
+  font-weight: 600;
 }
 
-.steps {
+.hud-next {
   display: grid;
-  gap: 1rem;
+  grid-template-columns: repeat(3, .62rem);
+  gap: .14rem;
+  justify-content: center;
+  margin-top: .35rem;
 }
 
-@media (min-width: 720px) {
-  .steps { grid-template-columns: repeat(3, 1fr); }
+.hud-next i {
+  aspect-ratio: 1;
+  border-radius: 22%;
+  background: var(--blk-yellow);
+  box-shadow: inset 0 .12em 0 rgba(255, 255, 255, .35);
 }
+
+.hud-next i.e { background: transparent; box-shadow: none; }
+
+.hud-bar {
+  height: .3rem;
+  width: 100%;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .12);
+  margin-top: .45rem;
+  overflow: hidden;
+}
+
+.hud-bar i {
+  display: block;
+  height: 100%;
+  width: 34%;
+  border-radius: inherit;
+  background: linear-gradient(to right, var(--acc-cyan), var(--acc-violet));
+}
+
+.hint {
+  margin-top: 2.4rem;
+  display: inline-flex;
+  align-items: center;
+  gap: .7rem;
+  padding: .7rem 1.4rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: .85rem;
+  color: var(--ink-dim);
+  text-decoration: none;
+}
+
+.hint:hover { color: var(--ink); }
+
+/* =========================================================
+   How it works — one stage, three synced steps
+   ========================================================= */
+.stage {
+  display: grid;
+  gap: 1.2rem;
+  padding: clamp(1rem, 3vw, 1.8rem);
+}
+
+@media (min-width: 820px) {
+  .stage {
+    grid-template-columns: 1.15fr 1fr;
+    align-items: center;
+    gap: 2rem;
+  }
+}
+
+.stage .scene {
+  height: clamp(300px, 70vw, 380px);
+  --S: clamp(30px, 8.2vw, 44px);
+}
+
+@media (min-width: 820px) {
+  .stage .scene { height: 400px; --S: 46px; }
+}
+
+.stage .iso { transform: translate(-50%, -38%) rotateX(58deg) rotateZ(45deg); }
+
+.cube.k-piece      { animation: k-piece var(--cycle) infinite; }
+.cube.k-bluefloor  { animation: k-bluefloor var(--cycle) infinite; }
+.cube.k-fall       { animation: k-fall var(--cycle) infinite; }
+.cube.k-yellowfloor{ animation: k-yellowfloor var(--cycle) infinite; }
+
+@keyframes k-piece {
+  0%, 9%   { transform: translate3d(calc(var(--i) * var(--S)), calc(var(--j) * var(--S)), calc((var(--l) + 2.6) * var(--S))) scale3d(1, 1, 1); opacity: 1; animation-timing-function: cubic-bezier(.5, 0, 1, .6); }
+  17%      { transform: translate3d(calc(var(--i) * var(--S)), calc(var(--j) * var(--S)), calc(var(--l) * var(--S))) scale3d(1, 1, 1); opacity: 1; animation-timing-function: cubic-bezier(.42, 0, 1, 1); }
+  21%      { transform: translate3d(calc(var(--i) * var(--S)), calc(var(--j) * var(--S)), calc(var(--l) * var(--S))) scale3d(1.28, 1.28, 1.28); opacity: 1; animation-timing-function: cubic-bezier(.42, 0, 1, 1); }
+  24%, 90% { transform: translate3d(calc(var(--i) * var(--S)), calc(var(--j) * var(--S)), calc(var(--l) * var(--S))) scale3d(.1, .1, .1); opacity: 0; }
+  96%      { transform: translate3d(calc(var(--i) * var(--S)), calc(var(--j) * var(--S)), calc((var(--l) + 2.6) * var(--S))) scale3d(1, 1, 1); opacity: 0; }
+  100%     { transform: translate3d(calc(var(--i) * var(--S)), calc(var(--j) * var(--S)), calc((var(--l) + 2.6) * var(--S))) scale3d(1, 1, 1); opacity: 1; }
+}
+
+@keyframes k-bluefloor {
+  0%, 17%  { transform: translate3d(calc(var(--i) * var(--S)), calc(var(--j) * var(--S)), calc(var(--l) * var(--S))) scale3d(1, 1, 1); opacity: 1; animation-timing-function: cubic-bezier(.42, 0, 1, 1); }
+  21%      { transform: translate3d(calc(var(--i) * var(--S)), calc(var(--j) * var(--S)), calc(var(--l) * var(--S))) scale3d(1.28, 1.28, 1.28); opacity: 1; animation-timing-function: cubic-bezier(.42, 0, 1, 1); }
+  24%, 90% { transform: translate3d(calc(var(--i) * var(--S)), calc(var(--j) * var(--S)), calc(var(--l) * var(--S))) scale3d(.1, .1, .1); opacity: 0; }
+  96%      { transform: translate3d(calc(var(--i) * var(--S)), calc(var(--j) * var(--S)), calc(var(--l) * var(--S))) scale3d(1, 1, 1); opacity: 0; }
+  100%     { transform: translate3d(calc(var(--i) * var(--S)), calc(var(--j) * var(--S)), calc(var(--l) * var(--S))) scale3d(1, 1, 1); opacity: 1; }
+}
+
+@keyframes k-fall {
+  0%, 27%  { transform: translate3d(calc(var(--i) * var(--S)), calc(var(--j) * var(--S)), calc((var(--l) + 1) * var(--S))) scale3d(1, 1, 1); opacity: 1; animation-timing-function: cubic-bezier(.5, 0, 1, .6); }
+  32%      { transform: translate3d(calc(var(--i) * var(--S)), calc(var(--j) * var(--S)), calc(var(--l) * var(--S))) scale3d(1, 1, 1); opacity: 1; animation-timing-function: cubic-bezier(.42, 0, 1, 1); }
+  38%      { transform: translate3d(calc(var(--i) * var(--S)), calc(var(--j) * var(--S)), calc(var(--l) * var(--S))) scale3d(1.28, 1.28, 1.28); opacity: 1; animation-timing-function: cubic-bezier(.42, 0, 1, 1); }
+  41%, 90% { transform: translate3d(calc(var(--i) * var(--S)), calc(var(--j) * var(--S)), calc(var(--l) * var(--S))) scale3d(.1, .1, .1); opacity: 0; }
+  96%      { transform: translate3d(calc(var(--i) * var(--S)), calc(var(--j) * var(--S)), calc((var(--l) + 1) * var(--S))) scale3d(1, 1, 1); opacity: 0; }
+  100%     { transform: translate3d(calc(var(--i) * var(--S)), calc(var(--j) * var(--S)), calc((var(--l) + 1) * var(--S))) scale3d(1, 1, 1); opacity: 1; }
+}
+
+@keyframes k-yellowfloor {
+  0%, 32%  { transform: translate3d(calc(var(--i) * var(--S)), calc(var(--j) * var(--S)), calc(var(--l) * var(--S))) scale3d(1, 1, 1); opacity: 1; animation-timing-function: cubic-bezier(.42, 0, 1, 1); }
+  38%      { transform: translate3d(calc(var(--i) * var(--S)), calc(var(--j) * var(--S)), calc(var(--l) * var(--S))) scale3d(1.28, 1.28, 1.28); opacity: 1; animation-timing-function: cubic-bezier(.42, 0, 1, 1); }
+  41%, 90% { transform: translate3d(calc(var(--i) * var(--S)), calc(var(--j) * var(--S)), calc(var(--l) * var(--S))) scale3d(.1, .1, .1); opacity: 0; }
+  96%      { transform: translate3d(calc(var(--i) * var(--S)), calc(var(--j) * var(--S)), calc(var(--l) * var(--S))) scale3d(1, 1, 1); opacity: 0; }
+  100%     { transform: translate3d(calc(var(--i) * var(--S)), calc(var(--j) * var(--S)), calc(var(--l) * var(--S))) scale3d(1, 1, 1); opacity: 1; }
+}
+
+/* In-game score / chain pop-outs, timed to the bursts */
+.pop {
+  position: absolute;
+  left: 50%;
+  font-family: var(--heading);
+  font-weight: 700;
+  font-size: 1.6rem;
+  letter-spacing: .02em;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate(-50%, 0) scale(.6);
+  text-shadow: 1px 0 0 #000, -1px 0 0 #000, 0 1px 0 #000, 0 -1px 0 #000, 0 3px 6px rgba(0, 0, 0, .45);
+  pointer-events: none;
+}
+
+.pop--points { top: 30%; color: var(--popup-points); animation: pop-points var(--cycle) infinite; }
+.pop--chain  { top: 22%; color: var(--score-orange); font-size: 2rem; animation: pop-chain var(--cycle) infinite; }
+
+@keyframes pop-points {
+  0%, 23%  { opacity: 0; transform: translate(-50%, 0) scale(.6); }
+  26%      { opacity: 1; transform: translate(-50%, -10px) scale(1.22); }
+  29%      { transform: translate(-50%, -18px) scale(1); }
+  36%, 100%{ opacity: 0; transform: translate(-50%, -36px) scale(1); }
+}
+
+@keyframes pop-chain {
+  0%, 40%  { opacity: 0; transform: translate(-50%, 0) scale(.6); }
+  43%      { opacity: 1; transform: translate(-50%, -10px) scale(1.27); }
+  46%      { transform: translate(-50%, -18px) scale(1); }
+  54%, 100%{ opacity: 0; transform: translate(-50%, -38px) scale(1); }
+}
+
+/* Stepper: rows light up with the phase they describe */
+.steps { display: grid; gap: .2rem; }
+
+.step {
+  display: grid;
+  grid-template-columns: 2.6rem 1fr;
+  gap: .2rem 1rem;
+  padding: 1rem .6rem 1rem 0;
+  border-left: 2px solid rgba(255, 255, 255, .12);
+  padding-left: 1.1rem;
+  opacity: .5;
+  animation: var(--cycle) infinite;
+}
+
+.step:nth-child(1) { animation-name: step-a; }
+.step:nth-child(2) { animation-name: step-b; }
+.step:nth-child(3) { animation-name: step-c; }
+
+@keyframes step-a { 0%, 17% { opacity: 1; border-color: var(--acc-cyan); } 22%, 100% { opacity: .5; border-color: rgba(255,255,255,.12); } }
+@keyframes step-b { 0%, 17% { opacity: .5; } 19%, 30% { opacity: 1; border-color: var(--acc-cyan); } 34%, 100% { opacity: .5; border-color: rgba(255,255,255,.12); } }
+@keyframes step-c { 0%, 30% { opacity: .5; } 32%, 52% { opacity: 1; border-color: var(--acc-cyan); } 58%, 100% { opacity: .5; border-color: rgba(255,255,255,.12); } }
 
 .step-n {
   font-family: var(--heading);
   font-weight: 700;
-  letter-spacing: .12em;
-  font-size: .72rem;
+  font-size: 1.6rem;
+  line-height: 1;
   color: var(--acc-cyan);
+  grid-row: span 2;
+  align-self: start;
 }
 
 .step h3 {
@@ -274,7 +654,8 @@ a:focus-visible {
   text-transform: uppercase;
   letter-spacing: .08em;
   font-size: 1.05rem;
-  margin: .35rem 0 .5rem;
+  margin: .15rem 0 0;
+  line-height: 1.2;
 }
 
 .step p {
@@ -283,90 +664,111 @@ a:focus-visible {
   font-size: .95rem;
 }
 
-.glyph {
+/* =========================================================
+   Five skies
+   ========================================================= */
+.skies {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: .3rem;
-  width: 7.4rem;
-  margin-bottom: 1.3rem;
-}
-
-.b {
-  aspect-ratio: 1;
-  border-radius: 22%;
-  box-shadow:
-    inset 0 .3em 0 rgba(255, 255, 255, .26),
-    inset 0 -.28em 0 rgba(0, 0, 0, .2);
-}
-
-.b-red    { background: var(--blk-red); }
-.b-blue   { background: var(--blk-blue); }
-.b-green  { background: var(--blk-green); }
-.b-yellow { background: var(--blk-yellow); }
-.b-purple { background: var(--blk-purple); }
-.b-cyan   { background: var(--blk-cyan); }
-.b-empty  { background: rgba(255, 255, 255, .07); box-shadow: none; }
-.b-hot    { box-shadow: inset 0 .3em 0 rgba(255, 255, 255, .4), 0 0 .9em rgba(255, 255, 255, .55); }
-.b-drop   { transform: translateY(-.15rem); }
-
-/* ---------- Gallery */
-.gallery {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-auto-flow: column;
+  grid-auto-columns: 62%;
   gap: .9rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: .2rem 1.25rem 1rem;
+  margin: 0 -1.25rem;
+  scrollbar-width: none;
 }
 
-@media (min-width: 640px) {
-  .gallery { grid-template-columns: repeat(3, 1fr); }
+.skies::-webkit-scrollbar { display: none; }
+
+@media (min-width: 560px) { .skies { grid-auto-columns: 40%; } }
+
+@media (min-width: 900px) {
+  .skies {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(5, 1fr);
+    grid-auto-columns: auto;
+    overflow: visible;
+    padding: 0;
+    margin: 0;
+  }
 }
 
-.shot {
-  position: relative;
-  aspect-ratio: 1179 / 2556;
-  border-radius: 12% / 5.5%;
+.sky-card {
+  scroll-snap-align: start;
   overflow: hidden;
-  margin: 0;
-  background: var(--glass);
-  border: 1px solid var(--glass-line);
+  padding: .45rem;
 }
 
-.shot img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+.swatch {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  border-radius: 13px;
+  overflow: hidden;
 }
 
-.shot .fill {
+.swatch::after {
+  content: "";
   position: absolute;
   inset: 0;
-  opacity: .9;
+  background-repeat: repeat;
+  background-size: 256px 512px;
+  opacity: 0;
 }
 
-.fill-red    { background: var(--blk-red); }
-.fill-blue   { background: var(--blk-blue); }
-.fill-yellow { background: var(--blk-yellow); }
-.fill-purple { background: var(--blk-purple); }
+.sw-dawn      { background: linear-gradient(to bottom, var(--da-0), var(--da-1), var(--da-2), var(--da-3), var(--da-4)); }
+.sw-cumulus   { background: linear-gradient(to bottom, var(--cu-0), var(--cu-1), var(--cu-2), var(--cu-3), var(--cu-4)); }
+.sw-sunset    { background: linear-gradient(to bottom, var(--su-0), var(--su-1), var(--su-2)); }
+.sw-twilight  { background: linear-gradient(to bottom, var(--tw-0), var(--tw-1), var(--tw-2)); }
+.sw-deepspace { background: linear-gradient(to bottom, var(--ds-0), var(--ds-1), var(--ds-2)); }
 
-.chip {
-  position: absolute;
-  left: .6rem;
-  bottom: .6rem;
+.sw-twilight::after  { background-image: url("assets/img/stars-twi-1.svg"); opacity: 1; }
+.sw-deepspace::after { background-image: url("assets/img/stars-deep-1.svg"), url("assets/img/stars-deep-2.svg"); opacity: 1; }
+
+.sky-name {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: .5rem;
+  padding: .75rem .45rem .4rem;
+}
+
+.sky-name b {
   font-family: var(--heading);
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .1em;
-  font-size: .58rem;
-  padding: .38rem .58rem;
-  border-radius: 999px;
-  color: var(--ink);
-  background: rgba(0, 0, 0, .58);
-  border: 1px solid rgba(255, 255, 255, .22);
+  font-variant-caps: small-caps;
+  letter-spacing: .12em;
+  font-size: 1rem;
 }
 
-/* ---------- Footer (sits on dawn's ground) */
+.sky-name small {
+  font-family: var(--heading);
+  font-weight: 700;
+  letter-spacing: .1em;
+  font-size: .6rem;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+}
+
+/* Six blocks — the palette itself */
+.palette {
+  display: flex;
+  justify-content: center;
+  gap: clamp(.6rem, 3vw, 1.4rem);
+  margin-top: clamp(1.8rem, 5vw, 2.6rem);
+}
+
+.palette .scene {
+  --S: clamp(22px, 6vw, 32px);
+  width: calc(var(--S) * 2.4);
+  height: calc(var(--S) * 2.6);
+}
+
+/* =========================================================
+   Footer — on dawn's ground
+   ========================================================= */
 .foot {
-  padding: 4rem 0 3rem;
+  padding: 2.6rem 0 2.4rem;
   text-align: center;
 }
 
@@ -375,7 +777,7 @@ a:focus-visible {
   justify-content: center;
   gap: 1.6rem;
   flex-wrap: wrap;
-  margin-bottom: 1rem;
+  margin-bottom: .9rem;
 }
 
 .foot a {
@@ -395,8 +797,10 @@ a:focus-visible {
   font-size: .8rem;
 }
 
-/* ---------- Document pages (privacy, contact) */
-.doc { margin: 1rem 0 5rem; }
+/* =========================================================
+   Document pages
+   ========================================================= */
+.doc { margin: 1rem 0 4rem; }
 
 .doc .card { padding: clamp(1.4rem, 5vw, 2.6rem); }
 
@@ -425,10 +829,7 @@ a:focus-visible {
   margin: 2.3rem 0 .6rem;
 }
 
-.doc p, .doc li {
-  color: rgba(255, 255, 255, .88);
-}
-
+.doc p, .doc li { color: rgba(255, 255, 255, .88); }
 .doc ul { padding-left: 1.2rem; }
 .doc li { margin: .3rem 0; }
 
@@ -470,5 +871,7 @@ a:focus-visible {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
+  .sg, .float, .cube, .pop, .step { animation: none !important; }
+  .step { opacity: 1; }
+  .pop { display: none; }
 }
