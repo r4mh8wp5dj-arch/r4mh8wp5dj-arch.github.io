@@ -2,7 +2,7 @@
   font-family: "Nippo";
   src: url("assets/fonts/Nippo-Variable.ttf") format("truetype");
   font-weight: 200 700;
-  font-display: swap;
+  font-display: block;
 }
 
 :root {
@@ -34,8 +34,8 @@
   --ink: #fff;
   --ink-dim: rgba(255, 255, 255, .72);
   --glass-tint: rgba(0, 0, 0, .34);
-  --heading: "Nippo", -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
-  --body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  --heading: "Nippo";
+  --body: "Nippo";
   --col: 62rem;
   --sp: clamp(3rem, 8vw, 5.5rem);
   --S: 40px;
@@ -53,6 +53,7 @@ html {
 body {
   margin: 0;
   font-family: var(--body);
+  font-weight: 300;
   line-height: 1.5;
   position: relative;
   min-height: 100vh;
@@ -64,79 +65,35 @@ body {
 }
 
 /* =========================================================
-   THE JOURNEY — one gradient across the whole document,
-   deepspace at the top down to dawn's ground. Scroll position
-   is sky position; nothing listens to scroll.
+   THE SKY — fixed, full-viewport, cross-faded between the five
+   themes by scroll position (sky.js). Stars live on the canvas.
    ========================================================= */
 .sky {
-  position: absolute;
+  position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  overflow: hidden;
-  background: linear-gradient(
-    to bottom,
-    var(--ds-0) 0%,   var(--ds-1) 14%,   var(--ds-2) 28%,
-    var(--tw-0) 31%,  var(--tw-1) 38%,   var(--tw-2) 45%,
-    var(--su-0) 48%,  var(--su-1) 54%,   var(--su-2) 60%,
-    var(--cu-0) 66%,  var(--cu-1) 69.5%, var(--cu-2) 73%,  var(--cu-3) 76.5%, var(--cu-4) 80%,
-    var(--da-0) 84%,  var(--da-1) 87.5%, var(--da-2) 91%,  var(--da-3) 94.5%, var(--da-4) 100%
-  );
+  background: var(--ds-0);
 }
 
-/* Star field: four interleaved groups of the same seeded field,
-   each twinkling and drifting on its own phase. Tiles render 1:1
-   so every star stays a sharp point. */
-.stars {
+.sky-layer {
   position: absolute;
-  left: 0;
-  right: 0;
-  pointer-events: none;
-  overflow: hidden;
+  inset: 0;
+  opacity: 0;
+  will-change: opacity;
 }
 
-.stars--deep {
-  top: 0;
-  height: 38%;
-  -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent);
-  mask-image: linear-gradient(to bottom, #000 55%, transparent);
-}
+.sky-deepspace { opacity: 1; background: linear-gradient(to bottom, var(--ds-0), var(--ds-1), var(--ds-2)); }
+.sky-twilight  { background: linear-gradient(to bottom, var(--tw-0), var(--tw-1), var(--tw-2)); }
+.sky-sunset    { background: linear-gradient(to bottom, var(--su-0), var(--su-1), var(--su-2)); }
+.sky-cumulus   { background: linear-gradient(to bottom, var(--cu-0), var(--cu-1), var(--cu-2), var(--cu-3), var(--cu-4)); }
+.sky-dawn      { background: linear-gradient(to bottom, var(--da-0), var(--da-1), var(--da-2), var(--da-3), var(--da-4)); }
 
-.stars--twilight {
-  top: 26%;
-  height: 26%;
-  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 35%, #000 65%, transparent);
-  mask-image: linear-gradient(to bottom, transparent, #000 35%, #000 65%, transparent);
-}
-
-.sg {
+#stars {
   position: absolute;
-  inset: -6% 0;
-  display: block;
-  background-repeat: repeat;
-  background-size: 512px 1024px;
-  will-change: opacity, transform;
-  animation:
-    twinkle var(--tw) ease-in-out infinite alternate,
-    drift var(--dr) ease-in-out infinite alternate;
-  animation-delay: var(--ph), calc(var(--ph) * 3);
-}
-
-.sg1 { background-image: url("assets/img/stars-deep-1.svg"); --tw: 3.1s; --dr: 90s; --ph: -0.4s; }
-.sg2 { background-image: url("assets/img/stars-deep-2.svg"); --tw: 4.7s; --dr: 120s; --ph: -2.1s; background-position: 37px 111px; }
-.sg3 { background-image: url("assets/img/stars-deep-3.svg"); --tw: 5.9s; --dr: 150s; --ph: -1.3s; background-position: 140px 61px; }
-.sg4 { background-image: url("assets/img/stars-deep-4.svg"); --tw: 7.3s; --dr: 200s; --ph: -3.7s; background-position: 259px 233px; }
-.sg5 { background-image: url("assets/img/stars-twi-1.svg"); --tw: 5.3s; --dr: 130s; --ph: -1.9s; }
-.sg6 { background-image: url("assets/img/stars-twi-2.svg"); --tw: 6.8s; --dr: 170s; --ph: -4.2s; background-position: 90px 180px; }
-
-@keyframes twinkle {
-  from { opacity: 1; }
-  to   { opacity: .42; }
-}
-
-@keyframes drift {
-  from { transform: translate3d(0, 0, 0); }
-  to   { transform: translate3d(0, -3%, 0); }
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
 
 /* =========================================================
@@ -173,12 +130,6 @@ a:focus-visible {
   display: flex;
   align-items: center;
   gap: .6rem;
-}
-
-.wordmark img {
-  width: 1.7rem;
-  height: 1.7rem;
-  border-radius: .45rem;
 }
 
 .top nav {
@@ -346,37 +297,8 @@ a:focus-visible {
   align-content: center;
   justify-items: center;
   text-align: center;
-  padding: 2rem 0 3rem;
+  padding: 1rem 0 2.5rem;
   position: relative;
-}
-
-.hero-pieces {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: clamp(1.2rem, 6vw, 3.4rem);
-  margin-bottom: 1.4rem;
-}
-
-.hero .icon {
-  width: clamp(76px, 18vw, 112px);
-  height: auto;
-  border-radius: 22%;
-  box-shadow: 0 18px 50px rgba(0, 0, 0, .6);
-}
-
-.float {
-  --S: clamp(18px, 4.6vw, 26px);
-  width: calc(var(--S) * 5);
-  height: calc(var(--S) * 4.2);
-  animation: bob 6s ease-in-out infinite alternate;
-}
-
-.float--b { animation-delay: -2.7s; animation-duration: 7s; }
-
-@keyframes bob {
-  from { transform: translateY(-5px); }
-  to   { transform: translateY(6px); }
 }
 
 /* BlockPitTitleText: Nippo heavy (axis max 700), uppercase, tracking 4/55,
@@ -397,10 +319,21 @@ a:focus-visible {
 }
 
 .tagline {
-  font-size: clamp(1.05rem, 3.8vw, 1.4rem);
-  color: var(--ink-dim);
-  margin: 1.1rem 0 1.7rem;
+  font-weight: 500;
+  font-size: clamp(1.15rem, 4.2vw, 1.55rem);
+  letter-spacing: .04em;
+  color: var(--ink);
+  margin: 1.2rem 0 .35rem;
   text-shadow: 0 1px 10px rgba(0, 0, 0, .5);
+}
+
+.sub {
+  font-weight: 300;
+  font-size: clamp(.92rem, 2.9vw, 1.08rem);
+  letter-spacing: .02em;
+  color: var(--ink-dim);
+  margin: 0 0 1.6rem;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, .5);
 }
 
 .badge {
@@ -411,7 +344,6 @@ a:focus-visible {
   border-radius: 999px;
   font-family: var(--heading);
   font-weight: 700;
-  text-transform: uppercase;
   letter-spacing: .12em;
   font-size: .72rem;
   color: var(--ink);
@@ -427,95 +359,29 @@ a:focus-visible {
   order: -1;
 }
 
-/* HUD cards, as laid out in-game: score left, level right */
-.hud {
-  display: flex;
-  gap: .8rem;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-top: 2.2rem;
+/* Hero stack: 4×4 base, up to four layers, one adjacent pair breathing */
+.stack {
+  --S: clamp(24px, 6.4vw, 34px);
+  width: calc(var(--S) * 7.2);
+  height: calc(var(--S) * 7.4);
+  margin: 2.2rem auto 0;
+  perspective-origin: 50% 30%;
 }
 
-.hud-card {
-  padding: .7rem 1rem;
-  min-width: 6.4rem;
-  text-align: center;
+.stack .iso { transform: translate(-50%, -30%) rotateX(58deg) rotateZ(45deg); }
+
+.cube.k-pulse { animation: k-pulse 2.4s ease-in-out infinite alternate; }
+.cube.k-pulse > i { animation: k-glow 2.4s ease-in-out infinite alternate; }
+
+@keyframes k-pulse {
+  from { transform: translate3d(calc(var(--i) * var(--S)), calc(var(--j) * var(--S)), calc(var(--l) * var(--S))) scale3d(1, 1, 1); }
+  to   { transform: translate3d(calc(var(--i) * var(--S)), calc(var(--j) * var(--S)), calc(var(--l) * var(--S))) scale3d(1.08, 1.08, 1.08); }
 }
 
-.hud-label {
-  font-family: var(--heading);
-  font-weight: 700;
-  letter-spacing: .18em;
-  font-size: .58rem;
-  text-transform: uppercase;
-  color: var(--acc-cyan);
+@keyframes k-glow {
+  from { filter: brightness(1); }
+  to   { filter: brightness(1.22); }
 }
-
-.hud-num {
-  font-family: var(--heading);
-  font-weight: 700;
-  font-size: 1.7rem;
-  line-height: 1.1;
-  background: linear-gradient(to bottom, var(--acc-cyan), var(--acc-violet));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.hud-sub {
-  font-size: .7rem;
-  color: var(--score-gold);
-  font-weight: 600;
-}
-
-.hud-next {
-  display: grid;
-  grid-template-columns: repeat(3, .62rem);
-  gap: .14rem;
-  justify-content: center;
-  margin-top: .35rem;
-}
-
-.hud-next i {
-  aspect-ratio: 1;
-  border-radius: 22%;
-  background: var(--blk-yellow);
-  box-shadow: inset 0 .12em 0 rgba(255, 255, 255, .35);
-}
-
-.hud-next i.e { background: transparent; box-shadow: none; }
-
-.hud-bar {
-  height: .3rem;
-  width: 100%;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, .12);
-  margin-top: .45rem;
-  overflow: hidden;
-}
-
-.hud-bar i {
-  display: block;
-  height: 100%;
-  width: 34%;
-  border-radius: inherit;
-  background: linear-gradient(to right, var(--acc-cyan), var(--acc-violet));
-}
-
-.hint {
-  margin-top: 2.4rem;
-  display: inline-flex;
-  align-items: center;
-  gap: .7rem;
-  padding: .7rem 1.4rem;
-  border-radius: 999px;
-  font-weight: 600;
-  font-size: .85rem;
-  color: var(--ink-dim);
-  text-decoration: none;
-}
-
-.hint:hover { color: var(--ink); }
 
 /* =========================================================
    How it works — one stage, three synced steps
@@ -973,7 +839,7 @@ a:focus-visible {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .sg, .float, .cube, .pop, .step { animation: none !important; }
+  .cube, .pop, .step { animation: none !important; }
   .step { opacity: 1; }
   .pop { display: none; }
 }

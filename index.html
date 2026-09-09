@@ -17,20 +17,22 @@
   <meta name="twitter:card" content="summary">
   <link rel="preload" href="assets/fonts/Nippo-Variable.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="stylesheet" href="styles.css">
+  <script src="sky.js" defer></script>
 </head>
 <body>
   <div class="sky" aria-hidden="true">
-    <div class="stars stars--deep"><i class="sg sg1"></i><i class="sg sg2"></i><i class="sg sg3"></i><i class="sg sg4"></i></div>
-    <div class="stars stars--twilight"><i class="sg sg5"></i><i class="sg sg6"></i></div>
+    <div class="sky-layer sky-deepspace"></div>
+    <div class="sky-layer sky-twilight"></div>
+    <div class="sky-layer sky-sunset"></div>
+    <div class="sky-layer sky-cumulus"></div>
+    <div class="sky-layer sky-dawn"></div>
+    <canvas id="stars"></canvas>
   </div>
 
   <header class="wrap top">
-    <a class="wordmark" href="./" aria-label="Block Pit home">
-      <img src="assets/img/logo-320.png" alt="" width="32" height="32">
-      Block Pit
-    </a>
+    <a class="wordmark" href="./">Block Pit</a>
     <nav aria-label="Site">
-      <a href="#how">How it works</a>
+      <a href="#how">How to play</a>
       <a href="#skies">Skies</a>
       <a href="contact.html">Contact</a>
     </nav>
@@ -38,46 +40,57 @@
 
   <main>
     <section class="wrap hero">
-      <div class="hero-pieces" aria-hidden="true">
-        <div class="scene float">
-          <div class="iso">
-            <div class="cube c-blue" style="--i:0;--j:0;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-blue" style="--i:1;--j:0;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-blue" style="--i:1;--j:1;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-          </div>
-        </div>
-        <img class="icon" src="assets/img/logo-320.png" alt="" width="112" height="112">
-        <div class="scene float float--b">
-          <div class="iso">
-            <div class="cube c-yellow" style="--i:0;--j:0;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-yellow" style="--i:1;--j:0;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-yellow" style="--i:0;--j:1;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-yellow" style="--i:1;--j:1;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-          </div>
-        </div>
-      </div>
-
       <h1 class="title">Block Pit</h1>
-      <p class="tagline">Rotate. Match. Trigger chains.</p>
-      <p><span class="badge glass">Coming soon to iOS</span></p>
+      <p class="tagline">Drop. Match. Chain.</p>
+      <p class="sub">A 4×4 pit. Match two. Chain everything.</p>
+      <p><span class="badge glass">COMING SOON TO iOS</span></p>
 
-      <div class="hud" aria-hidden="true">
-        <div class="hud-card glass">
-          <div class="hud-num">0</div>
-          <div class="hud-sub">🏆 0</div>
-        </div>
-        <div class="hud-card glass">
-          <div class="hud-label">LV</div>
-          <div class="hud-num">1</div>
-          <div class="hud-bar"><i></i></div>
-        </div>
-        <div class="hud-card glass">
-          <div class="hud-label">Next</div>
-          <div class="hud-next"><i class="e"></i><i></i><i class="e"></i><i></i><i></i><i></i></div>
+      <div class="scene stack" aria-hidden="true">
+        <div class="iso pit">
+          <div class="floor"></div>
+            <div class="cube c-red" style="--i:0;--j:0;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
+            <div class="cube c-yellow" style="--i:0;--j:0;--l:1"><i class="t"></i><i class="y"></i><i class="x"></i></div>
+            <div class="cube c-blue" style="--i:1;--j:0;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
+            <div class="cube c-purple" style="--i:1;--j:0;--l:1"><i class="t"></i><i class="y"></i><i class="x"></i></div>
+            <div class="cube c-blue" style="--i:1;--j:0;--l:2"><i class="t"></i><i class="y"></i><i class="x"></i></div>
+            <div class="cube c-green" style="--i:2;--j:0;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
+            <div class="cube c-cyan" style="--i:2;--j:0;--l:1"><i class="t"></i><i class="y"></i><i class="x"></i></div>
+            <div class="cube c-green" style="--i:2;--j:0;--l:2"><i class="t"></i><i class="y"></i><i class="x"></i></div>
+            <div class="cube c-cyan" style="--i:2;--j:0;--l:3"><i class="t"></i><i class="y"></i><i class="x"></i></div>
+            <div class="cube c-yellow" style="--i:3;--j:0;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
+            <div class="cube c-red" style="--i:3;--j:0;--l:1"><i class="t"></i><i class="y"></i><i class="x"></i></div>
+            <div class="cube c-yellow k-pulse" style="--i:3;--j:0;--l:2"><i class="t"></i><i class="y"></i><i class="x"></i></div>
+            <div class="cube c-green" style="--i:0;--j:1;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
+            <div class="cube c-cyan" style="--i:0;--j:1;--l:1"><i class="t"></i><i class="y"></i><i class="x"></i></div>
+            <div class="cube c-green" style="--i:0;--j:1;--l:2"><i class="t"></i><i class="y"></i><i class="x"></i></div>
+            <div class="cube c-yellow" style="--i:1;--j:1;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
+            <div class="cube c-red" style="--i:1;--j:1;--l:1"><i class="t"></i><i class="y"></i><i class="x"></i></div>
+            <div class="cube c-purple" style="--i:2;--j:1;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
+            <div class="cube c-blue" style="--i:2;--j:1;--l:1"><i class="t"></i><i class="y"></i><i class="x"></i></div>
+            <div class="cube c-purple" style="--i:2;--j:1;--l:2"><i class="t"></i><i class="y"></i><i class="x"></i></div>
+            <div class="cube c-cyan" style="--i:3;--j:1;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
+            <div class="cube c-green" style="--i:3;--j:1;--l:1"><i class="t"></i><i class="y"></i><i class="x"></i></div>
+            <div class="cube c-yellow k-pulse" style="--i:3;--j:1;--l:2"><i class="t"></i><i class="y"></i><i class="x"></i></div>
+            <div class="cube c-purple" style="--i:0;--j:2;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
+            <div class="cube c-blue" style="--i:0;--j:2;--l:1"><i class="t"></i><i class="y"></i><i class="x"></i></div>
+            <div class="cube c-purple" style="--i:0;--j:2;--l:2"><i class="t"></i><i class="y"></i><i class="x"></i></div>
+            <div class="cube c-blue" style="--i:0;--j:2;--l:3"><i class="t"></i><i class="y"></i><i class="x"></i></div>
+            <div class="cube c-cyan" style="--i:1;--j:2;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
+            <div class="cube c-green" style="--i:1;--j:2;--l:1"><i class="t"></i><i class="y"></i><i class="x"></i></div>
+            <div class="cube c-cyan" style="--i:1;--j:2;--l:2"><i class="t"></i><i class="y"></i><i class="x"></i></div>
+            <div class="cube c-red" style="--i:2;--j:2;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
+            <div class="cube c-yellow" style="--i:2;--j:2;--l:1"><i class="t"></i><i class="y"></i><i class="x"></i></div>
+            <div class="cube c-blue" style="--i:3;--j:2;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
+            <div class="cube c-red" style="--i:0;--j:3;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
+            <div class="cube c-yellow" style="--i:0;--j:3;--l:1"><i class="t"></i><i class="y"></i><i class="x"></i></div>
+            <div class="cube c-red" style="--i:0;--j:3;--l:2"><i class="t"></i><i class="y"></i><i class="x"></i></div>
+            <div class="cube c-blue" style="--i:1;--j:3;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
+            <div class="cube c-purple" style="--i:1;--j:3;--l:1"><i class="t"></i><i class="y"></i><i class="x"></i></div>
+            <div class="cube c-green" style="--i:2;--j:3;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
+            <div class="cube c-yellow" style="--i:3;--j:3;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
+            <div class="cube c-red" style="--i:3;--j:3;--l:1"><i class="t"></i><i class="y"></i><i class="x"></i></div>
         </div>
       </div>
-
-      <a class="hint glass" href="#how">↓ Scroll to descend</a>
     </section>
 
     <section class="wrap section" id="how">

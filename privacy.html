@@ -11,20 +11,23 @@
   <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
   <link rel="preload" href="assets/fonts/Nippo-Variable.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="stylesheet" href="styles.css">
+  <script src="sky.js" defer></script>
 </head>
 <body>
   <div class="sky" aria-hidden="true">
-    <div class="stars stars--deep"><i class="sg sg1"></i><i class="sg sg2"></i><i class="sg sg3"></i><i class="sg sg4"></i></div>
-    <div class="stars stars--twilight"><i class="sg sg5"></i><i class="sg sg6"></i></div>
+    <div class="sky-layer sky-deepspace"></div>
+    <div class="sky-layer sky-twilight"></div>
+    <div class="sky-layer sky-sunset"></div>
+    <div class="sky-layer sky-cumulus"></div>
+    <div class="sky-layer sky-dawn"></div>
+    <canvas id="stars"></canvas>
   </div>
 
   <header class="wrap top">
-    <a class="wordmark" href="./" aria-label="Block Pit home">
-      <img src="assets/img/logo-320.png" alt="" width="32" height="32">
-      Block Pit
-    </a>
+    <a class="wordmark" href="./">Block Pit</a>
     <nav aria-label="Site">
-      <a href="./">Home</a>
+      <a href="./#how">How to play</a>
+      <a href="./#skies">Skies</a>
       <a href="contact.html">Contact</a>
     </nav>
   </header>
@@ -90,7 +93,7 @@
       <p class="note">Confirm the ad SDK(s) actually integrated in the shipping build and remove any that are not used.</p>
       <p>The App displays advertisements served by <strong>Google AdMob</strong>, a service of Google LLC and, in the EEA, Google Ireland Limited. To serve and measure ads, Google may collect device information, the advertising identifier (where permitted), IP address and ad interaction data. The App may also show a Google-provided consent form where local law requires it.</p>
       <p><strong>Personalised advertising.</strong> Ads are personalised only if you allow tracking through Apple's App Tracking Transparency prompt and, where applicable, give consent in the in-app consent form. Otherwise you will see non-personalised ads, which may still rely on contextual information and your approximate location derived from your IP address.</p>
-      <p><strong>Your choices.</strong> You can withdraw tracking permission at any time in iOS under <em>Settings → Privacy &amp; Security → Tracking</em>, and limit Apple's own ad personalisation under <em>Settings → Privacy &amp; Security → Apple Advertising</em>. Information about how Google uses data from apps that use its services is available at <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener">policies.google.com/technologies/partner-sites</a>.</p>
+      <p><strong>Your choices.</strong> You can withdraw tracking permission at any time in iOS under <em>Settings › Privacy &amp; Security › Tracking</em>, and limit Apple's own ad personalisation under <em>Settings › Privacy &amp; Security › Apple Advertising</em>. Information about how Google uses data from apps that use its services is available at <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener">policies.google.com/technologies/partner-sites</a>.</p>
 
       <h2 id="analytics">6. Analytics</h2>
       <p class="note">State the analytics provider actually used, for example "Firebase Analytics (Google LLC)", or replace this section with: "The App does not use third-party analytics."</p>
