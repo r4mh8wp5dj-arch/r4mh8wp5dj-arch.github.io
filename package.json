@@ -1,0 +1,16 @@
+{
+  "name": "blockpit-site",
+  "private": true,
+  "description": "Dev tools for the Block Pit landing page. Nothing here ships to the site.",
+  "scripts": {
+    "serve": "python3 -m http.server 8765 --bind 0.0.0.0",
+    "capture": "node tools/capture.js",
+    "config": "node tools/config.js",
+    "stamp": "node tools/stamp.js",
+    "build": "node tools/config.js && node tools/stamp.js"
+  },
+  "devDependencies": {
+    "playwright-core": "1.48.2",
+    "puppeteer-core": "23.11.1"
+  }
+}
