@@ -17,6 +17,7 @@
   --pop: #FF8C1A;
   --gold: #F4B942;
   --gut: clamp(16px, 5vw, 64px);
+  --btn-h: 48px;
   --ease: cubic-bezier(.2, .8, .2, 1);
   --ink: #fff;
   --ink-2: rgba(255, 255, 255, .86);
@@ -147,7 +148,16 @@ main, .foot { position: relative; z-index: 1; }
 .soon { margin-top: 30px; display: inline-flex; align-items: center; gap: 10px; font-weight: 700; font-size: .98rem; }
 .soon i { width: 9px; height: 9px; background: var(--green); transform: rotate(45deg); box-shadow: 0 0 10px var(--green); }
 
-.cta-row { margin-top: 20px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.cta-row { margin-top: 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 16px 20px; }
+.sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+.appstore { display: inline-flex; border-radius: 9px; }
+.appstore img { display: block; height: var(--btn-h); width: auto; }
+.appstore-sm img { height: 40px; }
+.social { display: flex; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.social a { display: grid; place-items: center; width: var(--btn-h); height: var(--btn-h); border-radius: 50%; color: var(--ink); transition: background-color .2s, transform .2s var(--ease); }
+.social a:hover { background: rgba(255, 255, 255, .12); transform: translateY(-2px); }
+.on-light .social a:hover { background: rgba(10, 26, 61, .08); }
+.social svg { width: 24px; height: 24px; fill: currentColor; }
 .btn {
   appearance: none;
   display: inline-flex;

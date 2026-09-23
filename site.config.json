@@ -1,8 +1,13 @@
 {
   "baseUrl": "https://r4mh8wp5dj-arch.github.io/",
+  "appStore": "https://apps.apple.com/app/id[APP_ID]",
   "email": {
     "support": "support@playblockpit.com",
     "hello": "hello@playblockpit.com"
   },
-  "instagram": "playblockpit"
+  "social": {
+    "instagram": "https://www.instagram.com/playblockpit",
+    "tiktok": "[TIKTOK_URL]",
+    "facebook": "[FACEBOOK_URL]"
+  }
 }
