@@ -248,6 +248,7 @@ main, .foot { position: relative; z-index: 1; }
 .hud-score small { display: block; font-size: .8rem; color: var(--ink-2); }
 .hud-score b { display: block; font-weight: 700; font-size: 2rem; line-height: 1.05; font-variant-numeric: tabular-nums; }
 #hud-gauges { display: block; width: 56px; height: 350px; }
+#hud-score-cv { display: block; width: 132px; height: 56px; margin: 0 auto; }
 
 
 .how {
@@ -416,6 +417,7 @@ main, .foot { position: relative; z-index: 1; }
   .title-icon { width: min(15vw, 60px); }
   .announce { font-size: 11px; letter-spacing: .22em; }
   #hud-gauges { width: 48px; height: 300px; }
+  #hud-score-cv { width: 96px; height: 44px; }
   .pano-labels b { font-size: .8rem; }
   .pano-labels small { font-size: .74rem; }
   .pano-labels small span { display: none; }

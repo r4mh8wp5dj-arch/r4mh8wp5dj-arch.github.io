@@ -119,7 +119,6 @@
       var ch = { led: led, flow: t / 12 };
       I.plate(F.ctx, cam, ch);
       def.draw(api, t);
-      I.plateFront(F.ctx, cam, ch);
       cv.style.opacity = I.reduce ? 1 : (seg(t, 0, 0.2) * (1 - seg(t, def.dur - 0.3, def.dur))).toFixed(3);
     }
     function frame(now) {
@@ -142,24 +141,14 @@
     var cv = document.querySelector('.pano-sky');
     if (!cv || !SKY) return;
     var F = I.fit(cv), ctx = F.ctx;
-    var lw = 720, lh = 2, off = document.createElement('canvas');
-    off.width = lw; off.height = lh;
-    var octx = off.getContext('2d'), img = octx.createImageData(lw, lh), R = rng(9);
-    for (var x = 0; x < lw; x++) {
-      var c = SKY.stripColor((x + 0.5) / lw);
-      for (var y = 0; y < lh; y++) {
-        var k = (y * lw + x) * 4, dn = (R() - 0.5) * 1.5;
-        img.data[k] = c[0] + dn; img.data[k + 1] = c[1] + dn; img.data[k + 2] = c[2] + dn; img.data[k + 3] = 255;
-      }
-    }
-    octx.putImageData(img, 0, 0);
     ctx.save();
     ctx.beginPath();
     if (ctx.roundRect) ctx.roundRect(0, 0, F.w, F.h, 18); else ctx.rect(0, 0, F.w, F.h);
     ctx.clip();
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
-    ctx.drawImage(off, 0, 0, F.w, F.h);
+    var grad = ctx.createLinearGradient(0, 0, F.w, 0);
+    for (var i0 = 0; i0 <= 120; i0++) grad.addColorStop(i0 / 120, 'rgb(' + SKY.stripColor(i0 / 120).map(Math.round).join(',') + ')');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, F.w, F.h);
     var n = Math.round(F.w * F.h / 55), S = rng(5);
     for (var i = 0; i < n; i++) {
       var sx = S() * F.w, sy = S() * F.h, big = S() < 0.1, r = S(), a = S(), rad = S();

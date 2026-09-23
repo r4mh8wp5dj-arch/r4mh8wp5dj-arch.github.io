@@ -1,12 +1,12 @@
 (function () {
-  var THEMES = [
-    { id: 'dawn', led: '#F28C6B', stars: 0, starAlpha: 0, colors: ['#4E8AD0', '#6FA0D4', '#A8BCC4', '#7E9C58', '#4E6B30'] },
-    { id: 'cumulus', led: '#FAA751', stars: 0, starAlpha: 0, colors: ['#2A4C94', '#4A7FC0', '#8FB8DC', '#E8B77A', '#F2A24E'] },
-    { id: 'sunset', led: '#FA707A', stars: 0, starAlpha: 0, colors: ['#47296B', '#D9616B', '#FA944D'] },
-    { id: 'twilight', led: '#CF78E6', stars: 0.35, starAlpha: 0.55, colors: ['#120F2E', '#331F4D', '#573361'] },
-    { id: 'deepspace', led: '#73CCFF', stars: 1, starAlpha: 1, colors: ['#000000', '#0A1A3D', '#1A0D33'] }
+  var PATH = [
+    [0.00, '#4E6B30'], [0.06, '#7E9C58'], [0.16, '#6FA0D4'],
+    [0.25, '#8FB8DC'], [0.32, '#E8B77A'], [0.38, '#F2A24E'],
+    [0.44, '#FA944D'], [0.51, '#D9616B'], [0.60, '#47296B'],
+    [0.70, '#331F4D'], [0.78, '#120F2E'],
+    [0.85, '#1A0D33'], [0.92, '#0A1A3D'], [1.00, '#000000']
   ];
-  var BLEND = 0.34;
+  var LEDS = ['#F28C6B', '#FAA751', '#FA707A', '#CF78E6', '#73CCFF'];
   var GROUND = 1;
 
   var root = document.documentElement;
@@ -14,7 +14,7 @@
   var R0 = range[0], R1 = range[1];
 
   function hex(h) { return [parseInt(h.substr(1, 2), 16), parseInt(h.substr(3, 2), 16), parseInt(h.substr(5, 2), 16)]; }
-  THEMES.forEach(function (t) { t.pts = t.colors.map(function (c, i) { return [i / (t.colors.length - 1), hex(c)]; }); });
+  var PTS = PATH.map(function (p) { return [p[0], hex(p[1])]; });
 
   function toLin(v) { v /= 255; return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }
   function toSrgb(v) { v = v <= 0.0031308 ? v * 12.92 : 1.055 * Math.pow(v, 1 / 2.4) - 0.055; return Math.max(0, Math.min(255, v * 255)); }
@@ -43,48 +43,25 @@
     var o = [la[0] + (lb[0] - la[0]) * f, la[1] + (lb[1] - la[1]) * f, la[2] + (lb[2] - la[2]) * f];
     return fromLch([o[0], Math.sqrt(o[1] * o[1] + o[2] * o[2]), Math.atan2(o[2], o[1])]);
   }
-  function lerp(a, b, f) { return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f]; }
   function soft(t) { t = Math.max(0, Math.min(1, t)); return t * t * t * (t * (t * 6 - 15) + 10); }
 
-  function sampleTheme(i, v) {
-    var p = THEMES[i].pts;
-    v = Math.max(0, Math.min(1, v));
-    for (var k = 1; k < p.length; k++) {
-      if (v <= p[k][0]) return lerp(p[k - 1][1], p[k][1], (v - p[k - 1][0]) / (p[k][0] - p[k - 1][0]));
+  function pathColor(u) {
+    u = Math.max(0, Math.min(1, u));
+    for (var k = 1; k < PTS.length; k++) {
+      if (u <= PTS[k][0]) return mix(PTS[k - 1][1], PTS[k][1], (u - PTS[k - 1][0]) / (PTS[k][0] - PTS[k - 1][0]));
     }
-    return p[p.length - 1][1].slice();
+    return PTS[PTS.length - 1][1].slice();
   }
-
-  function weights(u) {
-    var p = Math.max(0, Math.min(4.9999, u * 5)), i = Math.floor(p), f = p - i;
-    if (f < BLEND && i > 0) return { a: i - 1, b: i, w: soft((f + BLEND) / (2 * BLEND)) };
-    if (f > 1 - BLEND && i < 4) return { a: i, b: i + 1, w: soft((f - (1 - BLEND)) / (2 * BLEND)) };
-    return { a: i, b: i, w: 0 };
-  }
-
-  function stripColor(u) {
-    var p = Math.max(0, Math.min(4.9999, u * 5)), q = weights(u);
-    var a = sampleTheme(q.a, 1 - (p - q.a)), b = sampleTheme(q.b, 1 - (p - q.b));
-    return q.w === 0 ? a : mix(a, b, q.w);
-  }
-  function blendNum(u, key) {
-    var q = weights(u);
-    return THEMES[q.a][key] + (THEMES[q.b][key] - THEMES[q.a][key]) * q.w;
-  }
-  function starDensity(u) { return blendNum(u, 'stars'); }
-  function starAlpha(u) { return blendNum(u, 'starAlpha'); }
+  function stripColor(u) { return pathColor(u); }
+  function starDensity(u) { return 0.35 * soft((u - 0.6) / 0.08) + 0.65 * soft((u - 0.76) / 0.12); }
+  function starAlpha(u) { return 0.55 + 0.45 * soft((u - 0.76) / 0.12); }
   function led(u) {
-    var q = weights(u);
-    return mix(hex(THEMES[q.a].led), hex(THEMES[q.b].led), q.w);
+    var p = Math.max(0, Math.min(4.9999, u * 5)), i = Math.floor(p), f = p - i;
+    var j = f < 0.5 ? Math.max(0, i - 1) : Math.min(4, i + 1), w = f < 0.5 ? 0.5 - f : f - 0.5;
+    return mix(hex(LEDS[i]), hex(LEDS[j]), soft((w - 0.3) / 0.4) * 0.5);
   }
-
   function pageU(t) { return 1 - (R0 + (R1 - R0) * Math.max(0, Math.min(1, t / GROUND))); }
-  function colorAt(t) {
-    var u = pageU(t), q = weights(u), p = u * 5;
-    function v(i) { var x = i + 1 - p; return i === 1 ? 1 - x : x; }
-    var a = sampleTheme(q.a, v(q.a));
-    return q.w === 0 ? a : mix(a, sampleTheme(q.b, v(q.b)), q.w);
-  }
+  function colorAt(t) { return pathColor(pageU(t)); }
   function lum(c) {
     var l = c.map(function (v) { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
     return 0.2126 * l[0] + 0.7152 * l[1] + 0.0722 * l[2];
@@ -103,7 +80,7 @@
   window.BP = window.BP || {};
   window.BP.sky = {
     colorAt: colorAt, lum: lum, mix: mix, stripColor: stripColor, starDensity: starDensity,
-    starAlpha: starAlpha, led: led, pageU: pageU, hex: hex
+    starAlpha: starAlpha, led: led, pageU: pageU, hex: hex, pathColor: pathColor
   };
 
   document.addEventListener('DOMContentLoaded', function () {

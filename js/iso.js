@@ -84,11 +84,12 @@
         var v = tf(M, e.cx + (C[0] - 0.5) * e.k * e.w, e.cy + (C[1] - 0.5) * e.k * e.h - (1 - e.h) * 0.5 * e.k, e.cz + (C[2] - 0.5) * e.k * e.w);
         pts[q] = [ox + v[0] * s, oy - v[1] * s];
       }
+      if (it2.custom) { ctx.globalAlpha = 1; it2.custom(ctx); continue; }
       var rgb = it2.rgb || RGB[it2.c];
       var key = it2.rgb ? it2.rgb.join(',') : it2.c;
       ctx.globalAlpha = it2.a == null ? 1 : it2.a;
       for (var f = 0; f < 6; f++) {
-        if (!fl[f].vis) continue;
+        if (!fl[f].vis || (it2.hide && it2.hide[f])) continue;
         var V = FACES[f].v;
         ctx.beginPath();
         ctx.moveTo(pts[V[0]][0], pts[V[0]][1]);
@@ -174,7 +175,7 @@
   function plate(ctx, cam, o) {
     o = o || {};
     var n = o.n || 4, c = n / 2, s = cam.s;
-    var outer = c + 0.35, open = c + 0.02, rimY = 0.08, botY = -0.5;
+    var outer = c + 0.35, open = c + 0.02, rimY = 0.02, botY = -0.5;
     var led = o.led || [115, 204, 255], glow = o.glow == null ? 1 : o.glow;
     ctx.save();
     var sc = project(cam, c, botY - 0.25, c);
@@ -229,13 +230,13 @@
       path(ctx, cam, [[0, 0, k], [n, 0, k]], false); ctx.stroke();
     }
 
-    ring(ctx, cam, o, false);
+    ring(ctx, cam, o);
     ctx.restore();
   }
 
   function ringPoints(o) {
     var n = o.n || 4, c = n / 2, open = c + 0.02;
-    var pts = rr(open + 0.055, 0.135, 0.082, c, 8), acc = [0];
+    var pts = rr(open + 0.055, 0.135, 0.004, c, 8), acc = [0];
     for (var i = 1; i <= pts.length; i++) {
       var a = pts[i - 1], b = pts[i % pts.length];
       acc.push(acc[i - 1] + Math.hypot(b[0] - a[0], b[2] - a[2]));
@@ -249,36 +250,17 @@
     return [0.55, 0.7, 0.85, 1].map(function (k) { return led.map(function (v) { return v * k; }); });
   }
 
-  function ring(ctx, cam, o, front) {
-    var n = o.n || 4, c = n / 2, s = cam.s, rimY = 0.08, outer = c + 0.35, open = c + 0.02;
+  function ring(ctx, cam, o) {
+    var n = o.n || 4, c = n / 2, s = cam.s;
     var gain = o.gain == null ? 1 : o.gain, flow = o.flow || 0;
     var pal = channelPalette(o), R = ringPoints(o);
     ctx.save();
     ctx.lineJoin = 'round';
     ctx.lineCap = 'butt';
-    if (front) {
-      ctx.save();
-      path(ctx, cam, rr(outer, 0.16, rimY, c, 5));
-      ctx.clip();
-      [[1, 0], [0, 1], [-1, 0], [0, -1]].forEach(function (d) {
-        if (tf(cam.M, d[0], 0, d[1])[2] <= 0) return;
-        var a = [c + d[0] * open - d[1] * outer, rimY, c + d[1] * open + d[0] * outer];
-        var b = [c + d[0] * open + d[1] * outer, rimY, c + d[1] * open - d[0] * outer];
-        var e = [c + d[0] * outer + d[1] * outer, rimY, c + d[1] * outer - d[0] * outer];
-        var f = [c + d[0] * outer - d[1] * outer, rimY, c + d[1] * outer + d[0] * outer];
-        path(ctx, cam, [a, b, e, f]);
-        ctx.fillStyle = shade(PLATE, 1.08);
-        ctx.fill();
-      });
-      ctx.restore();
-    }
     var groups = [[], [], [], []], N = 96, pts = R.pts;
     for (var k = 0; k < N; k++) {
       var d0 = k / N * R.len, d1 = (k + 1) / N * R.len;
       var p0 = at(d0), p1 = at(d1);
-      var mx = (p0[0] + p1[0]) / 2 - c, mz = (p0[2] + p1[2]) / 2 - c;
-      var isFront = tf(cam.M, mx, 0, mz)[2] > 0;
-      if (front && !isFront) continue;
       var idx = ((Math.floor(((k + 0.5) / N + flow) * 12) % 4) + 4) % 4;
       groups[idx].push([p0, p1]);
     }
@@ -313,7 +295,6 @@
     ctx.restore();
   }
 
-  function plateFront(ctx, cam, o) { ring(ctx, cam, o || {}, true); }
 
   function fitCam(M, w, h, n, y0, y1, pad, pivot) {
     var b = [1e9, -1e9, 1e9, -1e9], lo = -0.4, hi = n + 0.4;
@@ -369,7 +350,7 @@
     HEX: HEX, RGB: RGB, SHAPES: SHAPES,
     mul: mul, rotX: rotX, rotY: rotY, rotZ: rotZ, view: view, tf: tf,
     cubes: cubes, project: project, unproject: unproject, poly: poly,
-    plate: plate, plateFront: plateFront, fitCam: fitCam, rotCells: rotCells, randomShape: randomShape,
+    plate: plate, fitCam: fitCam, faces: FACES, rotCells: rotCells, randomShape: randomShape,
     fit: fit, visible: visible,
     reduce: window.matchMedia('(prefers-reduced-motion: reduce)').matches
   };
