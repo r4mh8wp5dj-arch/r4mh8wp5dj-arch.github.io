@@ -86,6 +86,9 @@ main, .foot { position: relative; z-index: 1; }
 .bar nav { justify-self: end; display: flex; gap: clamp(16px, 3vw, 32px); }
 .bar nav a { padding: 3px 0; border-bottom: 2px solid transparent; line-height: 1.3; }
 .bar nav a:hover { border-bottom-color: currentColor; }
+.bar nav { align-items: center; }
+.bar nav .bar-notify { padding: 6px 14px; border: 0; border-radius: 999px; background: var(--green); color: #0B2414; font-size: .82rem; line-height: 1.2; transition: background-color .2s; }
+.bar nav .bar-notify:hover { background: #5CC27D; border: 0; }
 @media (max-width: 1100px) {
   .bar { grid-template-columns: auto auto; row-gap: 5px; }
   .announce { grid-column: 1 / -1; grid-row: 2; font-size: 11px; letter-spacing: .22em; }
@@ -459,7 +462,7 @@ main, .foot { position: relative; z-index: 1; }
 }
 
 @media (max-width: 600px) {
-  .bar nav a:not(:last-child) { display: none; }
+  .bar nav .nav-x { display: none; }
   .title { font-size: min(10.4vw, 2.6rem); gap: 14px; }
   .title-icon { width: 56px; height: 56px; }
   #hud-gauges { width: 48px; height: 300px; }

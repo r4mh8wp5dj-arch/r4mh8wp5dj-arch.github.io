@@ -16,22 +16,23 @@
   <meta property="og:image" content="https://r4mh8wp5dj-arch.github.io/assets/img/logo-1024.png">
   <meta name="twitter:card" content="summary">
   <link rel="preload" href="assets/fonts/Nippo-Variable.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="styles.css?v=50a4224">
-  <script src="js/sky.js?v=50a4224"></script>
-  <script src="js/iso.js?v=50a4224" defer></script>
-  <script src="js/site.js?v=50a4224" defer></script>
-  <script src="js/play.js?v=50a4224" defer></script>
-  <script src="js/notify.js?v=50a4224" defer></script>
-  <script src="js/rail.js?v=50a4224" defer></script>
+  <link rel="stylesheet" href="styles.css?v=23b4d42">
+  <script src="js/sky.js?v=23b4d42"></script>
+  <script src="js/iso.js?v=23b4d42" defer></script>
+  <script src="js/site.js?v=23b4d42" defer></script>
+  <script src="js/play.js?v=23b4d42" defer></script>
+  <script src="js/notify.js?v=23b4d42" defer></script>
+  <script src="js/rail.js?v=23b4d42" defer></script>
 </head>
 <body class="home">
   <header class="bar">
     <a class="mark" href="./" aria-label="Block Pit home"><img src="assets/img/favicon-64.png" alt="" width="28" height="28"><span>Block Pit</span></a>
     <p class="announce">Coming soon to the App Store</p>
     <nav aria-label="Site">
-      <a href="#how">How to play</a>
-      <a href="#skies">Skies</a>
+      <a class="nav-x" href="#how">How to play</a>
+      <a class="nav-x" href="#skies">Skies</a>
       <a href="contact.html">Contact</a>
+      <a class="bar-notify" href="#notify" data-notify-jump>Notify Me</a>
     </nav>
   </header>
 
@@ -51,7 +52,7 @@
         <p class="tag"><b class="k-r">Drop.</b> <b class="k-y">Match.</b> <b class="k-c">Chain.</b></p>
         <p class="pitch">Stack the colors, spark the chains, rise from dawn to deep space.</p>
         <p class="soon"><i aria-hidden="true"></i>Coming soon to iOS</p>
-        <div class="notify" data-notify>
+        <div class="notify" id="notify" data-notify>
           <div class="notify-row">
             <button type="button" class="btn btn-go" data-notify-open aria-expanded="false" aria-controls="notify-1">Notify Me</button>
             <form id="notify-1" class="notify-form" action="https://buttondown.com/api/emails/embed-subscribe/playblockpit" method="post" novalidate hidden>

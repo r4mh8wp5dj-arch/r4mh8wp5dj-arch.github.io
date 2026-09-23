@@ -9,7 +9,9 @@
     failed: 'Couldn’t sign you up right now. Try again in a moment.'
   };
 
+  var boxes = [];
   document.querySelectorAll('[data-notify]').forEach(function (box) {
+    boxes.push(box);
     var open = box.querySelector('[data-notify-open]');
     var form = box.querySelector('form');
     var input = form.querySelector('input[type="email"]');
@@ -90,4 +92,21 @@
       });
     });
   });
+  function jump(smooth) {
+    var box = document.getElementById('notify');
+    if (!box) return false;
+    var open = box.querySelector('[data-notify-open]'), input = box.querySelector('input[type="email"]');
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    box.scrollIntoView({ behavior: smooth && !reduce ? 'smooth' : 'auto', block: 'center' });
+    if (open && !open.hidden) open.click();
+    else if (input) input.focus({ preventScroll: true });
+    return true;
+  }
+
+  document.querySelectorAll('[data-notify-jump]').forEach(function (a) {
+    a.addEventListener('click', function (ev) {
+      if (jump(true)) ev.preventDefault();
+    });
+  });
+  if (location.hash === '#notify') setTimeout(function () { jump(false); }, 60);
 })();
