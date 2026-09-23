@@ -26,8 +26,34 @@
       });
       return out;
     }
-    return { outer: ring(0.055, 0.2, 4), inner: ring(0.085, 0.16, 4), face: ring(0.02, 0.12, 3) };
+    return { outer: ring(0.1, 0.16, 4), inner: ring(0.13, 0.13, 4), face: ring(0.055, 0.14, 4) };
   })();
+  function mixRgb(a, b, f) { return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f]; }
+  function pathUV(ctx, map, ring) {
+    ctx.beginPath();
+    ring.forEach(function (q, i) { var m = map(q[0], q[1]); if (i) ctx.lineTo(m[0], m[1]); else ctx.moveTo(m[0], m[1]); });
+    ctx.closePath();
+  }
+  function convexHull(p) {
+    var pts = p.slice().sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; }), lo = [], hi = [];
+    function cr(o, a, b) { return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]); }
+    pts.forEach(function (q) { while (lo.length >= 2 && cr(lo[lo.length - 2], lo[lo.length - 1], q) <= 0) lo.pop(); lo.push(q); });
+    for (var i = pts.length - 1; i >= 0; i--) { var q = pts[i]; while (hi.length >= 2 && cr(hi[hi.length - 2], hi[hi.length - 1], q) <= 0) hi.pop(); hi.push(q); }
+    hi.pop(); lo.pop();
+    return lo.concat(hi);
+  }
+  function roundPath(ctx, pts, r) {
+    ctx.beginPath();
+    for (var i = 0; i < pts.length; i++) {
+      var p0 = pts[(i - 1 + pts.length) % pts.length], p1 = pts[i], p2 = pts[(i + 1) % pts.length];
+      var d1 = Math.hypot(p1[0] - p0[0], p1[1] - p0[1]) || 1, d2 = Math.hypot(p2[0] - p1[0], p2[1] - p1[1]) || 1;
+      var r1 = Math.min(r, d1 / 2) / d1, r2 = Math.min(r, d2 / 2) / d2;
+      var a = [p1[0] + (p0[0] - p1[0]) * r1, p1[1] + (p0[1] - p1[1]) * r1], b = [p1[0] + (p2[0] - p1[0]) * r2, p1[1] + (p2[1] - p1[1]) * r2];
+      if (i) ctx.lineTo(a[0], a[1]); else ctx.moveTo(a[0], a[1]);
+      ctx.quadraticCurveTo(p1[0], p1[1], b[0], b[1]);
+    }
+    ctx.closePath();
+  }
   function shadeRgb(rgb, k, add) { return rgb.map(function (c) { return Math.max(0, Math.min(255, (c + (add || 0)) * k)); }); }
   function css(c, a) { return 'rgba(' + Math.round(c[0]) + ',' + Math.round(c[1]) + ',' + Math.round(c[2]) + ',' + (a == null ? 1 : a) + ')'; }
 
@@ -103,59 +129,59 @@
       var rgb = it2.rgb || RGB[it2.c];
       var key = it2.rgb ? it2.rgb.join(',') : it2.c;
       ctx.globalAlpha = it2.a == null ? 1 : it2.a;
-      for (var f = 0; f < 6; f++) {
-        if (!fl[f].vis || (it2.hide && it2.hide[f])) continue;
-        var V = FACES[f].v;
-        ctx.beginPath();
-        ctx.moveTo(pts[V[0]][0], pts[V[0]][1]);
-        ctx.lineTo(pts[V[1]][0], pts[V[1]][1]);
-        ctx.lineTo(pts[V[2]][0], pts[V[2]][1]);
-        ctx.lineTo(pts[V[3]][0], pts[V[3]][1]);
-        ctx.closePath();
-        if (it2.flat) {
-          ctx.fillStyle = 'rgb(' + rgb.join(',') + ')';
+      var small = s * e.k < 14, glow = (it2.f || 0) * 0.9;
+      if (it2.flat || small) {
+        for (var f0 = 0; f0 < 6; f0++) {
+          if (!fl[f0].vis || (it2.hide && it2.hide[f0])) continue;
+          var V0 = FACES[f0].v;
+          ctx.beginPath();
+          ctx.moveTo(pts[V0[0]][0], pts[V0[0]][1]);
+          for (var j0 = 1; j0 < 4; j0++) ctx.lineTo(pts[V0[j0]][0], pts[V0[j0]][1]);
+          ctx.closePath();
+          ctx.fillStyle = it2.flat ? 'rgb(' + rgb.join(',') + ')' : tone(rgb, fl[f0].b + glow, key);
           ctx.fill();
           ctx.strokeStyle = ctx.fillStyle;
           ctx.lineWidth = 1;
           ctx.stroke();
-          continue;
         }
-        var b = fl[f].b + (it2.f || 0) * 0.9;
-        if (s * e.k < 14) {
-          ctx.fillStyle = tone(rgb, b, key);
-          ctx.fill();
-          continue;
-        }
+        continue;
+      }
+      var hull = convexHull(pts), px = s * e.k;
+      roundPath(ctx, hull, px * 0.13);
+      ctx.fillStyle = css(mixRgb(shadeRgb(rgb, 1.0 + glow), [255, 255, 255], 0.1));
+      ctx.fill();
+      for (var f = 0; f < 6; f++) {
+        if (!fl[f].vis || (it2.hide && it2.hide[f])) continue;
         var U = FACES[f].uv, P00 = pts[U[0]], P10 = pts[U[1]], P01 = pts[U[2]], P11 = pts[U[3]];
         var map = function (u, v) {
           return [P00[0] + (P10[0] - P00[0]) * u + (P01[0] - P00[0]) * v + (P11[0] - P10[0] - P01[0] + P00[0]) * u * v,
                   P00[1] + (P10[1] - P00[1]) * u + (P01[1] - P00[1]) * v + (P11[1] - P10[1] - P01[1] + P00[1]) * u * v];
         };
-        var lit = 0.74 + 0.3 * Math.max(0, Math.min(1, (b - 0.6) / 0.58)) + (it2.f || 0) * 0.9, up = map(0.5, 0), dn = map(0.5, 1);
-        ctx.fillStyle = css(shadeRgb(rgb, lit * 0.8));
-        ctx.fill();
+        var lit = (fl[f].top ? 1.06 : 0.8 + 0.2 * Math.max(0, Math.min(1, (fl[f].b - 0.6) / 0.58))) + glow;
+        var up = map(0.5, 0.07), dn = map(0.5, 0.93);
         var gr = ctx.createLinearGradient(up[0], up[1], dn[0], dn[1]);
-        gr.addColorStop(0, css(shadeRgb(rgb, lit, 61)));
-        gr.addColorStop(0.5, css(shadeRgb(rgb, lit)));
-        gr.addColorStop(1, css(shadeRgb(rgb, lit * 0.66)));
-        ctx.beginPath();
-        RR.face.forEach(function (q, i) { var m = map(q[0], q[1]); if (i) ctx.lineTo(m[0], m[1]); else ctx.moveTo(m[0], m[1]); });
-        ctx.closePath();
+        if (fl[f].top) {
+          gr.addColorStop(0, css(shadeRgb(rgb, lit, 34)));
+          gr.addColorStop(1, css(shadeRgb(rgb, lit, 8)));
+        } else {
+          gr.addColorStop(0, css(shadeRgb(rgb, lit, 18)));
+          gr.addColorStop(0.55, css(shadeRgb(rgb, lit)));
+          gr.addColorStop(1, css(shadeRgb(rgb, lit * 0.9)));
+        }
+        pathUV(ctx, map, RR.face);
         ctx.fillStyle = gr;
         ctx.fill();
-        var side = Math.hypot(P10[0] - P00[0], P10[1] - P00[1]) + Math.hypot(P01[0] - P00[0], P01[1] - P00[1]);
-        ctx.beginPath();
-        RR.outer.forEach(function (q, i) { var m = map(q[0], q[1]); if (i) ctx.lineTo(m[0], m[1]); else ctx.moveTo(m[0], m[1]); });
-        ctx.closePath();
-        ctx.strokeStyle = 'rgba(255,255,255,' + (0.28 * Math.min(1, lit)) + ')';
-        ctx.lineWidth = Math.max(0.7, side * 0.5 * 0.028);
+        var side = Math.min(Math.hypot(P10[0] - P00[0], P10[1] - P00[1]), Math.hypot(P01[0] - P00[0], P01[1] - P00[1]));
+        pathUV(ctx, map, RR.outer);
+        ctx.strokeStyle = 'rgba(255,255,255,' + (fl[f].top ? 0.34 : 0.2) + ')';
+        ctx.lineWidth = Math.max(0.6, side * 0.03);
         ctx.stroke();
-        ctx.beginPath();
-        RR.inner.forEach(function (q, i) { var m = map(q[0], q[1]); if (i) ctx.lineTo(m[0], m[1]); else ctx.moveTo(m[0], m[1]); });
-        ctx.closePath();
-        ctx.strokeStyle = css(shadeRgb(rgb, 0.5 * lit), 0.4);
-        ctx.lineWidth = Math.max(0.5, side * 0.5 * 0.012);
-        ctx.stroke();
+        if (fl[f].top) {
+          var a0 = map(0.2, 0.16), a1 = map(0.55, 0.16), a2 = map(0.55, 0.24), a3 = map(0.2, 0.24);
+          ctx.beginPath(); ctx.moveTo(a0[0], a0[1]); ctx.lineTo(a1[0], a1[1]); ctx.lineTo(a2[0], a2[1]); ctx.lineTo(a3[0], a3[1]); ctx.closePath();
+          ctx.fillStyle = 'rgba(255,255,255,0.12)';
+          ctx.fill();
+        }
       }
     }
     ctx.globalAlpha = 1;
@@ -303,8 +329,7 @@
     }
     function colorAt(pos) {
       var x = ((pos * 12) % 4 + 4) % 4, i = Math.floor(x), f = x - i;
-      f = Math.max(0, Math.min(1, (f - 0.78) / 0.22));
-      f = f * f * (3 - 2 * f);
+      f = 0;
       var a = pal[i], b = pal[(i + 1) % 4];
       return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f].map(function (v) { return Math.min(255, v * gain); });
     }
@@ -326,17 +351,18 @@
     ctx.shadowBlur = 0;
     var cols = [];
     for (var j = 0; j < N; j++) cols.push(colorAt((j + 0.5) / N + flow));
-    [[1, Math.max(1.3, s * 0.09)], [0.45, Math.max(0.6, s * 0.035)]].forEach(function (pass) {
-      ctx.lineWidth = pass[1];
-      for (var j2 = 0; j2 < N; j2++) {
-        var c1 = pass[0] === 1 ? cols[j2] : cols[j2].map(function (v) { return v + (255 - v) * pass[0]; });
-        ctx.beginPath();
-        ctx.moveTo(sp[j2][0], sp[j2][1]);
-        ctx.lineTo(sp[j2 + 1][0], sp[j2 + 1][1]);
-        ctx.strokeStyle = css(c1);
-        ctx.stroke();
-      }
-    });
+    ctx.lineWidth = Math.max(1.3, s * 0.09);
+    var j2 = 0;
+    while (j2 < N) {
+      var start = j2, c1 = cols[j2], key1 = c1.map(Math.round).join(',');
+      while (j2 + 1 < N && cols[j2 + 1].map(Math.round).join(',') === key1) j2++;
+      ctx.beginPath();
+      ctx.moveTo(sp[start][0], sp[start][1]);
+      for (var q2 = start + 1; q2 <= Math.min(N, j2 + 1); q2++) ctx.lineTo(sp[q2][0], sp[q2][1]);
+      ctx.strokeStyle = css(c1);
+      ctx.stroke();
+      j2++;
+    }
     ctx.restore();
   }
 

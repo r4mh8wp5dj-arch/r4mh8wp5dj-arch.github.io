@@ -16,23 +16,33 @@
   <meta property="og:image" content="https://r4mh8wp5dj-arch.github.io/assets/img/logo-1024.png">
   <meta name="twitter:card" content="summary">
   <link rel="preload" href="assets/fonts/Nippo-Variable.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="styles.css?v=16">
-  <script src="js/sky.js?v=16"></script>
-  <script src="js/iso.js?v=16" defer></script>
-  <script src="js/site.js?v=16" defer></script>
-  <script src="js/play.js?v=16" defer></script>
-  <script src="js/notify.js?v=16" defer></script>
+  <link rel="stylesheet" href="styles.css?v=32">
+  <script src="js/sky.js?v=32"></script>
+  <script src="js/iso.js?v=32" defer></script>
+  <script src="js/site.js?v=32" defer></script>
+  <script src="js/play.js?v=32" defer></script>
+  <script src="js/notify.js?v=32" defer></script>
+  <script src="js/rail.js?v=32" defer></script>
 </head>
 <body class="home">
-  <div class="announce">Coming soon to the App Store</div>
   <header class="bar">
     <a class="mark" href="./" aria-label="Block Pit home"><img src="assets/img/favicon-64.png" alt="" width="28" height="28"><span>Block Pit</span></a>
+    <p class="announce">Coming soon to the App Store</p>
     <nav aria-label="Site">
       <a href="#how">How to play</a>
       <a href="#skies">Skies</a>
       <a href="contact.html">Contact</a>
     </nav>
   </header>
+
+  <ol class="rail" aria-hidden="true">
+    <li class="rail-line"><i class="rail-mark"></i></li>
+    <li class="rail-stop" data-ink style="--at: 0"><b>Deep Space</b><small>170 placements</small></li>
+    <li class="rail-stop" data-ink style="--at: 1"><b>Twilight</b><small>100 placements</small></li>
+    <li class="rail-stop" data-ink style="--at: 2"><b>Sunset</b><small>50 placements</small></li>
+    <li class="rail-stop" data-ink style="--at: 3"><b>Cumulus</b><small>20 placements</small></li>
+    <li class="rail-stop" data-ink style="--at: 4"><b>Dawn</b><small>Start</small></li>
+  </ol>
 
   <main>
     <section class="hero">
@@ -100,18 +110,16 @@
     <section class="skies" id="skies" aria-labelledby="skies-h">
       <div class="skies-head" data-ink>
         <h2 id="skies-h">Five skies</h2>
-        <p>The sky around the pit changes as you keep placing, from dawn to deep space.</p>
+        <p>Every block you place lifts the pit higher, from dawn all the way to deep space.</p>
       </div>
-      <div class="pano">
-        <canvas class="pano-sky" role="img" aria-label="The five skies blend into each other, from dawn on the left to deep space on the right."></canvas>
-        <ol class="pano-labels" data-ink>
-          <li><b>Dawn</b><small>Start</small></li>
-          <li><b>Cumulus</b><small>20<span> placements</span></small></li>
-          <li><b>Sunset</b><small>50<span> placements</span></small></li>
-          <li><b>Twilight</b><small>100<span> placements</span></small></li>
-          <li><b>Deep Space</b><small>170<span> placements</span></small></li>
-        </ol>
-      </div>
+      <ol class="checkpoints" data-ink aria-label="The five skies, from dawn to deep space">
+        <li><canvas class="cp-art" data-theme="dawn" aria-hidden="true"></canvas><b>Dawn</b><small>Start</small></li>
+        <li><canvas class="cp-art" data-theme="cumulus" aria-hidden="true"></canvas><b>Cumulus</b><small>20 placements</small></li>
+        <li><canvas class="cp-art" data-theme="sunset" aria-hidden="true"></canvas><b>Sunset</b><small>50 placements</small></li>
+        <li><canvas class="cp-art" data-theme="twilight" aria-hidden="true"></canvas><b>Twilight</b><small>100 placements</small></li>
+        <li><canvas class="cp-art" data-theme="deepspace" aria-hidden="true"></canvas><b>Deep Space</b><small>170 placements</small></li>
+      </ol>
+      <p class="skies-hint" data-ink><span class="hint-left">Watch the rail on the left: that's the sky you're in right now.</span><span class="hint-right">Watch the rail on the right: that's the sky you're in right now.</span></p>
     </section>
 
     <section class="end">
