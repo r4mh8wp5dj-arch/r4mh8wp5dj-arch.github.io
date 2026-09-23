@@ -452,6 +452,7 @@
 
     var popNext = 0, currentBanner = null;
     function popScore(points, at) {
+      if (opts.noPoints) return;
       var now = performance.now(), wait = Math.max(0, popNext - now);
       popNext = now + wait + 420;
       if (wait) { setTimeout(function () { showScore(points, at); }, wait); return; }
@@ -1041,6 +1042,7 @@
     streak: false,
     camTop: 10.2,
     hoverCap: 10.4,
+    noPoints: true,
     shiftX: -0.06,
     gaugeBeside: 10,
     script: {
