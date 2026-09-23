@@ -53,18 +53,19 @@
     var W = 0, H = 0, docH = 1, stars = [], last = 0, sy = 0, dirty = true;
 
     function seed() {
-      var n = Math.max(160, Math.min(900, Math.round(W * H / 1700)));
+      var n = Math.max(300, Math.min(2400, Math.round(W * H / 700)));
       stars = [];
       for (var i = 0; i < n; i++) {
-        var big = Math.random() < 0.14;
+        var big = Math.random() < 0.12;
         stars.push({
           x: Math.random() * W,
-          y: Math.pow(Math.random(), 1.7) * H,
+          y: Math.pow(Math.random(), 1.4) * H,
           r: big ? 1.1 + Math.random() * 0.7 : 0.45 + Math.random() * 0.35,
           a: big ? 0.75 + Math.random() * 0.25 : 0.35 + Math.random() * 0.35,
           v: 0.2 + Math.random() * 0.3,
           p: Math.random() * 6.28,
-          f: 0.5 + Math.random() * 1.4
+          f: 0.5 + Math.random() * 1.4,
+          k: Math.random()
         });
       }
     }
@@ -82,7 +83,10 @@
 
     function darkAt(screenY) {
       var L = lum(colorAt((sy + screenY) / docH));
-      return Math.max(0, Math.min(1, (0.09 - L) / 0.07));
+      if (L >= 0.09) return 0;
+      if (L <= 0.012) return 1;
+      if (L <= 0.05) return 0.55 - (L - 0.012) / 0.038 * 0.2;
+      return 0.35 * (0.09 - L) / 0.04;
     }
 
     function draw(now) {
@@ -102,9 +106,9 @@
           if (s.y > H + 2) s.y -= H + 4;
         }
         var band = bands[Math.max(0, Math.min(10, Math.round(s.y / H * 10)))];
-        if (band <= 0.01) continue;
+        if (s.k > band) continue;
         var tw = reduce ? 1 : 0.7 + 0.3 * Math.sin(s.p + tt * s.f);
-        ctx.globalAlpha = s.a * tw * band;
+        ctx.globalAlpha = s.a * tw * Math.min(1, (band - s.k) * 10);
         ctx.beginPath();
         ctx.arc(s.x, s.y, s.r, 0, 6.2832);
         ctx.fill();

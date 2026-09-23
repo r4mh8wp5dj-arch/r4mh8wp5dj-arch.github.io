@@ -16,11 +16,11 @@
   <meta property="og:image" content="https://r4mh8wp5dj-arch.github.io/assets/img/logo-1024.png">
   <meta name="twitter:card" content="summary">
   <link rel="preload" href="assets/fonts/Nippo-Variable.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="styles.css?v=4">
-  <script src="js/sky.js?v=4"></script>
-  <script src="js/iso.js?v=4" defer></script>
-  <script src="js/site.js?v=4" defer></script>
-  <script src="js/play.js?v=4" defer></script>
+  <link rel="stylesheet" href="styles.css?v=5">
+  <script src="js/sky.js?v=5"></script>
+  <script src="js/iso.js?v=5" defer></script>
+  <script src="js/site.js?v=5" defer></script>
+  <script src="js/play.js?v=5" defer></script>
 </head>
 <body class="home">
   <header class="bar">
@@ -33,6 +33,7 @@
   </header>
 
   <main>
+    <div class="rain-zone" aria-hidden="true"><canvas class="rain"></canvas></div>
     <section class="hero">
       <div class="hero-copy" data-ink>
         <h1 class="title"><span>Block</span><span>Pit</span></h1>
@@ -108,13 +109,16 @@
         <h2 id="skies-h">Five skies</h2>
         <p>The sky around the pit changes as you keep placing, from dawn to deep space.</p>
       </div>
-      <ol class="strip" data-ink>
-        <li><span class="sw p-da"></span><b>Dawn</b><small>Start</small></li>
-        <li><span class="sw p-cu"></span><b>Cumulus</b><small>20 placements</small></li>
-        <li><span class="sw p-su"></span><b>Sunset</b><small>50 placements</small></li>
-        <li><span class="sw p-tw"></span><b>Twilight</b><small>100 placements</small></li>
-        <li><span class="sw p-ds"></span><b>Deep Space</b><small>170 placements</small></li>
-      </ol>
+      <div class="pano">
+        <canvas class="pano-sky" role="img" aria-label="The five skies blend into each other, from dawn on the left to deep space on the right."></canvas>
+        <ol class="pano-labels" data-ink>
+          <li><b>Dawn</b><small>Start</small></li>
+          <li><b>Cumulus</b><small>20<span> placements</span></small></li>
+          <li><b>Sunset</b><small>50<span> placements</span></small></li>
+          <li><b>Twilight</b><small>100<span> placements</span></small></li>
+          <li><b>Deep Space</b><small>170<span> placements</span></small></li>
+        </ol>
+      </div>
     </section>
 
     <section class="end">

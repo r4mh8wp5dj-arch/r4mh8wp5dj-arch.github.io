@@ -61,7 +61,124 @@
     });
   }
 
-  function draw() { glyphs(); city(); }
+
+  var SKIES = [
+    ['#4E8AD0', '#6FA0D4', '#A8BCC4', '#7E9C58', '#4E6B30'],
+    ['#2A4C94', '#4A7FC0', '#8FB8DC', '#E8B77A', '#F2A24E'],
+    ['#47296B', '#D9616B', '#FA944D'],
+    ['#120F2E', '#331F4D', '#573361'],
+    ['#000000', '#0A1A3D', '#1A0D33']
+  ];
+  var STAR_DENSITY = [0, 0, 0.04, 0.45, 1];
+
+  function hex(h) { return [parseInt(h.substr(1, 2), 16), parseInt(h.substr(3, 2), 16), parseInt(h.substr(5, 2), 16)]; }
+  function sample(stops, t) {
+    var x = t * (stops.length - 1), i = Math.min(stops.length - 2, Math.floor(x)), f = x - i;
+    var a = hex(stops[i]), b = hex(stops[i + 1]);
+    return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f];
+  }
+  function ease(t) { t = Math.max(0, Math.min(1, t)); return t * t * (3 - 2 * t); }
+  function across(u, vals) {
+    var p = u * vals.length - 0.5, i = Math.floor(p), f = p - i;
+    if (i < 0) return [vals[0], vals[0], 0];
+    if (i >= vals.length - 1) return [vals[vals.length - 1], vals[vals.length - 1], 0];
+    return [vals[i], vals[i + 1], ease((f - 0.22) / 0.56)];
+  }
+
+  function pano() {
+    var cv = document.querySelector('.pano-sky');
+    if (!cv) return;
+    var F = I.fit(cv), ctx = F.ctx;
+    var lw = 240, lh = 64, off = document.createElement('canvas');
+    off.width = lw; off.height = lh;
+    var octx = off.getContext('2d'), img = octx.createImageData(lw, lh);
+    for (var x = 0; x < lw; x++) {
+      var m = across((x + 0.5) / lw, SKIES);
+      for (var y = 0; y < lh; y++) {
+        var t = y / (lh - 1), a = sample(m[0], t), b = sample(m[1], t), k = (y * lw + x) * 4;
+        img.data[k] = a[0] + (b[0] - a[0]) * m[2];
+        img.data[k + 1] = a[1] + (b[1] - a[1]) * m[2];
+        img.data[k + 2] = a[2] + (b[2] - a[2]) * m[2];
+        img.data[k + 3] = 255;
+      }
+    }
+    octx.putImageData(img, 0, 0);
+    ctx.save();
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(0, 0, F.w, F.h, 18); else ctx.rect(0, 0, F.w, F.h);
+    ctx.clip();
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(off, 0, 0, F.w, F.h);
+    var seed = 5;
+    function R() { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }
+    var n = Math.round(F.w * F.h / 60);
+    ctx.fillStyle = '#fff';
+    for (var i = 0; i < n; i++) {
+      var sx = R() * F.w, sy = Math.pow(R(), 1.3) * F.h, big = R() < 0.12, r = R();
+      var d = across(sx / F.w, STAR_DENSITY), dens = d[0] + (d[1] - d[0]) * d[2];
+      if (r > dens) continue;
+      ctx.globalAlpha = (big ? 0.85 : 0.45 + R() * 0.35) * (1 - sy / F.h * 0.5);
+      ctx.beginPath();
+      ctx.arc(sx, sy, big ? 1.2 + R() * 0.6 : 0.5 + R() * 0.4, 0, 6.2832);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  (function rain() {
+    var cv = document.querySelector('.rain');
+    if (!cv) return;
+    var zone = cv.parentNode, A, pieces = [], on = false, last = 0, mx = 0.5, tmx = 0.5;
+    function make(initial) {
+      var sh = I.randomShape(), z = Math.pow(Math.random(), 1.5), cells = sh.cells, c = [0, 0, 0];
+      cells.forEach(function (p) { c[0] += p[0]; c[1] += p[1]; c[2] += p[2]; });
+      return {
+        cells: cells, piv: c.map(function (v) { return v / cells.length + 0.5; }),
+        c: Math.floor(Math.random() * 6), z: z, s: 7 + z * z * 34,
+        x: Math.random() * A.w, y: initial ? Math.random() * A.h * 1.1 - A.h * 0.1 : -60,
+        v: 12 + z * 55, yaw: Math.random() * 6.28, ys: (Math.random() - 0.5) * 0.8,
+        roll: (Math.random() - 0.5) * 0.9, rs: (Math.random() - 0.5) * 0.3
+      };
+    }
+    function resize() {
+      A = I.fit(cv);
+      var n = Math.round(Math.max(16, Math.min(46, A.w * A.h / 30000)));
+      pieces = [];
+      for (var i = 0; i < n; i++) pieces.push(make(true));
+      paint();
+    }
+    function paint() {
+      A.ctx.clearRect(0, 0, A.w, A.h);
+      pieces.forEach(function (p) {
+        var M = I.mul(I.rotX(0.5), I.mul(I.rotZ(p.roll), I.rotY(p.yaw)));
+        I.cubes(A.ctx, p.cells.map(function (c) { return { x: c[0], y: c[1], z: c[2], c: p.c, a: 0.18 + p.z * 0.5 }; }),
+          { M: M, s: p.s, x: p.x + (mx - 0.5) * p.z * -40, y: p.y, pivot: p.piv });
+      });
+    }
+    function frame(now) {
+      if (!on) return;
+      var dt = last ? Math.min(0.05, (now - last) / 1000) : 0;
+      last = now;
+      mx += (tmx - mx) * Math.min(1, dt * 3);
+      pieces.forEach(function (p, i) {
+        p.y += p.v * dt; p.yaw += p.ys * dt; p.roll += p.rs * dt * 0.3;
+        if (p.y > A.h + 80) pieces[i] = make(false);
+      });
+      pieces.sort(function (a, b) { return a.z - b.z; });
+      paint();
+      requestAnimationFrame(frame);
+    }
+    window.addEventListener('pointermove', function (e) { tmx = e.clientX / window.innerWidth; });
+    window.addEventListener('resize', resize);
+    resize();
+    if (I.reduce) return;
+    I.visible(zone, function (v) {
+      if (v && !on) { on = true; last = 0; requestAnimationFrame(frame); } else if (!v) on = false;
+    });
+  })();
+
+  function draw() { glyphs(); city(); pano(); }
   window.addEventListener('resize', draw);
   draw();
 })();
