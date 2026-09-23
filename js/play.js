@@ -17,7 +17,7 @@
 
   var grid, piece, phase, fallY, fallV, score, streak, pressure, pending, nextId, aim, frags, flashes, timers;
   var plan = null, planT = 0, shown = 0, wipeT = 0, clock = 0, freeze = 0, bob = 0;
-  var spin = { from: 0, to: 0, t: -10, next: 2.2 }, count = { from: 0, to: 0, t: -1 }, flashS = { v: 1, vel: 0, until: -1 };
+  var spin = { from: 0, to: 0, t: -10, next: 2.5 }, count = { from: 0, to: 0, t: -1 }, flashS = { v: 1, vel: 0, until: -1 };
   var ghostKey = '', ghostPop = -1, pressFill = { row: -1, t: 0 }, pressBurst = -1, lastPressure = 0;
   var chan = { gain: 1, from: 1, peak: 1, t: -1, heat: 0, tier: 0, tierT: 0, flow: 0 };
   var streakView = { i: 0, v: 0, pulse: 0, pv: 0, pt: -1 };
@@ -321,6 +321,7 @@
       if (pending > 0) {
         streak += 1;
         streakView.pt = clock;
+        if (streak === 6 || streak === 12 || streak === 18) banner('On fire!', 'fire', 40);
         score += Math.round(pending * multiplier(streak) * 6);
         pending = 0;
       }
@@ -345,7 +346,7 @@
       popScore(Math.round(value * 6), c);
     });
     squashNeighbors(gone);
-    if (chain >= 2) banner('Chain ×' + chain);
+    if (chain >= 2) banner('Chain x' + chain + '!', chain >= 6 ? 'c3' : chain >= 4 ? 'c2' : 'c1', 28 * (1 + (Math.min(chain, 6) - 2) * 0.15));
     pulseChannel(chain >= 4 ? 3 : chain >= 2 ? 2 : 1);
     if (!reduce) freeze = [0.04, 0.045, 0.05, 0.055, 0.06][Math.min(chain, 5) - 1];
     later(200, function () {
@@ -407,9 +408,11 @@
     var tier = points >= 400 ? 3 : points >= 200 ? 2 : points >= 50 ? 1 : 0;
     var hang = [0, 0, 0.18, 0.4][tier], total = (1.3 + hang) * 1000;
     var p = I.project(cam, at[0] + 0.5, at[1] + 1, at[2] + 0.5);
-    var el = document.createElement('span'), inner = document.createElement('b');
+    var el = document.createElement('span'), inner = document.createElement('i'), fill = document.createElement('b');
     el.className = 'pop pop-t' + tier;
-    inner.textContent = '+' + points;
+    fill.textContent = '+' + points;
+    inner.setAttribute('data-t', '+' + points);
+    inner.appendChild(fill);
     el.appendChild(inner);
     el.style.left = (p[0] / cw * 100) + '%';
     el.style.top = (p[1] / ch * 100) + '%';
@@ -427,17 +430,21 @@
     }
     setTimeout(function () { el.remove(); }, total + 50);
   }
-  function banner(text) {
-    var el = document.createElement('span');
-    el.className = 'pop pop-chain';
-    el.textContent = text;
+  function banner(text, look, size) {
+    var el = document.createElement('span'), inner = document.createElement('i'), fill = document.createElement('b');
+    el.className = 'pop pop-banner pop-' + look;
+    fill.textContent = text;
+    inner.setAttribute('data-t', text);
+    inner.appendChild(fill);
+    el.appendChild(inner);
     el.style.left = '50%';
-    el.style.top = '14%';
+    el.style.top = '16%';
+    el.style.fontSize = Math.round(size * Math.min(1, cw / 420)) + 'px';
     elPops.appendChild(el);
     if (el.animate) {
-      el.animate([{ transform: 'translate(-50%,-50%) scale(.01)', opacity: 0 }, { transform: 'translate(-50%,-50%) scale(1.3)', opacity: 1, offset: 0.2 }, { transform: 'translate(-50%,-50%) scale(1)', opacity: 1, offset: 0.32 }, { transform: 'translate(-50%,-50%) scale(1)', opacity: 1, offset: 0.8 }, { transform: 'translate(-50%,-60%) scale(1)', opacity: 0 }], { duration: 1200, fill: 'forwards' });
+      el.animate([{ transform: 'translate(-50%,-50%) scale(.5)', opacity: 0 }, { transform: 'translate(-50%,-50%) scale(1.22)', opacity: 1, offset: 0.14 }, { transform: 'translate(-50%,-50%) scale(1)', opacity: 1, offset: 0.26 }, { transform: 'translate(-50%,-50%) scale(1)', opacity: 1, offset: 0.82 }, { transform: 'translate(-50%,-62%) scale(1)', opacity: 0 }], { duration: 1500, fill: 'forwards', easing: 'ease-out' });
     }
-    setTimeout(function () { el.remove(); }, 1250);
+    setTimeout(function () { el.remove(); }, 1550);
   }
 
   function resize() {
@@ -477,7 +484,7 @@
     var fw = 2 * Math.PI / 0.22, ftarget = clock < flashS.until ? 1.22 : 1;
     flashS.vel += ((ftarget - flashS.v) * fw * fw - 2 * 0.45 * fw * flashS.vel) * dt;
     flashS.v += flashS.vel * dt;
-    if (!reduce && clock >= spin.next && clock - spin.t > 0.7) spin = { from: spin.to, to: spin.to + Math.PI / 2, t: clock, next: clock + 2.2 };
+    if (!reduce && clock >= spin.next && clock - spin.t > 0.7) spin = { from: spin.to, to: spin.to + Math.PI / 2, t: clock, next: clock + 2.5 };
     if (phase === 'fall') {
       fallV += (reduce ? 26 : 70) * dt;
       fallY -= fallV * dt;

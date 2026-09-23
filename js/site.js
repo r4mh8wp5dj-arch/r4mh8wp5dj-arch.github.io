@@ -145,10 +145,17 @@
     ctx.beginPath();
     if (ctx.roundRect) ctx.roundRect(0, 0, F.w, F.h, 18); else ctx.rect(0, 0, F.w, F.h);
     ctx.clip();
-    var grad = ctx.createLinearGradient(0, 0, F.w, 0);
-    for (var i0 = 0; i0 <= 120; i0++) grad.addColorStop(i0 / 120, 'rgb(' + SKY.stripColor(i0 / 120).map(Math.round).join(',') + ')');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, F.w, F.h);
+    var dpr = Math.min(window.devicePixelRatio || 1, 2), pw = Math.round(F.w * dpr), ph = Math.round(F.h * dpr);
+    var off = document.createElement('canvas');
+    off.width = pw; off.height = ph;
+    var octx = off.getContext('2d'), img = octx.createImageData(pw, ph), cols = [], R = rng(13);
+    for (var x = 0; x < pw; x++) cols.push(SKY.stripColor((x + 0.5) / pw));
+    for (var y = 0; y < ph; y++) for (var x2 = 0; x2 < pw; x2++) {
+      var c = cols[x2], k = (y * pw + x2) * 4, dn = R() + R() - 1;
+      img.data[k] = c[0] + dn; img.data[k + 1] = c[1] + dn; img.data[k + 2] = c[2] + dn; img.data[k + 3] = 255;
+    }
+    octx.putImageData(img, 0, 0);
+    ctx.drawImage(off, 0, 0, F.w, F.h);
     var n = Math.round(F.w * F.h / 55), S = rng(5);
     for (var i = 0; i < n; i++) {
       var sx = S() * F.w, sy = S() * F.h, big = S() < 0.1, r = S(), a = S(), rad = S();

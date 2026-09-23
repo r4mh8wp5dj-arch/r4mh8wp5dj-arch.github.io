@@ -8,13 +8,28 @@
 
   var CORNERS = [[0, 0, 0], [1, 0, 0], [1, 0, 1], [0, 0, 1], [0, 1, 0], [1, 1, 0], [1, 1, 1], [0, 1, 1]];
   var FACES = [
-    { v: [4, 5, 6, 7], n: [0, 1, 0] },
-    { v: [0, 3, 2, 1], n: [0, -1, 0] },
-    { v: [1, 2, 6, 5], n: [1, 0, 0] },
-    { v: [0, 4, 7, 3], n: [-1, 0, 0] },
-    { v: [3, 7, 6, 2], n: [0, 0, 1] },
-    { v: [0, 1, 5, 4], n: [0, 0, -1] }
+    { v: [4, 5, 6, 7], n: [0, 1, 0], uv: [4, 5, 7, 6] },
+    { v: [0, 3, 2, 1], n: [0, -1, 0], uv: [0, 1, 3, 2] },
+    { v: [1, 2, 6, 5], n: [1, 0, 0], uv: [5, 6, 1, 2] },
+    { v: [0, 4, 7, 3], n: [-1, 0, 0], uv: [7, 4, 3, 0] },
+    { v: [3, 7, 6, 2], n: [0, 0, 1], uv: [7, 6, 3, 2] },
+    { v: [0, 1, 5, 4], n: [0, 0, -1], uv: [5, 4, 1, 0] }
   ];
+  var RR = (function () {
+    function ring(ins, rad, seg) {
+      var out = [], lo = ins + rad, hi = 1 - ins - rad;
+      [[hi, lo, -0.5], [hi, hi, 0], [lo, hi, 0.5], [lo, lo, 1]].forEach(function (c) {
+        for (var i = 0; i <= seg; i++) {
+          var a = (c[2] + i / seg * 0.5) * Math.PI;
+          out.push([c[0] + Math.cos(a) * rad, c[1] + Math.sin(a) * rad]);
+        }
+      });
+      return out;
+    }
+    return { outer: ring(0.055, 0.2, 4), inner: ring(0.085, 0.16, 4), face: ring(0.0, 0.1, 3) };
+  })();
+  function shadeRgb(rgb, k, add) { return rgb.map(function (c) { return Math.max(0, Math.min(255, (c + (add || 0)) * k)); }); }
+  function css(c, a) { return 'rgba(' + Math.round(c[0]) + ',' + Math.round(c[1]) + ',' + Math.round(c[2]) + ',' + (a == null ? 1 : a) + ')'; }
 
   var SHAPES = {
     single: [[[0, 0, 0]]],
@@ -106,22 +121,39 @@
           continue;
         }
         var b = fl[f].b + (it2.f || 0) * 0.9;
-        ctx.fillStyle = tone(rgb, b, key);
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(0,0,0,0.2)';
-        ctx.lineWidth = lw;
-        ctx.stroke();
-        if (fl[f].top && s * e.k > 14) {
-          var mx = (pts[V[0]][0] + pts[V[2]][0]) / 2, my = (pts[V[0]][1] + pts[V[2]][1]) / 2;
-          ctx.beginPath();
-          for (var r = 0; r < 4; r++) {
-            var px = mx + (pts[V[r]][0] - mx) * 0.72, py = my + (pts[V[r]][1] - my) * 0.72;
-            if (r) ctx.lineTo(px, py); else ctx.moveTo(px, py);
-          }
-          ctx.closePath();
-          ctx.fillStyle = tone(rgb, b + 0.07, key);
+        if (s * e.k < 14) {
+          ctx.fillStyle = tone(rgb, b, key);
           ctx.fill();
+          continue;
         }
+        var U = FACES[f].uv, P00 = pts[U[0]], P10 = pts[U[1]], P01 = pts[U[2]], P11 = pts[U[3]];
+        var map = function (u, v) {
+          return [P00[0] + (P10[0] - P00[0]) * u + (P01[0] - P00[0]) * v + (P11[0] - P10[0] - P01[0] + P00[0]) * u * v,
+                  P00[1] + (P10[1] - P00[1]) * u + (P01[1] - P00[1]) * v + (P11[1] - P10[1] - P01[1] + P00[1]) * u * v];
+        };
+        var lit = Math.min(1.25, b), up = map(0.5, 0), dn = map(0.5, 1);
+        var gr = ctx.createLinearGradient(up[0], up[1], dn[0], dn[1]);
+        gr.addColorStop(0, css(shadeRgb(rgb, lit, 61)));
+        gr.addColorStop(0.5, css(shadeRgb(rgb, lit)));
+        gr.addColorStop(1, css(shadeRgb(rgb, lit * 0.66)));
+        ctx.beginPath();
+        RR.face.forEach(function (q, i) { var m = map(q[0], q[1]); if (i) ctx.lineTo(m[0], m[1]); else ctx.moveTo(m[0], m[1]); });
+        ctx.closePath();
+        ctx.fillStyle = gr;
+        ctx.fill();
+        var side = Math.hypot(P10[0] - P00[0], P10[1] - P00[1]) + Math.hypot(P01[0] - P00[0], P01[1] - P00[1]);
+        ctx.beginPath();
+        RR.outer.forEach(function (q, i) { var m = map(q[0], q[1]); if (i) ctx.lineTo(m[0], m[1]); else ctx.moveTo(m[0], m[1]); });
+        ctx.closePath();
+        ctx.strokeStyle = 'rgba(255,255,255,' + (0.28 * Math.min(1, lit)) + ')';
+        ctx.lineWidth = Math.max(0.7, side * 0.5 * 0.028);
+        ctx.stroke();
+        ctx.beginPath();
+        RR.inner.forEach(function (q, i) { var m = map(q[0], q[1]); if (i) ctx.lineTo(m[0], m[1]); else ctx.moveTo(m[0], m[1]); });
+        ctx.closePath();
+        ctx.strokeStyle = css(shadeRgb(rgb, 0.5 * lit), 0.4);
+        ctx.lineWidth = Math.max(0.5, side * 0.5 * 0.012);
+        ctx.stroke();
       }
     }
     ctx.globalAlpha = 1;
@@ -176,16 +208,16 @@
     o = o || {};
     var n = o.n || 4, c = n / 2, s = cam.s;
     var outer = c + 0.35, open = c + 0.02, rimY = 0.02, botY = -0.5;
-    var led = o.led || [115, 204, 255], glow = o.glow == null ? 1 : o.glow;
     ctx.save();
-    var sc = project(cam, c, botY - 0.25, c);
-    var g = ctx.createRadialGradient(sc[0], sc[1], 0, sc[0], sc[1], outer * s * 1.25);
-    g.addColorStop(0, 'rgba(0,0,0,0.32)');
-    g.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = g;
-    ctx.beginPath();
-    ctx.ellipse(sc[0], sc[1], outer * s * 1.3, outer * s * 0.6, 0, 0, 6.2832);
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.42)';
+    ctx.shadowBlur = s * 0.9;
+    ctx.shadowOffsetX = 10000 * (ctx.getTransform ? ctx.getTransform().a : 1);
+    ctx.translate(-10000, 0);
+    path(ctx, cam, rr(outer * 1.02, 0.5, botY - 0.2, c, 6));
+    ctx.fillStyle = '#000';
     ctx.fill();
+    ctx.restore();
 
     var top = rr(outer, 0.16, rimY, c, 5), bot = rr(outer - 0.12, 0.14, botY, c, 5);
     for (var i = 0; i < top.length; i++) {
@@ -257,13 +289,7 @@
     ctx.save();
     ctx.lineJoin = 'round';
     ctx.lineCap = 'butt';
-    var groups = [[], [], [], []], N = 96, pts = R.pts;
-    for (var k = 0; k < N; k++) {
-      var d0 = k / N * R.len, d1 = (k + 1) / N * R.len;
-      var p0 = at(d0), p1 = at(d1);
-      var idx = ((Math.floor(((k + 0.5) / N + flow) * 12) % 4) + 4) % 4;
-      groups[idx].push([p0, p1]);
-    }
+    var N = 180, pts = R.pts;
     function at(d) {
       for (var i = 1; i < R.acc.length; i++) {
         if (d <= R.acc[i]) {
@@ -273,25 +299,39 @@
       }
       return pts[0];
     }
-    groups.forEach(function (segs, gi) {
-      if (!segs.length) return;
-      var base = pal[gi].map(function (v) { return Math.min(255, v * gain); });
-      var col = 'rgb(' + base.map(Math.round).join(',') + ')';
-      var core = 'rgb(' + base.map(function (v) { return Math.round(v + (255 - v) * 0.45); }).join(',') + ')';
-      [[col, Math.max(1.4, s * 0.1), Math.max(4, s * 0.4) * Math.min(2, gain)], [core, Math.max(0.7, s * 0.045), 0]].forEach(function (pass) {
-        ctx.strokeStyle = pass[0];
-        ctx.lineWidth = pass[1];
-        ctx.shadowColor = col;
-        ctx.shadowBlur = pass[2];
-        ctx.beginPath();
-        segs.forEach(function (sg) {
-          var q0 = project(cam, sg[0][0], sg[0][1], sg[0][2]), q1 = project(cam, sg[1][0], sg[1][1], sg[1][2]);
-          ctx.moveTo(q0[0], q0[1]);
-          ctx.lineTo(q1[0], q1[1]);
-        });
-        ctx.stroke();
-      });
-    });
+    function colorAt(pos) {
+      var x = ((pos * 12) % 4 + 4) % 4, i = Math.floor(x), f = x - i;
+      f = f * f * (3 - 2 * f);
+      var a = pal[i], b = pal[(i + 1) % 4];
+      return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f].map(function (v) { return Math.min(255, v * gain); });
+    }
+    var sp = [];
+    for (var k = 0; k <= N; k++) { var w = at(k / N * R.len); sp.push(project(cam, w[0], w[1], w[2])); }
+    var avg = [0, 0, 0];
+    pal.forEach(function (c2) { avg[0] += c2[0] / 4; avg[1] += c2[1] / 4; avg[2] += c2[2] / 4; });
+    avg = avg.map(function (v) { return Math.min(255, v * gain); });
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    sp.forEach(function (q, i) { if (i) ctx.lineTo(q[0], q[1]); else ctx.moveTo(q[0], q[1]); });
+    ctx.closePath();
+    ctx.strokeStyle = css(avg, 0.55);
+    ctx.lineWidth = Math.max(1.4, s * 0.1);
+    ctx.shadowColor = css(avg);
+    ctx.shadowBlur = Math.max(4, s * 0.4) * Math.min(2, gain);
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+    for (var j = 0; j < N; j++) {
+      var c1 = colorAt(j / N + flow);
+      ctx.beginPath();
+      ctx.moveTo(sp[j][0], sp[j][1]);
+      ctx.lineTo(sp[j + 1][0], sp[j + 1][1]);
+      ctx.strokeStyle = css(c1);
+      ctx.lineWidth = Math.max(1.2, s * 0.085);
+      ctx.stroke();
+      ctx.strokeStyle = css(c1.map(function (v) { return v + (255 - v) * 0.45; }));
+      ctx.lineWidth = Math.max(0.6, s * 0.035);
+      ctx.stroke();
+    }
     ctx.restore();
   }
 

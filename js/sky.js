@@ -73,7 +73,7 @@
       var c = colorAt(i / 160);
       grad.push('rgb(' + c.map(Math.round).join(',') + ') ' + (i / 1.6).toFixed(3) + '%');
     }
-    root.style.background = 'linear-gradient(to bottom,' + grad.join(',') + ')';
+    root.style.backgroundImage = 'linear-gradient(to bottom,' + grad.join(',') + ')';
   }
   paintSky();
 
@@ -85,6 +85,16 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var grain = document.createElement('canvas');
+    grain.width = grain.height = 160;
+    var gx = grain.getContext('2d'), gd = gx.createImageData(160, 160);
+    for (var gi = 0; gi < gd.data.length; gi += 4) { var gv = Math.random() * 255; gd.data[gi] = gd.data[gi + 1] = gd.data[gi + 2] = gv; gd.data[gi + 3] = 255; }
+    gx.putImageData(gd, 0, 0);
+    var film = document.createElement('div');
+    film.className = 'grain';
+    film.setAttribute('aria-hidden', 'true');
+    film.style.backgroundImage = 'url(' + grain.toDataURL() + ')';
+    document.body.insertBefore(film, document.body.firstChild);
     var canvas = document.createElement('canvas');
     canvas.className = 'stars';
     canvas.setAttribute('aria-hidden', 'true');
