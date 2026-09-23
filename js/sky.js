@@ -179,11 +179,11 @@
       }
       for (var i = 0; i < inks.length; i++) {
         var r = inks[i].getBoundingClientRect();
-        inks[i].classList.toggle('on-light', lum(colorAt((sy + r.top + r.height / 2) / docH)) > 0.26);
+        inks[i].classList.toggle('on-light', lum(colorAt((sy + r.top + r.height / 2) / docH)) > 0.18);
       }
       if (bar) {
         var br = bar.getBoundingClientRect();
-        bar.classList.toggle('on-light', lum(colorAt((sy + br.top + br.height / 2) / docH)) > 0.26);
+        bar.classList.toggle('on-light', lum(colorAt((sy + br.top + br.height / 2) / docH)) > 0.18);
       }
       if (reduce) draw(performance.now());
     }

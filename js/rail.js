@@ -24,7 +24,7 @@
     var u0 = SKY.pageU((vh / 2) / docH), u1 = SKY.pageU((docH - vh / 2) / docH);
     var f = reduce ? k / 4 : Math.max(0, Math.min(1, (u0 - u) / Math.max(0.001, u0 - u1)));
     mark.style.transform = 'translate3d(0,' + (f * lineH).toFixed(1) + 'px,0)';
-    rail.classList.toggle('on-light', SKY.lum(SKY.colorAt((window.scrollY + rail.getBoundingClientRect().top + rail.offsetHeight / 2) / docH)) > 0.26);
+    rail.classList.toggle('on-light', SKY.lum(SKY.colorAt((window.scrollY + rail.getBoundingClientRect().top + rail.offsetHeight / 2) / docH)) > 0.18);
     if (k !== active) {
       active = k;
       stops.forEach(function (s, i) { s.classList.toggle('is-on', i === k); });
