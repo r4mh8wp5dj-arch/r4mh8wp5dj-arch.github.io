@@ -17,7 +17,7 @@
     var plan = null, planT = 0, shown = 0, wipeT = 0, clock = 0, freeze = 0, bob = 0;
     var spin = { from: 0, to: 0, t: -10, next: 2.5, dur: 0.7, n: 0 }, count = { from: 0, to: 0, t: -1 }, flashS = { v: 1, vel: 0, until: -1 };
     var ghostSim = { key: '', over: false }, DANGER_RED = [230, 31, 26];
-    var pressFill = { row: -1, t: 0 }, pressBurst = -1, lastPressure = 0;
+    var ghost = { key: '', t: -1, from: [0, 0, 0], pos: null }, pressFill = { row: -1, t: 0 }, pressBurst = -1, lastPressure = 0;
     var chan = { gain: 1, from: 1, peak: 1, t: -1, heat: 0, tier: 0, tierT: 0, flow: 0 };
     var streakView = { i: 0, v: 0, pulse: 0, pv: 0, pt: -1 };
 
@@ -101,6 +101,7 @@
       shown = 0;
       count = { from: 0, to: 0, t: -1 };
       if (elScore) elScore.textContent = '0';
+      ghost = { key: '', t: -1, from: [0, 0, 0], pos: null };
       spawn(true);
     }
 
@@ -204,6 +205,7 @@
 
     function lock() {
       drops++;
+      ghost = { key: '', t: -1, from: [0, 0, 0], pos: null };
       var y0 = landing(), ids = {};
       piece.cells.forEach(function (c) {
         var b = block(piece.c, y0 + c[1]);
@@ -677,7 +679,6 @@
 
       if (piece && phase === 'aim') {
         var fc = finalCells(piece.cells, aim.x, aim.z), key = fc.map(function (f) { return f.slice(0, 3).join(','); }).join(';');
-        var gs = 1;
         var col = I.RGB[piece.c], set = {}, gc = [0, 0, 0], lowest = {};
         var high = fc.some(function (f) { return f[1] >= H; });
         if (key + '|' + piece.c !== ghostSim.key) ghostSim = { key: key + '|' + piece.c, over: high && endsInOverflow(piece.cells, piece.c, aim.x, aim.z) };
@@ -688,14 +689,24 @@
           if (!(k2 in lowest) || f[1] < lowest[k2]) lowest[k2] = f[1];
         });
         gc = gc.map(function (v) { return v / fc.length; });
+        if (key !== ghost.key) {
+          ghost.from = ghost.pos ? [ghost.pos[0] - gc[0], ghost.pos[1] - gc[1], ghost.pos[2] - gc[2]] : [0, 0, 0];
+          ghost.t = ghost.key ? clock : -1;
+          ghost.key = key;
+        }
+        var ge = ghost.t < 0 ? 1 : clamp((clock - ghost.t) / 0.08, 0, 1), gk = 1 - easeOutQ(ge);
+        var go = [ghost.from[0] * gk, ghost.from[1] * gk, ghost.from[2] * gk];
+        ghost.pos = [gc[0] + go[0], gc[1] + go[1], gc[2] + go[2]];
+        var pe = ghost.t < 0 ? 1 : clock - ghost.t;
+        var gs = pe < 0.06 ? 1 + 0.16 * easeOutQ(pe / 0.06) : pe < 0.2 ? 1.16 - 0.16 * easeOutQ((pe - 0.06) / 0.14) : 1;
         fc.forEach(function (f) {
           var hide = {};
           I.faces.forEach(function (face, fi) { if (set[(f[0] + face.n[0]) + ',' + (f[1] + face.n[1]) + ',' + (f[2] + face.n[2])]) hide[fi] = true; });
-          items.push({ x: f[0] + (f[0] - gc[0]) * (gs - 1), y: f[1] + (f[1] - gc[1]) * (gs - 1), z: f[2] + (f[2] - gc[2]) * (gs - 1), rgb: ghostSim.over && f[1] >= H ? DANGER_RED : col, flat: true, a: 0.32, k: 0.86 * gs, hide: hide });
+          items.push({ x: f[0] + go[0] + (f[0] - gc[0]) * (gs - 1), y: f[1] + go[1] + (f[1] - gc[1]) * (gs - 1), z: f[2] + go[2] + (f[2] - gc[2]) * (gs - 1), rgb: ghostSim.over && f[1] >= H ? DANGER_RED : col, flat: true, a: 0.32, k: 0.86 * gs, hide: hide });
         });
         Object.keys(lowest).forEach(function (k2) {
           var xz = k2.split(',').map(Number), ty = lowest[k2] + 0.018;
-          items.push({ x: xz[0], y: ty - 0.48, z: xz[1], custom: tileDraw(xz[0] + 0.5, ty, xz[1] + 0.5, gs, col) });
+          items.push({ x: xz[0] + go[0], y: ty + go[1] - 0.48, z: xz[1] + go[2], custom: tileDraw(xz[0] + 0.5 + go[0], ty + go[1], xz[1] + 0.5 + go[2], gs, col) });
         });
       }
       if (piece && (phase === 'aim' || phase === 'fall')) {
