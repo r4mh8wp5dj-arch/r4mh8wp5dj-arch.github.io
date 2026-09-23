@@ -404,7 +404,14 @@
     chan.tier = tier; chan.tierT = clock; chan.heat = T.heat;
   }
 
+  var popNext = 0, currentBanner = null;
   function popScore(points, at) {
+    var now = performance.now(), wait = Math.max(0, popNext - now);
+    popNext = now + wait + 420;
+    if (wait) { setTimeout(function () { showScore(points, at); }, wait); return; }
+    showScore(points, at);
+  }
+  function showScore(points, at) {
     var tier = points >= 400 ? 3 : points >= 200 ? 2 : points >= 50 ? 1 : 0;
     var hang = [0, 0, 0.18, 0.4][tier], total = (1.3 + hang) * 1000;
     var p = I.project(cam, at[0] + 0.5, at[1] + 1, at[2] + 0.5);
@@ -431,6 +438,7 @@
     setTimeout(function () { el.remove(); }, total + 50);
   }
   function banner(text, look, size) {
+    if (currentBanner) currentBanner.remove();
     var el = document.createElement('span'), inner = document.createElement('i'), fill = document.createElement('b');
     el.className = 'pop pop-banner pop-' + look;
     fill.textContent = text;
@@ -438,13 +446,20 @@
     inner.appendChild(fill);
     el.appendChild(inner);
     el.style.left = '50%';
-    el.style.top = '16%';
+    el.style.top = '14%';
     el.style.fontSize = Math.round(size * Math.min(1, cw / 420)) + 'px';
     elPops.appendChild(el);
+    currentBanner = el;
     if (el.animate) {
-      el.animate([{ transform: 'translate(-50%,-50%) scale(.5)', opacity: 0 }, { transform: 'translate(-50%,-50%) scale(1.22)', opacity: 1, offset: 0.14 }, { transform: 'translate(-50%,-50%) scale(1)', opacity: 1, offset: 0.26 }, { transform: 'translate(-50%,-50%) scale(1)', opacity: 1, offset: 0.82 }, { transform: 'translate(-50%,-62%) scale(1)', opacity: 0 }], { duration: 1500, fill: 'forwards', easing: 'ease-out' });
+      el.animate([{ transform: 'translate(-50%,-50%) scale(.5)', opacity: 0 }, { transform: 'translate(-50%,-50%) scale(1)', opacity: 1, offset: 0.12 }, { transform: 'translate(-50%,-50%) scale(1)', opacity: 1, offset: 0.8 }, { transform: 'translate(-50%,-50%) scale(1)', opacity: 0 }], { duration: 1500, fill: 'forwards', easing: 'ease-out' });
+      if (look === 'c1') {
+        fill.animate([{ filter: 'brightness(1)' }, { filter: 'brightness(1.6)', offset: 0.3 }, { filter: 'brightness(1)' }], { duration: 400, delay: 80 });
+      } else {
+        var o = look === 'c3' ? 1.25 : 1.18, w = look === 'c3' ? 1.4 : 1, sw = o - 1;
+        inner.animate([{ transform: 'scale(.72)' }, { transform: 'scale(' + o + ')', offset: 0.29 }, { transform: 'scale(' + (1 - sw * 0.35 * w) + ')', offset: 0.49 }, { transform: 'scale(' + (1 + sw * 0.15 * w) + ')', offset: 0.84 }, { transform: 'scale(1)' }], { duration: 410, easing: 'ease-out' });
+      }
     }
-    setTimeout(function () { el.remove(); }, 1550);
+    setTimeout(function () { el.remove(); if (currentBanner === el) currentBanner = null; }, 1550);
   }
 
   function resize() {
@@ -506,7 +521,7 @@
     }
     dying = dying.filter(function (d) { return clock - d.t < 0.13; });
     flashes = flashes.filter(function (f) { return clock - f.t < 0.13; });
-    chan.flow += dt / 12 * (1 + (chan.tier && clock - chan.tierT < TIERS[chan.tier].dur ? TIERS[chan.tier].speed : 0)) * (streak >= 6 ? 2 : 1);
+    chan.flow += dt / 8 * (1 + (chan.tier && clock - chan.tierT < TIERS[chan.tier].dur ? TIERS[chan.tier].speed : 0)) * (streak >= 6 ? 2 : 1);
     if (chan.t >= 0) {
       var e = clock - chan.t;
       chan.gain = e < 0.08 ? chan.from + (chan.peak - chan.from) * e / 0.08 : 1 + (chan.peak - 1) * Math.pow(1 - Math.min(1, (e - 0.08) / 0.6), 3);
@@ -745,7 +760,7 @@
       faceFill([[dx, top], [0, top - dy], [0, top - dy + edge], [dx, top + edge]], top, 0.8, filled, 0.36, fade);
       faceFill([[dx, top], [dx, top + edge], [2 * dx, top - dy + edge], [2 * dx, top - dy]], top, 1, filled, 0.26, fade);
       if (row === 0) {
-        roundPoly(g, [[dx + inset, 2 * dy], [2 * dx + inset, dy], [dx + inset, 0], [inset, dy]], cr);
+        roundPoly(g, [[dx + inset, 2 * dy + inset], [2 * dx + inset, dy + inset], [dx + inset, inset], [inset, dy + inset]], cr);
         g.fillStyle = filled ? rgb(mid.map(function (v) { return v * 1.15 * pulseB; }), fade) : rgb(base, 0.18);
         g.fill();
       }
@@ -755,12 +770,12 @@
     g.strokeStyle = 'rgba(0,0,0,0.3)';
     g.lineWidth = 0.75;
     g.beginPath();
-    g.moveTo(inset + dx, 0); g.lineTo(inset + 2 * dx, dy); g.lineTo(inset + 2 * dx, bottom - dy); g.lineTo(inset + dx, bottom); g.lineTo(inset, bottom - dy); g.lineTo(inset, dy); g.closePath();
+    g.moveTo(inset + dx, inset); g.lineTo(inset + 2 * dx, inset + dy); g.lineTo(inset + 2 * dx, bottom - dy); g.lineTo(inset + dx, bottom); g.lineTo(inset, bottom - dy); g.lineTo(inset, inset + dy); g.closePath();
     for (var r2 = 0; r2 < PRESSURE_MAX; r2++) {
       var tp = inset + 2 * dy + r2 * edge - dy;
       g.moveTo(inset, tp); g.lineTo(inset + dx, tp + dy); g.lineTo(inset + 2 * dx, tp);
     }
-    g.moveTo(inset + dx, 2 * dy); g.lineTo(inset + dx, bottom);
+    g.moveTo(inset + dx, inset + 2 * dy); g.lineTo(inset + dx, bottom);
     g.stroke();
     if (pressBurst >= 0) {
       var be = clock - pressBurst, bo = be < 0.05 ? 1 : Math.max(0, 1 - easeOutQ((be - 0.05) / 0.25));
@@ -768,7 +783,7 @@
         g.globalCompositeOperation = 'lighter';
         g.fillStyle = 'rgba(255,255,255,' + (bo * 0.35) + ')';
         g.beginPath();
-        g.moveTo(inset + dx, 0); g.lineTo(inset + 2 * dx, dy); g.lineTo(inset + 2 * dx, bottom - dy); g.lineTo(inset + dx, bottom); g.lineTo(inset, bottom - dy); g.lineTo(inset, dy); g.closePath();
+        g.moveTo(inset + dx, inset); g.lineTo(inset + 2 * dx, inset + dy); g.lineTo(inset + 2 * dx, bottom - dy); g.lineTo(inset + dx, bottom); g.lineTo(inset, bottom - dy); g.lineTo(inset, inset + dy); g.closePath();
         g.fill();
         g.globalCompositeOperation = 'source-over';
       }

@@ -124,19 +124,24 @@ main, .foot { position: relative; z-index: 1; }
 }
 .title {
   display: flex;
-  align-items: center;
-  gap: .3em;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
   font-size: clamp(2.2rem, 5.4vw, 4.9rem);
   line-height: 1;
   letter-spacing: .04em;
   white-space: nowrap;
 }
 .title-icon {
-  width: clamp(52px, 1.1em, 88px);
+  width: 60px;
   height: auto;
   flex: none;
   border-radius: 23%;
   box-shadow: 0 10px 28px rgba(0, 0, 0, .35);
+}
+@media (min-width: 1380px) {
+  .title { position: relative; display: block; }
+  .title-icon { position: absolute; right: calc(100% + .3em); top: 50%; width: clamp(52px, 1.1em, 88px); transform: translateY(-50%); }
 }
 .tag {
   margin-top: 26px;
@@ -230,11 +235,13 @@ main, .foot { position: relative; z-index: 1; }
 .pop-t1 { font-size: 27px; }
 .pop-t2 { font-size: 30px; }
 .pop-t3 { font-size: 35px; }
-.pop-banner { letter-spacing: 2px; text-transform: uppercase; }
-.pop-c1 b { background-image: linear-gradient(#00B894, #00E5B4); }
-.pop-c2 b { background-image: linear-gradient(#00E5C8, #5CFFE8); }
-.pop-c3 b { background-image: linear-gradient(#00F5C4, #8CFFE6); }
-.pop-fire b { background-image: linear-gradient(#FFC857, #FF590D 40%, #B80F0A); }
+.pop-banner { letter-spacing: 2px; text-transform: uppercase; font-weight: 700; }
+.pop-banner b { background-size: 220% 100%, 220% 100%, 100% 100%; animation: glowdrift 2.4s linear infinite; }
+.pop-c1 b { background-image: radial-gradient(circle at 30% 45%, #7AF5D8 0, transparent 38%), radial-gradient(circle at 70% 60%, #3DEFC4 0, transparent 38%), linear-gradient(#00B894, #00E5B4); }
+.pop-c2 b { background-image: radial-gradient(circle at 30% 45%, #A8FFF4 0, transparent 38%), radial-gradient(circle at 70% 60%, #7AFFEE 0, transparent 38%), linear-gradient(#00E5C8, #5CFFE8); }
+.pop-c3 b { background-image: radial-gradient(circle at 30% 45%, #3DFFDD 0, transparent 38%), radial-gradient(circle at 70% 60%, #00FFD1 0, transparent 38%), linear-gradient(#00F5C4, #8CFFE6); }
+.pop-fire b { background-image: radial-gradient(circle at 30% 45%, #FFB826 0, transparent 38%), radial-gradient(circle at 70% 60%, #FF8A3D 0, transparent 38%), linear-gradient(#B80F0A, #FF590D); }
+@keyframes glowdrift { from { background-position: 0% 0, 100% 0, 0 0; } to { background-position: 100% 0, 0% 0, 0 0; } }
 .pop {
   position: absolute;
   transform: translate(-50%, -50%);
@@ -419,8 +426,8 @@ main, .foot { position: relative; z-index: 1; }
 
 @media (max-width: 600px) {
   .bar nav a:not(:last-child) { display: none; }
-  .title { font-size: min(10.4vw, 2.6rem); gap: .28em; }
-  .title-icon { width: min(15vw, 60px); }
+  .title { font-size: min(10.4vw, 2.6rem); gap: 14px; }
+  .title-icon { width: 56px; }
   .announce { font-size: 11px; letter-spacing: .22em; }
   #hud-gauges { width: 48px; height: 300px; }
   #hud-score-cv { width: 96px; height: 44px; }

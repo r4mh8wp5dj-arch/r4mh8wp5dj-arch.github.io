@@ -26,7 +26,7 @@
       });
       return out;
     }
-    return { outer: ring(0.055, 0.2, 4), inner: ring(0.085, 0.16, 4), face: ring(0.0, 0.1, 3) };
+    return { outer: ring(0.055, 0.2, 4), inner: ring(0.085, 0.16, 4), face: ring(0.02, 0.12, 3) };
   })();
   function shadeRgb(rgb, k, add) { return rgb.map(function (c) { return Math.max(0, Math.min(255, (c + (add || 0)) * k)); }); }
   function css(c, a) { return 'rgba(' + Math.round(c[0]) + ',' + Math.round(c[1]) + ',' + Math.round(c[2]) + ',' + (a == null ? 1 : a) + ')'; }
@@ -131,7 +131,9 @@
           return [P00[0] + (P10[0] - P00[0]) * u + (P01[0] - P00[0]) * v + (P11[0] - P10[0] - P01[0] + P00[0]) * u * v,
                   P00[1] + (P10[1] - P00[1]) * u + (P01[1] - P00[1]) * v + (P11[1] - P10[1] - P01[1] + P00[1]) * u * v];
         };
-        var lit = Math.min(1.25, b), up = map(0.5, 0), dn = map(0.5, 1);
+        var lit = 0.74 + 0.3 * Math.max(0, Math.min(1, (b - 0.6) / 0.58)) + (it2.f || 0) * 0.9, up = map(0.5, 0), dn = map(0.5, 1);
+        ctx.fillStyle = css(shadeRgb(rgb, lit * 0.8));
+        ctx.fill();
         var gr = ctx.createLinearGradient(up[0], up[1], dn[0], dn[1]);
         gr.addColorStop(0, css(shadeRgb(rgb, lit, 61)));
         gr.addColorStop(0.5, css(shadeRgb(rgb, lit)));
@@ -279,7 +281,7 @@
   function channelPalette(o) {
     if (o.palette) return o.palette;
     var led = o.led || [115, 204, 255];
-    return [0.55, 0.7, 0.85, 1].map(function (k) { return led.map(function (v) { return v * k; }); });
+    return [0.32, 0.58, 0.84, 1.1].map(function (k) { return led.map(function (v) { return Math.min(255, v * k); }); });
   }
 
   function ring(ctx, cam, o) {
@@ -289,7 +291,7 @@
     ctx.save();
     ctx.lineJoin = 'round';
     ctx.lineCap = 'butt';
-    var N = 180, pts = R.pts;
+    var N = 288, pts = R.pts;
     function at(d) {
       for (var i = 1; i < R.acc.length; i++) {
         if (d <= R.acc[i]) {
@@ -301,6 +303,7 @@
     }
     function colorAt(pos) {
       var x = ((pos * 12) % 4 + 4) % 4, i = Math.floor(x), f = x - i;
+      f = Math.max(0, Math.min(1, (f - 0.78) / 0.22));
       f = f * f * (3 - 2 * f);
       var a = pal[i], b = pal[(i + 1) % 4];
       return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f].map(function (v) { return Math.min(255, v * gain); });
@@ -310,7 +313,8 @@
     var avg = [0, 0, 0];
     pal.forEach(function (c2) { avg[0] += c2[0] / 4; avg[1] += c2[1] / 4; avg[2] += c2[2] / 4; });
     avg = avg.map(function (v) { return Math.min(255, v * gain); });
-    ctx.lineCap = 'round';
+    ctx.lineCap = 'butt';
+    ctx.lineJoin = 'miter';
     ctx.beginPath();
     sp.forEach(function (q, i) { if (i) ctx.lineTo(q[0], q[1]); else ctx.moveTo(q[0], q[1]); });
     ctx.closePath();
@@ -320,18 +324,19 @@
     ctx.shadowBlur = Math.max(4, s * 0.4) * Math.min(2, gain);
     ctx.stroke();
     ctx.shadowBlur = 0;
-    for (var j = 0; j < N; j++) {
-      var c1 = colorAt(j / N + flow);
-      ctx.beginPath();
-      ctx.moveTo(sp[j][0], sp[j][1]);
-      ctx.lineTo(sp[j + 1][0], sp[j + 1][1]);
-      ctx.strokeStyle = css(c1);
-      ctx.lineWidth = Math.max(1.2, s * 0.085);
-      ctx.stroke();
-      ctx.strokeStyle = css(c1.map(function (v) { return v + (255 - v) * 0.45; }));
-      ctx.lineWidth = Math.max(0.6, s * 0.035);
-      ctx.stroke();
-    }
+    var cols = [];
+    for (var j = 0; j < N; j++) cols.push(colorAt((j + 0.5) / N + flow));
+    [[1, Math.max(1.3, s * 0.09)], [0.45, Math.max(0.6, s * 0.035)]].forEach(function (pass) {
+      ctx.lineWidth = pass[1];
+      for (var j2 = 0; j2 < N; j2++) {
+        var c1 = pass[0] === 1 ? cols[j2] : cols[j2].map(function (v) { return v + (255 - v) * pass[0]; });
+        ctx.beginPath();
+        ctx.moveTo(sp[j2][0], sp[j2][1]);
+        ctx.lineTo(sp[j2 + 1][0], sp[j2 + 1][1]);
+        ctx.strokeStyle = css(c1);
+        ctx.stroke();
+      }
+    });
     ctx.restore();
   }
 
