@@ -281,8 +281,7 @@ main, .foot { position: relative; z-index: 1; }
 
 .rail { position: fixed; left: 18px; top: 22vh; height: 56vh; width: 140px; margin: 0; padding: 0; list-style: none; z-index: 5; pointer-events: none; transition: opacity .8s ease; }
 .rail.is-idle { opacity: .28; }
-.rail.is-hero { opacity: .45; }
-.rail.is-hero.is-idle { opacity: .14; }
+.rail.is-hero, .rail.is-hero.is-idle { opacity: 0; }
 .rail.is-away, .rail.is-away.is-idle { opacity: 0; }
 .rail.on-light .rail-line { background: rgba(10, 26, 61, .28); }
 .rail-line { position: absolute; left: 4px; top: 0; bottom: 0; width: 2px; border-radius: 2px; background: rgba(255, 255, 255, .22); }
@@ -306,8 +305,8 @@ main, .foot { position: relative; z-index: 1; }
 }
 @media (max-width: 700px) {
   .rail { left: auto; right: 4px; top: 30vh; height: 40vh; width: 10px; opacity: .55; }
-  .rail.is-idle, .rail.is-hero { opacity: .3; }
-  .rail.is-hero.is-idle { opacity: .15; }
+  .rail.is-idle { opacity: .3; }
+  .rail.is-hero, .rail.is-hero.is-idle { opacity: 0; }
   .rail-line { left: 4px; width: 1.5px; }
   .rail-mark { left: 1px; top: -4px; width: 8px; height: 8px; box-shadow: 0 0 8px rgba(244, 185, 66, .7); }
   .rail-stop::before { left: 2px; width: 6px; height: 6px; margin-top: -3px; }

@@ -17,7 +17,7 @@
 
   var grid, piece, phase, fallY, fallV, score, streak, pressure, pending, nextId, aim, frags, flashes, timers;
   var plan = null, planT = 0, shown = 0, wipeT = 0, clock = 0, freeze = 0, bob = 0;
-  var spin = { from: 0, to: 0, t: -10, next: 2.5 }, count = { from: 0, to: 0, t: -1 }, flashS = { v: 1, vel: 0, until: -1 };
+  var spin = { from: 0, to: 0, t: -10, next: 2.5, dur: 0.7, n: 0 }, count = { from: 0, to: 0, t: -1 }, flashS = { v: 1, vel: 0, until: -1 };
   var ghostKey = '', ghostPop = -1, pressFill = { row: -1, t: 0 }, pressBurst = -1, lastPressure = 0;
   var chan = { gain: 1, from: 1, peak: 1, t: -1, heat: 0, tier: 0, tierT: 0, flow: 0 };
   var streakView = { i: 0, v: 0, pulse: 0, pv: 0, pt: -1 };
@@ -499,7 +499,7 @@
     var fw = 2 * Math.PI / 0.22, ftarget = clock < flashS.until ? 1.22 : 1;
     flashS.vel += ((ftarget - flashS.v) * fw * fw - 2 * 0.45 * fw * flashS.vel) * dt;
     flashS.v += flashS.vel * dt;
-    if (!reduce && clock >= spin.next && clock - spin.t > 0.7) spin = { from: spin.to, to: spin.to + Math.PI / 2, t: clock, next: clock + 2.5 };
+    if (!reduce && clock >= spin.next && clock - spin.t > spin.dur) { var slow = spin.n >= 2; spin = { from: spin.to, to: spin.to + Math.PI / 2, t: clock, dur: slow ? 1.3 : 0.7, next: clock + (slow ? 6 : 2.5), n: spin.n + 1 }; }
     if (phase === 'fall') {
       fallV += (reduce ? 26 : 70) * dt;
       fallY -= fallV * dt;
@@ -560,7 +560,7 @@
       led = sky.led(sky.pageU((window.scrollY + r.top + r.height / 2) / dh));
     }
     var fit = I.fitCam(VIEW, cw, ch, 4, -0.6, 7.3, 0.06, [2, 2, 2]);
-    var yaw = YAW0 + spin.from + (spin.to - spin.from) * easeInOut((clock - spin.t) / 0.7);
+    var yaw = YAW0 + spin.from + (spin.to - spin.from) * easeInOut((clock - spin.t) / spin.dur);
     cam.M = I.view(yaw, ELEV); cam.s = fit.s; cam.x = fit.x; cam.y = fit.y; cam.pivot = fit.pivot;
     var chanOpts = { led: led, palette: channelPalette(led), gain: chan.gain, flow: chan.flow };
     I.plate(ctx, cam, chanOpts);

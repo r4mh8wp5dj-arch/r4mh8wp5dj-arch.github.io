@@ -36,7 +36,7 @@
     rail.classList.remove('is-idle');
     clearTimeout(idleTimer);
     idleTimer = setTimeout(function () { rail.classList.add('is-idle'); }, 2500);
-    if (hero) rail.classList.toggle('is-hero', window.scrollY < hero.offsetHeight * 0.6);
+    if (hero) rail.classList.toggle('is-hero', hero.getBoundingClientRect().bottom > window.innerHeight * 0.45);
   }
   window.addEventListener('scroll', function () {
     wake();
