@@ -10,7 +10,7 @@
     if (!canvas) return;
     var elScore = opts.score || null, scoreCv = opts.scoreCv || null, blobCv = document.createElement('canvas');
     var gauges = opts.gauges, elPops = opts.pops, wrap = canvas.parentNode, reduce = I.reduce;
-    var script = opts.script || null, stepIdx = 0, endT = 0, marks = { key: '', t: 0 };
+    var script = opts.script || null, stepIdx = 0, endT = 0, doomT = 0, drops = 0, marks = { key: '', t: 0 };
 
 
     var grid, piece, phase, fallY, fallV, score, streak, pressure, pending, nextId, aim, frags, flashes, timers;
@@ -89,7 +89,7 @@
       nextId = 1; score = 0; streak = 0; pressure = 0; pending = 0; lastPressure = 0;
       frags = []; flashes = [];
       aim = { x: 1, z: 1 };
-      stepIdx = 0; endT = 0;
+      stepIdx = 0; endT = 0; drops = 0;
       if (script) {
         script.grid.forEach(function (col) { col[2].forEach(function (c, y) { grid[col[0]][y][col[1]] = block(c, y); }); });
         pressure = lastPressure = script.pressure;
@@ -172,7 +172,7 @@
       piece.cells.forEach(function (c) { base = Math.max(base, colH(aim.x + c[0], aim.z + c[2]) - c[1]); });
       return base;
     }
-    function hoverY() { return Math.min(opts.hoverCap || (cw < 500 ? 4.3 : 5.2), Math.max(2.8, maxHeight() + 2.2)); }
+    function hoverY() { return Math.min(opts.hoverCap || (cw < 500 ? 8.2 : 8.9), Math.max(2.8, maxHeight() + 2.2)); }
     function finalCells(cells, ax, az) {
       var cols = {};
       cells.forEach(function (c) { var k = (ax + c[0]) + ',' + (az + c[2]); (cols[k] = cols[k] || []).push(c); });
@@ -197,6 +197,7 @@
     }
 
     function lock() {
+      drops++;
       var y0 = landing(), ids = {};
       piece.cells.forEach(function (c) {
         var b = block(piece.c, y0 + c[1]);
@@ -220,7 +221,8 @@
 
     function next() {
       if (script) return spawn(false);
-      if (overflow() || maxHeight() >= 5) return wipe();
+      if (overflow()) return wipe();
+      if (maxHeight() >= 7) { phase = 'doom'; doomT = 0; piece = null; plan = null; return; }
       spawn(false);
     }
     function wipe() {
@@ -271,7 +273,8 @@
       placed.forEach(function (p) { grid[p[0]][p[1]][p[2]] = null; });
       if (!ok) return -1e9;
       if (top > H && endsInOverflow(cells, piece.c, ax, az)) return -1e8 + hits;
-      return hits * 10 + (hits ? 6 : 0) - top * 1.8 + Math.random() * 2.5;
+      var sl = clamp((drops - 8) / 10, 0, 1);
+      return (hits * 10 + (hits ? 6 : 0)) * (1 - sl) - top * 1.2 * (1 - sl) + top * 1.6 * sl - (hits ? 9 : 0) * sl + Math.random() * 4;
     }
     function choose() {
       var best = null, cells = piece.cells;
@@ -535,6 +538,10 @@
       clock += dt;
       bob += dt;
       botStep(dt);
+      if (phase === 'doom') {
+        doomT += dt;
+        if (doomT > 0.8) wipe();
+      }
       if (phase === 'wipe') {
         wipeT += dt;
         if (wipeT > 0.95) reset();
@@ -615,7 +622,7 @@
         var r = wrap.getBoundingClientRect(), dh = Math.max(1, document.documentElement.scrollHeight);
         led = sky.led(sky.pageU((window.scrollY + r.top + r.height / 2) / dh));
       }
-      var fit = I.fitCam(VIEW, cw, ch, 4, -0.6, opts.camTop || (cw < 500 ? 6.2 : 7.3), cw < 500 ? 0.03 : 0.06, [2, 2, 2]);
+      var fit = I.fitCam(VIEW, cw, ch, 4, -0.6, opts.camTop || (cw < 500 ? 8.8 : 9.4), cw < 500 ? 0.03 : 0.06, [2, 2, 2]);
       var yaw = YAW0 + spin.from + (spin.to - spin.from) * easeInOut((clock - spin.t) / spin.dur);
       cam.M = I.view(yaw, ELEV); cam.s = fit.s; cam.x = fit.x + cw * (opts.shiftX || 0); cam.y = fit.y; cam.pivot = fit.pivot;
       if (opts.gaugeBeside) {
