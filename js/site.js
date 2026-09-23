@@ -88,8 +88,110 @@
     }
   };
 
+
+  var DANGER = (function () {
+    var cols = {}, R = rng(77);
+    function key(x, y, z) { return x + ',' + y + ',' + z; }
+    var pre = {};
+    function put(x, z, list) { list.forEach(function (c, y) { pre[key(x, y, z)] = c; }); cols[x + ',' + z] = list.length; }
+    put(1, 2, [1, 3, 0, 2, 3]);
+    put(0, 2, [2, 0, 3, 1, 2]);
+    put(2, 2, [3, 2, 1, 0, 2, 1]);
+    var H = { '0,0': 2, '1,0': 2, '2,0': 1, '3,0': 2, '0,1': 3, '1,1': 3, '2,1': 2, '3,1': 1, '3,2': 2, '0,3': 1, '1,3': 2, '2,3': 2, '3,3': 1 };
+    function pick(grid, x, y, z, extra) {
+      var bad = {};
+      [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]].forEach(function (d) { var c = grid[key(x + d[0], y + d[1], z + d[2])]; if (c != null) bad[c] = 1; });
+      (extra || []).forEach(function (c) { bad[c] = 1; });
+      var opts = [0, 1, 2, 3].filter(function (c) { return !bad[c]; });
+      return opts[Math.floor(R() * opts.length)];
+    }
+    Object.keys(H).forEach(function (k) {
+      var xz = k.split(',').map(Number);
+      for (var y = 0; y < H[k]; y++) pre[key(xz[0], y, xz[1])] = pick(pre, xz[0], y, xz[1], y === 5 && xz[0] === 1 ? [0] : null);
+      cols[k] = H[k];
+    });
+    var shifted = {};
+    Object.keys(pre).forEach(function (k) { var p = k.split(',').map(Number); shifted[key(p[0], p[1] + 1, p[2])] = pre[k]; });
+    shifted[key(1, 6, 2)] = 0;
+    shifted[key(1, 7, 2)] = 1;
+    var fresh = {};
+    for (var x = 0; x < 4; x++) for (var z = 0; z < 4; z++) { var c = pick(Object.assign({}, shifted, fresh), x, 0, z); fresh[key(x, 0, z)] = c; }
+    return { pre: pre, fresh: fresh, key: key };
+  })();
+  var MARK = { 6: ['!', '#F2CC26'], 7: ['!!', '#F28C1A'], 8: ['!!!', '#E61F1A'] };
+  var PRESS_ON = [34, 211, 238], PRESS_OFF = [30, 52, 70];
+
+  SCENES.danger = {
+    own: true, dur: 6.6, key: 2.8, cam: { y1: 9.4, pad: 0.05, pivot: [2, 3, 2], dx: 0.08 },
+    draw: function (d, t) {
+      var K = DANGER.key, items = [], heights = {};
+      var rise = ease(seg(t, 1.6, 2.1)), after = t >= 2.1;
+      function add(x, y, z, c, extra) {
+        var it = { x: x, y: y, z: z, c: c };
+        if (extra) Object.assign(it, extra);
+        items.push(it);
+      }
+      var gone = {};
+      if (t >= 4.15) { gone[K(1, 6, 2)] = 1; gone[K(0, 6, 2)] = 1; }
+      if (t >= 4.85) { gone['a7'] = 1; gone[K(2, 6, 2)] = 1; }
+      var f1 = t > 4.0 && t < 4.15 ? 0.35 + 0.35 * Math.sin((t - 4) * 40) : 0;
+      var f2 = t > 4.7 && t < 4.85 ? 0.35 + 0.35 * Math.sin((t - 4.7) * 40) : 0;
+      Object.keys(DANGER.pre).forEach(function (k) {
+        var p = k.split(',').map(Number), y = p[1] + rise;
+        var fy = after ? p[1] + 1 : null;
+        if (fy != null && gone[K(p[0], fy, p[2])]) return;
+        var f = 0;
+        if (after && p[0] === 2 && p[2] === 2 && fy === 6) f = f2;
+        add(p[0], y, p[2], DANGER.pre[k], { f: f });
+      });
+      if (t >= 1.6) Object.keys(DANGER.fresh).forEach(function (k) {
+        var p = k.split(',').map(Number);
+        add(p[0], -1 + rise, p[2], DANGER.fresh[k], { k: 0.3 + 0.7 * rise });
+      });
+      var d1 = seg(t, 0.1, 0.6), d2 = seg(t, 0.8, 1.3);
+      if (t >= 0.1) {
+        var y1 = t < 0.6 ? 9 - (9 - 5) * d1 * d1 : 5 + rise;
+        if (!(after && gone[K(1, 6, 2)])) add(1, y1, 2, 0, { f: after ? f1 : 0 });
+      }
+      if (t >= 0.8) {
+        var y2 = t < 1.3 ? 9 - (9 - 6) * d2 * d2 : 6 + rise, fallA = seg(t, 4.35, 4.6);
+        if (t >= 4.35) y2 = 7 - fallA * fallA;
+        if (!gone['a7']) add(1, y2, 2, 1, { f: t > 4.7 ? f2 : 0 });
+      }
+      if (t >= 3.4 && !gone[K(0, 6, 2)]) {
+        var d3 = seg(t, 3.4, 3.9);
+        add(0, t < 3.9 ? 9.5 - 3.5 * d3 * d3 : 6, 2, 0, { f: f1 });
+      }
+      d.cubes(items.concat(frags([[1, 6, 2, 0], [0, 6, 2, 0]], 4.15, t, 5), frags([[1, 6, 2, 1], [2, 6, 2, 1]], 4.85, t, 9)));
+      items.forEach(function (it) {
+        if (it.k && it.k < 0.99) return;
+        var k2 = it.x + ',' + it.z, top = Math.round(it.y) + 1;
+        if (Math.abs(it.y - Math.round(it.y)) > 0.05) return;
+        heights[k2] = Math.max(heights[k2] || 0, top);
+      });
+      var maxH = 0;
+      Object.keys(heights).forEach(function (k) { maxH = Math.max(maxH, heights[k]); });
+      if (maxH >= 6 && !(t >= 4.85 && t < 6.1)) {
+        if (t >= 4.85 && t < 6.1) maxH = 0;
+        var m = MARK[Math.min(8, Math.max(6, maxH))], pulse = maxH >= 8 ? 1 + 0.12 * Math.sin(t * 12) : 1;
+        Object.keys(heights).forEach(function (k) {
+          if (heights[k] !== maxH) return;
+          var xz = k.split(',').map(Number);
+          d.popup(m[0], [xz[0] + 0.5, maxH + 0.55, xz[1] + 0.5], 1, m[1], 0.95 * pulse, true);
+        });
+      }
+      if (t >= 4.85) d.popup('×2', [3.4, 6.6 + seg(t, 4.85, 6) * 1.2, 2.2], 1 - seg(t, 5.6, 6.1), '#FF4D5E', 0.95, true);
+      var level = t < 0.6 ? 6 : t < 1.4 ? 7 : t < 1.6 ? 8 : t < 3.9 ? 0 : 1;
+      var blink = t >= 1.4 && t < 1.6 && Math.sin(t * 60) > 0;
+      var F = d.size(), cm = d.cam(), gs = cm.s * 0.62, gx = F.w * 0.06 + gs, gy = F.h * 0.86;
+      var gauge = [];
+      for (var i = 0; i < 8; i++) gauge.push({ x: 0, y: i, z: 0, rgb: i < level ? (blink ? [220, 250, 255] : PRESS_ON) : PRESS_OFF });
+      I.cubes(d.ctx(), gauge, { M: cm.M, s: gs, x: gx, y: gy, pivot: [0.5, 0, 0.5] });
+    }
+  };
+
   var SYNC = { t0: 0, running: 0, cycle: 0 };
-  Object.keys(SCENES).forEach(function (k) { SYNC.cycle = Math.max(SYNC.cycle, SCENES[k].dur); });
+  Object.keys(SCENES).forEach(function (k) { if (!SCENES[k].own) SYNC.cycle = Math.max(SYNC.cycle, SCENES[k].dur); });
 
   function scene(cv) {
     var def = SCENES[cv.getAttribute('data-scene')];
@@ -97,7 +199,9 @@
     var F, cam, led, on = false, t0 = 0;
     function resize() {
       F = I.fit(cv);
-      cam = I.fitCam(I.view(Math.PI / 4 - 0.22, 0.6), F.w, F.h, 4, -0.6, 3.7, 0.06, [2, 1, 2]);
+      var fc = def.cam || {};
+      cam = I.fitCam(I.view(Math.PI / 4 - 0.22, 0.6), F.w, F.h, 4, -0.6, fc.y1 || 3.7, fc.pad || 0.06, fc.pivot || [2, 1, 2]);
+      if (fc.dx) cam.x += F.w * fc.dx;
       led = ledFor(cv);
     }
     var api = {
@@ -106,18 +210,28 @@
         var p = I.project(cam, at[0], at[1], at[2]);
         I.cubes(F.ctx, cells.map(function (it) { var o = Object.assign({}, it); o.k = 0.94; return o; }), { M: I.mul(cam.M, I.rotY(angle)), s: cam.s, x: p[0], y: p[1], pivot: pivot });
       },
-      popup: function (text, at, alpha) {
+      popup: function (text, at, alpha, color, size, contour) {
         var p = I.project(cam, at[0], at[1], at[2]), ctx = F.ctx;
         ctx.save();
-        ctx.globalAlpha = Math.max(0, alpha);
-        ctx.font = '700 ' + Math.round(cam.s * 0.85) + 'px Nippo';
+        ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+        ctx.font = '700 ' + Math.round(cam.s * (size || 0.85)) + 'px Nippo';
         ctx.textAlign = 'center';
-        ctx.fillStyle = 'rgba(0,0,0,0.35)';
-        ctx.fillText(text, p[0], p[1] + 2);
-        ctx.fillStyle = '#FF4D5E';
+        if (contour) {
+          ctx.lineJoin = 'round';
+          ctx.lineWidth = Math.max(2, cam.s * 0.12);
+          ctx.strokeStyle = '#000';
+          ctx.strokeText(text, p[0], p[1]);
+        } else {
+          ctx.fillStyle = 'rgba(0,0,0,0.35)';
+          ctx.fillText(text, p[0], p[1] + 2);
+        }
+        ctx.fillStyle = color || '#FF4D5E';
         ctx.fillText(text, p[0], p[1]);
         ctx.restore();
-      }
+      },
+      ctx: function () { return F.ctx; },
+      cam: function () { return cam; },
+      size: function () { return F; }
     };
     function draw(T) {
       var t = Math.min(T, def.dur - 0.3);
@@ -125,12 +239,14 @@
       var ch = { led: led, palette: REST, flow: t / 12 };
       I.plate(F.ctx, cam, ch);
       def.draw(api, t);
-      cv.style.opacity = I.reduce ? 1 : (seg(T, 0, 0.2) * (1 - seg(T, SYNC.cycle - 0.3, SYNC.cycle))).toFixed(3);
+      var cyc = def.own ? def.dur : SYNC.cycle;
+      cv.style.opacity = I.reduce ? 1 : (seg(T, 0, 0.2) * (1 - seg(T, cyc - 0.3, cyc))).toFixed(3);
     }
+    var cycle = def.own ? def.dur : SYNC.cycle;
     function frame(now) {
       if (!on) return;
-      if (!SYNC.t0) SYNC.t0 = now;
-      draw(((now - SYNC.t0) / 1000) % SYNC.cycle);
+      if (def.own) { if (!t0) t0 = now; draw(((now - t0) / 1000) % cycle); }
+      else { if (!SYNC.t0) SYNC.t0 = now; draw(((now - SYNC.t0) / 1000) % cycle); }
       requestAnimationFrame(frame);
     }
     window.addEventListener('resize', function () { resize(); if (I.reduce || !on) draw(def.key); });
@@ -140,13 +256,13 @@
     if (I.reduce) return;
     I.visible(cv, function (v) {
       if (v && !on) {
-        if (!SYNC.running) SYNC.t0 = 0;
-        SYNC.running++;
+        if (def.own) t0 = 0;
+        else { if (!SYNC.running) SYNC.t0 = 0; SYNC.running++; }
         on = true;
         requestAnimationFrame(frame);
       } else if (!v && on) {
         on = false;
-        SYNC.running = Math.max(0, SYNC.running - 1);
+        if (!def.own) SYNC.running = Math.max(0, SYNC.running - 1);
       }
     });
   }

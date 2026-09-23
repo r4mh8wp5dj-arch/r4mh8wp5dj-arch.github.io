@@ -209,6 +209,7 @@
     piece = null;
     plan = null;
     wipeT = 0;
+    banner('Pit full', 'full', 34);
   }
 
   function evaluate(cells, ax, az) {
@@ -451,7 +452,7 @@
     elPops.appendChild(el);
     currentBanner = el;
     if (el.animate && !reduce) {
-      el.animate([{ transform: 'translate(-50%,-50%) scale(.5)', opacity: 0 }, { transform: 'translate(-50%,-50%) scale(1)', opacity: 1, offset: 0.12 }, { transform: 'translate(-50%,-50%) scale(1)', opacity: 1, offset: 0.8 }, { transform: 'translate(-50%,-50%) scale(1)', opacity: 0 }], { duration: 1500, fill: 'forwards', easing: 'ease-out' });
+      el.animate([{ transform: 'translate(-50%,-50%) scale(.5)', opacity: 0 }, { transform: 'translate(-50%,-50%) scale(1)', opacity: 1, offset: 0.12 }, { transform: 'translate(-50%,-50%) scale(1)', opacity: 1, offset: 0.8 }, { transform: 'translate(-50%,-50%) scale(1)', opacity: 0 }], { duration: look === 'full' ? 900 : 1500, fill: 'forwards', easing: 'ease-out' });
       if (look === 'c1') {
         fill.animate([{ filter: 'brightness(1)' }, { filter: 'brightness(1.6)', offset: 0.3 }, { filter: 'brightness(1)' }], { duration: 400, delay: 80 });
       } else {
@@ -459,7 +460,7 @@
         inner.animate([{ transform: 'scale(.72)' }, { transform: 'scale(' + o + ')', offset: 0.29 }, { transform: 'scale(' + (1 - sw * 0.35 * w) + ')', offset: 0.49 }, { transform: 'scale(' + (1 + sw * 0.15 * w) + ')', offset: 0.84 }, { transform: 'scale(1)' }], { duration: 410, easing: 'ease-out' });
       }
     }
-    setTimeout(function () { el.remove(); if (currentBanner === el) currentBanner = null; }, 1550);
+    setTimeout(function () { el.remove(); if (currentBanner === el) currentBanner = null; }, look === 'full' ? 950 : 1550);
   }
 
   function resize() {
@@ -488,7 +489,7 @@
     botStep(dt);
     if (phase === 'wipe') {
       wipeT += dt;
-      if (wipeT > (reduce ? 1.2 : 0.8)) reset();
+      if (wipeT > 0.95) reset();
     }
     if (score !== count.to) {
       count = { from: shown, to: score, t: clock };
@@ -565,7 +566,7 @@
     var chanOpts = { led: led, palette: channelPalette(led), gain: chan.gain, flow: chan.flow };
     I.plate(ctx, cam, chanOpts);
 
-    var items = [], wk = phase === 'wipe' ? wipeT / (reduce ? 1.2 : 0.8) : 0;
+    var items = [], wk = phase === 'wipe' ? Math.max(0, (wipeT - 0.5) / 0.45) : 0;
     each(function (b, x, y, z) {
       var k = 1, s = sqScale(b.sq), item;
       if (b.antic >= 0) k = 1 + 0.28 * easeIn(Math.min(1, (clock - b.antic) / 0.12));
@@ -637,6 +638,23 @@
       ctx.restore();
     });
 
+    if (phase === 'wipe' && wipeT < 0.62) {
+      var tallest = maxHeight(), pulse = 1 + 0.1 * Math.sin(wipeT * 30);
+      for (var tx = 0; tx < W; tx++) for (var tz = 0; tz < D; tz++) {
+        if (colH(tx, tz) !== tallest) continue;
+        var tp = I.project(cam, tx + 0.5, tallest + 0.6, tz + 0.5);
+        ctx.save();
+        ctx.font = '700 ' + Math.round(cam.s * 0.9 * pulse) + 'px Nippo';
+        ctx.textAlign = 'center';
+        ctx.lineJoin = 'round';
+        ctx.lineWidth = Math.max(2, cam.s * 0.12);
+        ctx.strokeStyle = '#000';
+        ctx.strokeText('!!!', tp[0], tp[1]);
+        ctx.fillStyle = '#E61F1A';
+        ctx.fillText('!!!', tp[0], tp[1]);
+        ctx.restore();
+      }
+    }
     drawGauges(now);
     drawScore(now);
   }

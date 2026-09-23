@@ -209,6 +209,7 @@ main, .foot { position: relative; z-index: 1; }
 .pop-c1 b { background-image: radial-gradient(circle at 30% 45%, #7AF5D8 0, transparent 38%), radial-gradient(circle at 70% 60%, #3DEFC4 0, transparent 38%), linear-gradient(#00B894, #00E5B4); }
 .pop-c2 b { background-image: radial-gradient(circle at 30% 45%, #A8FFF4 0, transparent 38%), radial-gradient(circle at 70% 60%, #7AFFEE 0, transparent 38%), linear-gradient(#00E5C8, #5CFFE8); }
 .pop-c3 b { background-image: radial-gradient(circle at 30% 45%, #3DFFDD 0, transparent 38%), radial-gradient(circle at 70% 60%, #00FFD1 0, transparent 38%), linear-gradient(#00F5C4, #8CFFE6); }
+.pop-full b { background-image: linear-gradient(#FF8A80, #E61F1A 55%, #9E0E0B); }
 .pop-fire b { background-image: radial-gradient(circle at 30% 45%, #FFB826 0, transparent 38%), radial-gradient(circle at 70% 60%, #FF8A3D 0, transparent 38%), linear-gradient(#B80F0A, #FF590D); }
 @keyframes glowdrift { from { background-position: 0% 0, 100% 0, 0 0; } to { background-position: 100% 0, 0% 0, 0 0; } }
 .pop {
@@ -247,6 +248,10 @@ main, .foot { position: relative; z-index: 1; }
 .how h2 { font-size: clamp(1.5rem, 2.3vw, 2rem); }
 .how p { margin-top: 14px; max-width: 28ch; font-size: clamp(1.1rem, 1.35vw, 1.22rem); font-weight: 400; line-height: 1.55; color: var(--ink-2); }
 .how .k-r { color: #FF6B5E; }
+.how .band { grid-column: 1 / -1; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); align-items: center; justify-items: start; gap: 12px 40px; padding: 18px 44px 18px 24px; text-align: left; background: rgba(34, 8, 18, .78); box-shadow: inset 0 0 0 1px rgba(255, 77, 94, .28), inset 4px 0 0 #E61F1A; }
+.band-scene { max-width: none; aspect-ratio: 16 / 11; margin: 0; }
+.band h2 { font-size: clamp(1.5rem, 2.5vw, 2.2rem); color: #FF6B5E; }
+.band p { margin-top: 14px; max-width: 34ch; }
 .how .k-y { color: #F9C24E; }
 .how .k-c { color: #3FD0DE; }
 
@@ -427,6 +432,9 @@ main, .foot { position: relative; z-index: 1; }
   .how { gap: 18px; padding-top: 6vh; padding-bottom: 6vh; }
   .how article { padding: 14px 18px 24px; }
   .scene { margin-bottom: 14px; max-width: 300px; }
+  .how .band { grid-template-columns: minmax(0, 1fr); justify-items: center; text-align: center; padding: 14px 18px 28px; box-shadow: inset 0 0 0 1px rgba(255, 77, 94, .28), inset 0 4px 0 #E61F1A; }
+  .band-scene { max-width: 340px; margin-bottom: 4px; }
+  .band p { margin-left: auto; margin-right: auto; }
   .foot-mail a { display: inline-flex; align-items: center; min-height: 44px; }
   .foot-mail { gap: 0; }
   .hud { gap: 22px; width: 56px; }
