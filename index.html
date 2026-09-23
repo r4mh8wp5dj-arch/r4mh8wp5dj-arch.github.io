@@ -41,11 +41,11 @@
   }
   </script>
   <link rel="preload" href="assets/fonts/Nippo-Variable.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="styles.css?v=02a4440">
-  <script src="js/sky.js?v=02a4440"></script>
-  <script src="js/iso.js?v=02a4440" defer></script>
-  <script src="js/site.js?v=02a4440" defer></script>
-  <script src="js/play.js?v=02a4440" defer></script>
+  <link rel="stylesheet" href="styles.css?v=adb1798">
+  <script src="js/sky.js?v=adb1798"></script>
+  <script src="js/iso.js?v=adb1798" defer></script>
+  <script src="js/site.js?v=adb1798" defer></script>
+  <script src="js/play.js?v=adb1798" defer></script>
 </head>
 <body class="home">
   <svg class="sprite" aria-hidden="true" focusable="false">
@@ -118,10 +118,14 @@
         <p>Blocks above fall into the gap and can match again, and every scoring drop in a row raises your multiplier.</p>
       </article>
           <article class="band" data-ink>
-        <canvas class="scene band-scene" data-scene="danger" role="img" aria-label="The pressure column fills, a new row pushes the stack up, the tallest column shows one, two, then three warning marks, and a chain burst clears space."></canvas>
+        <div class="band-stage">
+          <canvas class="band-cv" role="img" aria-label="The pressure column fills, a new row lifts the pit, the tallest column shows one, two, then three warning marks, and a chain burst brings it back down."></canvas>
+          <canvas class="band-gauge" aria-hidden="true"></canvas>
+          <div class="pit-pops" aria-hidden="true"></div>
+        </div>
         <div class="band-copy">
           <h2>The pit fights back.</h2>
-          <p>Every drop fills the pressure column, and when it's full a new row pushes the whole pit up. Stack past the top and the run is over.</p>
+          <p>Every drop fills the pressure column. When it's full, a new row lifts the whole pit; columns already at the top hold there. The run ends only when a drop stacks past the rim.</p>
         </div>
       </article>
     </section>
