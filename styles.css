@@ -219,15 +219,15 @@ main, .foot { position: relative; z-index: 1; }
   pointer-events: none;
 }
 
-.hud { display: flex; flex-direction: column; align-items: flex-start; gap: 18px; width: 190px; }
+.hud { display: flex; flex-direction: column; align-items: flex-start; gap: 18px; width: 220px; }
 .hud-score { align-self: flex-start; width: 64px; }
 .gauges { position: relative; width: 100%; }
-.gnote { position: absolute; left: 68px; right: 0; font-size: .78rem; line-height: 1.35; color: var(--ink-2); }
-.gnote b { display: block; margin-bottom: 2px; font-size: .9rem; color: var(--ink); }
-.gnote-press { top: 22px; }
-.gnote-streak { top: 206px; }
+.gnote { position: absolute; left: 70px; right: 0; font-size: .95rem; line-height: 1.4; color: var(--ink-2); }
+.gnote b { display: block; margin-bottom: 4px; font-size: 1.1rem; color: var(--ink); }
+.gnote-press { top: 14px; }
+.gnote-streak { top: 200px; }
 .hud-score { text-align: center; }
-.hud-score small { display: block; font-size: .8rem; color: var(--ink-2); }
+.hud-score small { display: block; font-size: 1rem; font-weight: 700; color: var(--ink-2); }
 .hud-score b { display: block; font-weight: 700; font-size: 2rem; line-height: 1.05; font-variant-numeric: tabular-nums; }
 #hud-gauges { display: block; width: 56px; height: 350px; margin-left: 4px; }
 #hud-score-cv { display: block; width: 132px; height: 56px; margin-left: -34px; }
@@ -414,10 +414,10 @@ main, .foot { position: relative; z-index: 1; }
   .hud-score { width: 56px; }
   .machine { gap: 4px; }
   .hud { gap: 22px; width: 56px; }
-  .gnote { left: 4px; width: 48px; text-align: center; font-size: .62rem; }
-  .gnote b { font-size: .66rem; margin: 0; }
+  .gnote { left: -6px; width: 68px; text-align: center; font-size: .8rem; }
+  .gnote b { font-size: .82rem; margin: 0; }
   .gnote span { display: none; }
-  .gnote-press { top: -16px; }
+  .gnote-press { top: -20px; }
   .gnote-streak { top: 128px; }
   .bar .mark, .bar nav a { min-height: 44px; display: inline-flex; align-items: center; }
     .foot nav a, .toc a { min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; }
