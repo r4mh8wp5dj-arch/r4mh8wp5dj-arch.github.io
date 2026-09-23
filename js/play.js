@@ -230,6 +230,31 @@
       banner('Pit full', 'full', 34);
     }
 
+    function endsInOverflow(cells, c, ax, az) {
+      var saved = grid, trigger = {}, external = true, guard = 0;
+      grid = saved.map(function (col) { return col.map(function (row) { return row.slice(); }); });
+      finalCells(cells, ax, az).forEach(function (f, i) {
+        if (f[1] >= TOP) return;
+        var id = -1000 - i;
+        grid[f[0]][f[1]][f[2]] = { c: c, id: id, vy: f[1] };
+        trigger[id] = 1;
+      });
+      while (guard++ < 20) {
+        var groups = groupsFor(trigger, external);
+        if (!groups.length) break;
+        groups.forEach(function (g) { g.forEach(function (p) { grid[p[0]][p[1]][p[2]] = null; }); });
+        var before = pairs();
+        compact();
+        var after = pairs(), fresh = {};
+        Object.keys(after).forEach(function (k) { if (!before[k]) { fresh[after[k][0]] = 1; fresh[after[k][1]] = 1; } });
+        trigger = fresh;
+        external = false;
+      }
+      var result = overflow();
+      grid = saved;
+      return result;
+    }
+
     function evaluate(cells, ax, az) {
       var temp = {}, placed = [], ok = true, top = 0;
       finalCells(cells, ax, az).forEach(function (f, i) {
@@ -244,6 +269,7 @@
       if (ok) groupsFor(temp, true).forEach(function (g) { hits += g.length; });
       placed.forEach(function (p) { grid[p[0]][p[1]][p[2]] = null; });
       if (!ok) return -1e9;
+      if (top > H && endsInOverflow(cells, piece.c, ax, az)) return -1e8 + hits;
       return hits * 10 + (hits ? 6 : 0) - top * 1.8 + Math.random() * 2.5;
     }
     function choose() {
