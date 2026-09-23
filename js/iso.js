@@ -70,7 +70,8 @@
       var k = it.k == null ? 1 : it.k;
       var cx = it.x + 0.5 - P[0], cy = it.y + 0.5 - P[1], cz = it.z + 0.5 - P[2];
       var c = tf(M, cx, cy, cz);
-      list.push({ it: it, k: k, cx: cx, cy: cy, cz: cz, d: c[2] });
+      var sq = it.sq || 0;
+      list.push({ it: it, k: k, h: 1 - sq, w: 1 + sq * 0.55, cx: cx, cy: cy, cz: cz, d: c[2] });
     }
     list.sort(function (a, b) { return a.d - b.d; });
     var lw = Math.max(0.6, s * 0.035);
@@ -80,7 +81,7 @@
       var pts = new Array(8);
       for (var q = 0; q < 8; q++) {
         var C = CORNERS[q];
-        var v = tf(M, e.cx + (C[0] - 0.5) * e.k, e.cy + (C[1] - 0.5) * e.k, e.cz + (C[2] - 0.5) * e.k);
+        var v = tf(M, e.cx + (C[0] - 0.5) * e.k * e.w, e.cy + (C[1] - 0.5) * e.k * e.h - (1 - e.h) * 0.5 * e.k, e.cz + (C[2] - 0.5) * e.k * e.w);
         pts[q] = [ox + v[0] * s, oy - v[1] * s];
       }
       var rgb = it2.rgb || RGB[it2.c];
@@ -145,77 +146,100 @@
     ctx.closePath();
   }
 
-  function walls(cam, w, d, h) {
-    return [
-      { n: [1, 0, 0], p: [[0, 0, 0], [0, 0, d], [0, h, d], [0, h, 0]] },
-      { n: [-1, 0, 0], p: [[w, 0, 0], [w, 0, d], [w, h, d], [w, h, 0]] },
-      { n: [0, 0, 1], p: [[0, 0, 0], [w, 0, 0], [w, h, 0], [0, h, 0]] },
-      { n: [0, 0, -1], p: [[0, 0, d], [w, 0, d], [w, h, d], [0, h, d]] }
-    ].map(function (wl) {
-      wl.back = tf(cam.M, wl.n[0], wl.n[1], wl.n[2])[2] > 0;
-      return wl;
+  function rr(half, r, y, c, seg) {
+    var pts = [], corners = [[half - r, half - r, 0], [-(half - r), half - r, 0.5], [-(half - r), -(half - r), 1], [half - r, -(half - r), 1.5]];
+    corners.forEach(function (k) {
+      for (var i = 0; i <= seg; i++) {
+        var a = (k[2] + i / seg * 0.5) * Math.PI;
+        pts.push([c + k[0] + Math.cos(a) * r, y, c + k[1] + Math.sin(a) * r]);
+      }
     });
+    return pts;
   }
 
-  function pitBack(ctx, cam, o) {
-    var w = o.w || 4, d = o.d || 4, h = o.h || 8;
+  function path(ctx, cam, pts, close) {
+    ctx.beginPath();
+    for (var i = 0; i < pts.length; i++) {
+      var p = project(cam, pts[i][0], pts[i][1], pts[i][2]);
+      if (i) ctx.lineTo(p[0], p[1]); else ctx.moveTo(p[0], p[1]);
+    }
+    if (close !== false) ctx.closePath();
+  }
+
+  var PLATE = [61, 68, 84];
+  function shade(rgb, b) { return 'rgb(' + rgb.map(function (c) { return Math.round(Math.min(255, c * b)); }).join(',') + ')'; }
+
+  function plate(ctx, cam, o) {
+    o = o || {};
+    var n = o.n || 4, c = n / 2, s = cam.s;
+    var outer = c + 0.35, open = c + 0.02, rimY = 0.08, botY = -0.5;
+    var led = o.led || [115, 204, 255], glow = o.glow == null ? 1 : o.glow;
     ctx.save();
-    for (var x = 0; x < w; x++) for (var z = 0; z < d; z++) {
-      poly(ctx, cam, [[x, 0, z], [x + 1, 0, z], [x + 1, 0, z + 1], [x, 0, z + 1]]);
-      ctx.fillStyle = (x + z) % 2 ? 'rgba(46,34,24,0.78)' : 'rgba(58,44,31,0.78)';
+    var sc = project(cam, c, botY - 0.25, c);
+    var g = ctx.createRadialGradient(sc[0], sc[1], 0, sc[0], sc[1], outer * s * 1.25);
+    g.addColorStop(0, 'rgba(0,0,0,0.32)');
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.ellipse(sc[0], sc[1], outer * s * 1.3, outer * s * 0.6, 0, 0, 6.2832);
+    ctx.fill();
+
+    var top = rr(outer, 0.16, rimY, c, 5), bot = rr(outer - 0.12, 0.14, botY, c, 5);
+    for (var i = 0; i < top.length; i++) {
+      var j = (i + 1) % top.length;
+      var nx = (top[i][0] + top[j][0]) / 2 - c, nz = (top[i][2] + top[j][2]) / 2 - c;
+      var nv = tf(cam.M, nx, 0, nz);
+      if (nv[2] <= 0) continue;
+      var len = Math.hypot(nv[0], nv[2]) || 1;
+      path(ctx, cam, [top[i], top[j], bot[j], bot[i]]);
+      ctx.fillStyle = shade(PLATE, 0.62 - 0.18 * nv[0] / len);
       ctx.fill();
-      ctx.strokeStyle = 'rgba(242,140,107,0.16)';
+      ctx.strokeStyle = ctx.fillStyle;
       ctx.lineWidth = 1;
       ctx.stroke();
     }
-    walls(cam, w, d, h).forEach(function (wl) {
-      if (!wl.back) return;
-      poly(ctx, cam, wl.p);
-      ctx.fillStyle = 'rgba(92,71,51,0.2)';
-      ctx.fill();
-      ctx.strokeStyle = 'rgba(255,255,255,0.05)';
-      ctx.lineWidth = 1;
-      for (var y = 1; y < h; y++) {
-        var a = wl.p[0], b = wl.p[1];
-        poly(ctx, cam, [[a[0], y, a[2]], [b[0], y, b[2]]]);
-        ctx.stroke();
-      }
-      if (o.danger) {
-        var a2 = wl.p[0], b2 = wl.p[1];
-        ctx.setLineDash([4, 5]);
-        ctx.strokeStyle = 'rgba(255,77,94,0.45)';
-        poly(ctx, cam, [[a2[0], o.danger, a2[2]], [b2[0], o.danger, b2[2]]]);
-        ctx.stroke();
-        ctx.setLineDash([]);
-      }
-    });
-    ctx.restore();
-  }
+    path(ctx, cam, top);
+    ctx.fillStyle = shade(PLATE, 1.08);
+    ctx.fill();
+    path(ctx, cam, rr(open, 0.04, rimY, c, 2));
+    ctx.fillStyle = '#0D1016';
+    ctx.fill();
+    path(ctx, cam, [[0, 0, 0], [n, 0, 0], [n, 0, n], [0, 0, n]]);
+    ctx.fillStyle = '#181C26';
+    ctx.fill();
 
-  function pitFront(ctx, cam, o) {
-    var w = o.w || 4, d = o.d || 4, h = o.h || 8;
-    ctx.save();
-    walls(cam, w, d, h).forEach(function (wl) {
-      if (wl.back) return;
-      poly(ctx, cam, wl.p);
-      ctx.fillStyle = 'rgba(255,255,255,0.025)';
-      ctx.fill();
-    });
-    var rim = [[0, h, 0], [w, h, 0], [w, h, d], [0, h, d]];
-    ctx.strokeStyle = 'rgba(242,140,107,0.95)';
-    ctx.shadowColor = 'rgba(242,140,107,0.8)';
-    ctx.shadowBlur = o.glow == null ? 12 : o.glow;
-    ctx.lineWidth = Math.max(1.5, cam.s * 0.06);
-    poly(ctx, cam, rim);
+    var gw = Math.max(0.8, s * 0.05), bw = Math.max(0.6, s * 0.03), ins = 0.06;
+    ctx.lineCap = 'round';
+    for (var x = 0; x < n; x++) for (var z = 0; z < n; z++) {
+      var a = [x + ins, 0, z + ins], b = [x + 1 - ins, 0, z + ins], d = [x + 1 - ins, 0, z + 1 - ins], e = [x + ins, 0, z + 1 - ins];
+      path(ctx, cam, [e, a, b], false);
+      ctx.strokeStyle = 'rgba(0,0,0,0.38)';
+      ctx.lineWidth = bw;
+      ctx.stroke();
+      path(ctx, cam, [b, d, e], false);
+      ctx.strokeStyle = 'rgba(255,255,255,0.16)';
+      ctx.stroke();
+    }
+    ctx.strokeStyle = 'rgba(0,0,0,0.55)';
+    ctx.lineWidth = gw;
+    for (var k = 1; k < n; k++) {
+      path(ctx, cam, [[k, 0, 0], [k, 0, n]], false); ctx.stroke();
+      path(ctx, cam, [[0, 0, k], [n, 0, k]], false); ctx.stroke();
+    }
+
+    var ring = rr(open + 0.055, 0.135, rimY + 0.002, c, 6);
+    var col = 'rgb(' + led.map(Math.round).join(',') + ')';
+    var core = 'rgb(' + led.map(function (v) { return Math.round(v + (255 - v) * 0.45); }).join(',') + ')';
+    ctx.lineJoin = 'round';
+    ctx.shadowColor = col;
+    ctx.shadowBlur = Math.max(4, s * 0.45) * glow;
+    ctx.strokeStyle = col;
+    ctx.lineWidth = Math.max(1.4, s * 0.1);
+    path(ctx, cam, ring);
     ctx.stroke();
     ctx.shadowBlur = 0;
-    ctx.lineWidth = Math.max(1, cam.s * 0.03);
-    ctx.strokeStyle = 'rgba(242,140,107,0.45)';
-    [[0, 0], [w, 0], [w, d], [0, d]].forEach(function (c) {
-      poly(ctx, cam, [[c[0], 0, c[1]], [c[0], h, c[1]]]);
-      ctx.stroke();
-    });
-    poly(ctx, cam, [[0, 0, 0], [w, 0, 0], [w, 0, d], [0, 0, d]]);
+    ctx.strokeStyle = core;
+    ctx.lineWidth = Math.max(0.7, s * 0.045);
     ctx.stroke();
     ctx.restore();
   }
@@ -264,7 +288,7 @@
     HEX: HEX, RGB: RGB, SHAPES: SHAPES,
     mul: mul, rotX: rotX, rotY: rotY, rotZ: rotZ, view: view, tf: tf,
     cubes: cubes, project: project, unproject: unproject, poly: poly,
-    pitBack: pitBack, pitFront: pitFront, rotCells: rotCells, randomShape: randomShape,
+    plate: plate, rotCells: rotCells, randomShape: randomShape,
     fit: fit, visible: visible,
     reduce: window.matchMedia('(prefers-reduced-motion: reduce)').matches
   };

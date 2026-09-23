@@ -16,13 +16,14 @@
   <meta property="og:image" content="https://r4mh8wp5dj-arch.github.io/assets/img/logo-1024.png">
   <meta name="twitter:card" content="summary">
   <link rel="preload" href="assets/fonts/Nippo-Variable.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="styles.css?v=6">
-  <script src="js/sky.js?v=6"></script>
-  <script src="js/iso.js?v=6" defer></script>
-  <script src="js/site.js?v=6" defer></script>
-  <script src="js/play.js?v=6" defer></script>
+  <link rel="stylesheet" href="styles.css?v=7">
+  <script src="js/sky.js?v=7"></script>
+  <script src="js/iso.js?v=7" defer></script>
+  <script src="js/site.js?v=7" defer></script>
+  <script src="js/play.js?v=7" defer></script>
 </head>
 <body class="home">
+  <div class="announce">Coming soon to the App Store</div>
   <header class="bar">
     <a class="mark" href="./" aria-label="Block Pit home"><img src="assets/img/favicon-64.png" alt="" width="28" height="28"><span>Block Pit</span></a>
     <nav aria-label="Site">
@@ -33,10 +34,9 @@
   </header>
 
   <main>
-    <div class="rain-zone" aria-hidden="true"><canvas class="rain"></canvas></div>
     <section class="hero">
       <div class="hero-copy" data-ink>
-        <h1 class="title"><span>Block</span><span>Pit</span></h1>
+        <h1 class="title"><img class="title-icon" src="assets/img/logo-320.png" alt="" width="84" height="84"><span>Block Pit</span></h1>
         <p class="tag"><b class="k-r">Drop.</b> <b class="k-y">Match.</b> <b class="k-c">Chain.</b></p>
         <p class="pitch">A 3D puzzle for iPhone. Pieces fall into a 4×4 pit, and two blocks of one colour touching burst.</p>
         <div class="get">
@@ -79,8 +79,8 @@
           </div>
         </div>
         <p class="hint" data-ink>
-          <span class="how-mouse">Try it here. Move to aim, click to drop, R to turn.</span>
-          <span class="how-touch">Try it here. Drag to aim, lift to drop, tap to turn.</span>
+          <span class="how-mouse">Move over the pit to take over. Click to drop, R to turn.</span>
+          <span class="how-touch">Touch the pit to take over. Drag to aim, lift to drop, tap to turn.</span>
           <button type="button" data-pit="reset" class="restart">Restart</button>
         </p>
       </div>
@@ -88,17 +88,17 @@
 
     <section class="how" id="how" aria-label="How it plays">
       <article data-ink>
-        <canvas class="glyph" data-glyph="drop" aria-hidden="true"></canvas>
+        <canvas class="scene" data-scene="drop" role="img" aria-label="A piece hovers over the pit, slides one cell, turns and drops into place."></canvas>
         <h2 class="k-r">Drop</h2>
         <p>Drag a piece over the pit, tap to turn it, and let go.</p>
       </article>
       <article data-ink>
-        <canvas class="glyph" data-glyph="match" aria-hidden="true"></canvas>
+        <canvas class="scene" data-scene="match" role="img" aria-label="A yellow block lands next to another yellow block and both burst."></canvas>
         <h2 class="k-y">Match</h2>
         <p>Two blocks of one colour touching, in any direction, burst.</p>
       </article>
       <article data-ink>
-        <canvas class="glyph" data-glyph="chain" aria-hidden="true"></canvas>
+        <canvas class="scene" data-scene="chain" role="img" aria-label="Two red blocks burst, the blue block above falls into the gap, touches another blue block and bursts for a chain of two."></canvas>
         <h2 class="k-c">Chain</h2>
         <p>Blocks above fall into the gap and can match again, and every scoring drop in a row raises your multiplier.</p>
       </article>

@@ -1,31 +1,181 @@
 (function () {
-  var I = window.BP && window.BP.iso;
+  var I = window.BP && window.BP.iso, SKY = window.BP && window.BP.sky;
   if (!I) return;
 
-  var GLYPHS = {
-    drop: [[0, 0, 0, 1], [1, 0, 0, 2], [2, 0, 0, 5], [1, 2.8, 0, 0], [2, 2.8, 0, 0]],
-    match: [[0, 0, 0, 1], [1, 0, 0, 3], [2, 0, 0, 3], [0, 1, 0, 2]],
-    chain: [[0, 0, 0, 2], [1, 0, 0, 5], [0, 1, 0, 1], [1, 1, 0, 3], [1, 2.4, 0, 3]]
+  function ease(t) { t = Math.max(0, Math.min(1, t)); return t * t * (3 - 2 * t); }
+  function seg(t, a, b) { return Math.max(0, Math.min(1, (t - a) / (b - a))); }
+  function centroid(cells) {
+    var c = [0, 0, 0];
+    cells.forEach(function (p) { c[0] += p[0]; c[1] += p[1]; c[2] += p[2]; });
+    return c.map(function (v) { return v / cells.length + 0.5; });
+  }
+  function ledFor(el) {
+    if (!SKY) return [115, 204, 255];
+    var r = el.getBoundingClientRect(), dh = Math.max(1, document.documentElement.scrollHeight);
+    return SKY.led(SKY.pageU((window.scrollY + r.top + r.height / 2) / dh));
+  }
+  function rng(seed) { return function () { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }; }
+  function squash(t, a, b, amt) { return t > a && t < b ? amt * Math.sin(Math.PI * seg(t, a, b)) : 0; }
+  function flash(t, a, b) { return t > a && t < b ? 0.35 + 0.35 * Math.sin((t - a) * 30) : 0; }
+
+  function frags(origins, t0, t, seed) {
+    var out = [], R = rng(seed), tau = t - t0;
+    if (tau < 0 || tau > 0.85 || I.reduce) return out;
+    origins.forEach(function (o) {
+      for (var i = 0; i < 7; i++) {
+        var vx = (R() - 0.5) * 5, vz = (R() - 0.5) * 5, vy = 2.5 + R() * 3.5;
+        out.push({ x: o[0] + vx * tau, y: o[1] + vy * tau - 7 * tau * tau, z: o[2] + vz * tau, c: o[3], k: Math.max(0.02, 0.3 * (1 - tau / 0.85)) });
+      }
+    });
+    return out;
+  }
+  function hover(t, until) { return t < until ? Math.sin(t * 6) * 0.08 : 0; }
+
+  var SCENES = {
+    drop: {
+      dur: 3.6, key: 2.4,
+      base: [[0, 0, 0, 1], [1, 0, 0, 2], [2, 0, 0, 1], [3, 0, 0, 5], [0, 0, 1, 5], [3, 0, 1, 2], [0, 0, 2, 2], [1, 0, 3, 5], [3, 0, 3, 1]],
+      draw: function (d, t) {
+        var L = [[0, 0, 0], [1, 0, 0], [0, 0, 1]], Lr = I.rotCells(L);
+        var items = this.base.map(function (b) { return { x: b[0], y: b[1], z: b[2], c: b[3] }; });
+        if (t >= 1.95) {
+          var sq = squash(t, 1.95, 2.25, 0.22);
+          Lr.forEach(function (c) { items.push({ x: 1 + c[0], y: c[1], z: 1 + c[2], c: 0, sq: sq }); });
+          d.cubes(items);
+          return;
+        }
+        d.cubes(items);
+        var ax = ease(seg(t, 0.6, 1.0)), turn = ease(seg(t, 1.1, 1.5)), fall = seg(t, 1.6, 1.95);
+        var y = 2.6 - 2.6 * fall * fall + hover(t, 0.6);
+        var c0 = centroid(L), c1 = centroid(Lr);
+        var at = [ax + c0[0] + (c1[0] - c0[0]) * turn, y + 0.5, 1 + c0[2] + (c1[2] - c0[2]) * turn];
+        d.piece(L.map(function (c) { return { x: c[0], y: c[1], z: c[2], c: 0 }; }), c0, at, -Math.PI / 2 * turn);
+      }
+    },
+    match: {
+      dur: 3.4, key: 1.25,
+      base: [[0, 0, 0, 1], [1, 0, 0, 5], [3, 0, 0, 2], [0, 0, 1, 2], [2, 0, 1, 3], [3, 0, 1, 1], [0, 0, 3, 5], [2, 0, 3, 2], [3, 0, 3, 5]],
+      draw: function (d, t) {
+        var burst = 1.45, fall = seg(t, 0.5, 0.85), f = flash(t, 1.05, burst);
+        var items = [];
+        this.base.forEach(function (b) {
+          var hit = b[0] === 2 && b[2] === 1;
+          if (hit && t >= burst) return;
+          items.push({ x: b[0], y: b[1], z: b[2], c: b[3], f: hit ? f : 0 });
+        });
+        if (t < burst) items.push({ x: 1, y: 2.6 - 2.6 * fall * fall + hover(t, 0.5), z: 1, c: 3, f: f, sq: squash(t, 0.85, 1.05, 0.22) });
+        d.cubes(items.concat(frags([[1, 0, 1, 3], [2, 0, 1, 3]], burst, t, 7)));
+      }
+    },
+    chain: {
+      dur: 4.2, key: 2.05,
+      base: [[0, 0, 0, 3], [3, 0, 0, 2], [0, 0, 1, 5], [1, 0, 1, 0], [2, 0, 1, 1], [3, 0, 1, 5], [0, 0, 3, 2], [2, 0, 3, 5], [3, 0, 3, 3]],
+      draw: function (d, t) {
+        var b1 = 1.3, b2 = 2.2, fall = seg(t, 0.45, 0.8), f1 = flash(t, 1.0, b1), f2 = flash(t, 1.9, b2);
+        var bf = seg(t, 1.45, 1.75), items = [];
+        this.base.forEach(function (b) {
+          var red = b[0] === 1 && b[2] === 1, blue = b[0] === 2 && b[2] === 1;
+          if ((red && t >= b1) || (blue && t >= b2)) return;
+          items.push({ x: b[0], y: b[1], z: b[2], c: b[3], f: red ? f1 : blue ? f2 : 0 });
+        });
+        if (t < b1) items.push({ x: 1, y: 2.6 - 2.6 * fall * fall + hover(t, 0.45), z: 0, c: 0, f: f1, sq: squash(t, 0.8, 1.0, 0.22) });
+        if (t < b2) items.push({ x: 1, y: t < 1.45 ? 1 : 1 - bf * bf, z: 1, c: 1, f: f2, sq: squash(t, 1.75, 1.9, 0.16) });
+        d.cubes(items.concat(frags([[1, 0, 0, 0], [1, 0, 1, 0]], b1, t, 3), frags([[1, 0, 1, 1], [2, 0, 1, 1]], b2, t, 11)));
+        if (t >= b2) d.popup('×2', [1.6, 1.3 + seg(t, b2, b2 + 1.2) * 1.2, 1.2], 1 - seg(t, b2 + 0.9, b2 + 1.5));
+      }
+    }
   };
 
-  function glyphs() {
-    document.querySelectorAll('canvas[data-glyph]').forEach(function (cv) {
-      var kind = cv.getAttribute('data-glyph'), cells = GLYPHS[kind];
-      var F = I.fit(cv);
-      var s = Math.min(F.w / 4.6, F.h / 4.4);
-      var cx = 0, cy = 0, cz = 0;
-      cells.forEach(function (c) { cx += c[0]; cy += c[1]; cz += c[2]; });
-      var n = cells.length;
-      I.cubes(F.ctx, cells.map(function (c) {
-        return { x: c[0], y: c[1], z: c[2], c: c[3], f: kind === 'match' && c[3] === 3 ? 0.25 : 0 };
-      }), { M: I.view(Math.PI / 4 - 0.2, 0.55), s: s, x: F.w / 2, y: F.h / 2, pivot: [cx / n + 0.5, cy / n + 0.5, cz / n + 0.5] });
+  function scene(cv) {
+    var def = SCENES[cv.getAttribute('data-scene')];
+    if (!def) return;
+    var F, cam, led, on = false, t0 = 0;
+    function resize() {
+      F = I.fit(cv);
+      var s = Math.min(F.w / 7, F.h / 6.4);
+      cam = { M: I.view(Math.PI / 4 - 0.2, 0.6), s: s, x: F.w / 2, y: F.h * 0.6, pivot: [2, 1, 2] };
+      led = ledFor(cv);
+    }
+    var api = {
+      cubes: function (items) { I.cubes(F.ctx, items, cam); },
+      piece: function (cells, pivot, at, angle) {
+        var p = I.project(cam, at[0], at[1], at[2]);
+        I.cubes(F.ctx, cells, { M: I.mul(cam.M, I.rotY(angle)), s: cam.s, x: p[0], y: p[1], pivot: pivot });
+      },
+      popup: function (text, at, alpha) {
+        var p = I.project(cam, at[0], at[1], at[2]), ctx = F.ctx;
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, alpha);
+        ctx.font = '700 ' + Math.round(cam.s * 0.85) + 'px Nippo';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = 'rgba(0,0,0,0.35)';
+        ctx.fillText(text, p[0], p[1] + 2);
+        ctx.fillStyle = '#F4B942';
+        ctx.fillText(text, p[0], p[1]);
+        ctx.restore();
+      }
+    };
+    function draw(t) {
+      F.ctx.clearRect(0, 0, F.w, F.h);
+      I.plate(F.ctx, cam, { led: led, glow: 0.8 });
+      def.draw(api, t);
+      cv.style.opacity = I.reduce ? 1 : (seg(t, 0, 0.2) * (1 - seg(t, def.dur - 0.3, def.dur))).toFixed(3);
+    }
+    function frame(now) {
+      if (!on) return;
+      if (!t0) t0 = now;
+      draw(((now - t0) / 1000) % def.dur);
+      requestAnimationFrame(frame);
+    }
+    window.addEventListener('resize', function () { resize(); if (I.reduce || !on) draw(def.key); });
+    resize();
+    draw(def.key);
+    cv.style.opacity = 1;
+    if (I.reduce) return;
+    I.visible(cv, function (v) {
+      if (v && !on) { on = true; t0 = 0; requestAnimationFrame(frame); } else if (!v) on = false;
     });
+  }
+
+  function pano() {
+    var cv = document.querySelector('.pano-sky');
+    if (!cv || !SKY) return;
+    var F = I.fit(cv), ctx = F.ctx;
+    var lw = 360, lh = 90, off = document.createElement('canvas');
+    off.width = lw; off.height = lh;
+    var octx = off.getContext('2d'), img = octx.createImageData(lw, lh), R = rng(9);
+    for (var x = 0; x < lw; x++) {
+      var u = (x + 0.5) / lw;
+      for (var y = 0; y < lh; y++) {
+        var c = SKY.stripColor(u, y / (lh - 1)), k = (y * lw + x) * 4, dn = (R() - 0.5) * 2;
+        img.data[k] = c[0] + dn; img.data[k + 1] = c[1] + dn; img.data[k + 2] = c[2] + dn; img.data[k + 3] = 255;
+      }
+    }
+    octx.putImageData(img, 0, 0);
+    ctx.save();
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(0, 0, F.w, F.h, 18); else ctx.rect(0, 0, F.w, F.h);
+    ctx.clip();
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(off, 0, 0, F.w, F.h);
+    var n = Math.round(F.w * F.h / 55), S = rng(5);
+    for (var i = 0; i < n; i++) {
+      var sx = S() * F.w, sy = Math.pow(S(), 1.25) * F.h, big = S() < 0.1, r = S(), a = S(), rad = S();
+      var uu = sx / F.w, dens = SKY.starDensity(uu);
+      if (r > dens) continue;
+      ctx.fillStyle = 'rgb(' + SKY.starTint(uu).map(Math.round).join(',') + ')';
+      ctx.globalAlpha = (big ? 0.9 : 0.4 + a * 0.4) * (1 - sy / F.h * 0.55) * Math.min(1, (dens - r) * 14);
+      ctx.beginPath();
+      ctx.arc(sx, sy, big ? 1.1 + rad * 0.6 : 0.45 + rad * 0.4, 0, 6.2832);
+      ctx.fill();
+    }
+    ctx.restore();
   }
 
   function city() {
     var canvas = document.querySelector('.city');
     if (!canvas) return;
-    function rnd(seed) { return function () { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }; }
     var F = I.fit(canvas), ctx = F.ctx, w = F.w, h = F.h;
     ctx.clearRect(0, 0, w, h);
     [
@@ -33,7 +183,7 @@
       { col: 'rgba(58,86,70,0.8)', min: 0.2, max: 0.75, bw: [34, 80], win: 0.08, seed: 19 },
       { col: '#1c2a22', min: 0.14, max: 0.6, bw: [28, 70], win: 0.22, seed: 41 }
     ].forEach(function (L) {
-      var R = rnd(L.seed), x = -10;
+      var R = rng(L.seed), x = -10;
       while (x < w + 10) {
         var bw = L.bw[0] + R() * (L.bw[1] - L.bw[0]);
         var bh = h * (L.min + R() * (L.max - L.min));
@@ -61,127 +211,8 @@
     });
   }
 
-
-  var SKIES = [
-    ['#4E8AD0', '#6FA0D4', '#A8BCC4', '#7E9C58', '#4E6B30'],
-    ['#2A4C94', '#4A7FC0', '#8FB8DC', '#E8B77A', '#F2A24E'],
-    ['#47296B', '#D9616B', '#FA944D'],
-    ['#120F2E', '#331F4D', '#573361'],
-    ['#000000', '#0A1A3D', '#1A0D33']
-  ];
-  var STAR_DENSITY = [0, 0, 0.04, 0.45, 1];
-
-  function hex(h) { return [parseInt(h.substr(1, 2), 16), parseInt(h.substr(3, 2), 16), parseInt(h.substr(5, 2), 16)]; }
-  function sample(stops, t) {
-    var x = t * (stops.length - 1), i = Math.min(stops.length - 2, Math.floor(x)), f = x - i;
-    return window.BP.sky.mix(hex(stops[i]), hex(stops[i + 1]), f);
-  }
-  function ease(t) { t = Math.max(0, Math.min(1, t)); return t * t * (3 - 2 * t); }
-  function across(u, vals) {
-    var p = u * vals.length - 0.5, i = Math.floor(p), f = p - i;
-    if (i < 0) return [vals[0], vals[0], 0];
-    if (i >= vals.length - 1) return [vals[vals.length - 1], vals[vals.length - 1], 0];
-    return [vals[i], vals[i + 1], ease(f)];
-  }
-
-  function pano() {
-    var cv = document.querySelector('.pano-sky');
-    if (!cv) return;
-    var F = I.fit(cv), ctx = F.ctx;
-    var mix = window.BP.sky.mix, lw = 320, lh = 96, off = document.createElement('canvas');
-    off.width = lw; off.height = lh;
-    var octx = off.getContext('2d'), img = octx.createImageData(lw, lh);
-    for (var x = 0; x < lw; x++) {
-      var m = across((x + 0.5) / lw, SKIES);
-      for (var y = 0; y < lh; y++) {
-        var t = y / (lh - 1), c = mix(sample(m[0], t), sample(m[1], t), m[2]), k = (y * lw + x) * 4, dn = (Math.random() - 0.5) * 2;
-        img.data[k] = c[0] + dn;
-        img.data[k + 1] = c[1] + dn;
-        img.data[k + 2] = c[2] + dn;
-        img.data[k + 3] = 255;
-      }
-    }
-    octx.putImageData(img, 0, 0);
-    ctx.save();
-    ctx.beginPath();
-    if (ctx.roundRect) ctx.roundRect(0, 0, F.w, F.h, 18); else ctx.rect(0, 0, F.w, F.h);
-    ctx.clip();
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
-    ctx.drawImage(off, 0, 0, F.w, F.h);
-    var seed = 5;
-    function R() { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }
-    var n = Math.round(F.w * F.h / 60);
-    ctx.fillStyle = '#fff';
-    for (var i = 0; i < n; i++) {
-      var sx = R() * F.w, sy = Math.pow(R(), 1.3) * F.h, big = R() < 0.12, r = R();
-      var d = across(sx / F.w, STAR_DENSITY), dens = d[0] + (d[1] - d[0]) * d[2];
-      if (r > dens) continue;
-      ctx.globalAlpha = (big ? 0.85 : 0.45 + R() * 0.35) * (1 - sy / F.h * 0.5);
-      ctx.beginPath();
-      ctx.arc(sx, sy, big ? 1.2 + R() * 0.6 : 0.5 + R() * 0.4, 0, 6.2832);
-      ctx.fill();
-    }
-    ctx.restore();
-  }
-
-  (function rain() {
-    var cv = document.querySelector('.rain');
-    if (!cv) return;
-    var zone = cv.parentNode, A, pieces = [], on = false, last = 0, mx = 0.5, tmx = 0.5;
-    function make(initial) {
-      var sh = I.randomShape(), z = Math.pow(Math.random(), 1.5), cells = sh.cells, c = [0, 0, 0];
-      cells.forEach(function (p) { c[0] += p[0]; c[1] += p[1]; c[2] += p[2]; });
-      return {
-        cells: cells, piv: c.map(function (v) { return v / cells.length + 0.5; }),
-        c: Math.floor(Math.random() * 6), z: z, s: 7 + z * z * 34,
-        x: Math.random() * A.w, y: initial ? Math.random() * A.h * 1.1 - A.h * 0.1 : -60,
-        v: 12 + z * 55, yaw: Math.random() * 6.28, ys: (Math.random() - 0.5) * 0.8,
-        roll: (Math.random() - 0.5) * 0.9, rs: (Math.random() - 0.5) * 0.3
-      };
-    }
-    function resize() {
-      A = I.fit(cv);
-      var n = Math.round(Math.max(14, Math.min(36, A.w * A.h / 36000)));
-      pieces = [];
-      for (var i = 0; i < n; i++) pieces.push(make(true));
-      paint();
-    }
-    function paint() {
-      A.ctx.clearRect(0, 0, A.w, A.h);
-      var sky = window.BP.sky, docH = Math.max(1, document.documentElement.scrollHeight), sy = window.scrollY;
-      pieces.forEach(function (p) {
-        var M = I.mul(I.rotX(0.5), I.mul(I.rotZ(p.roll), I.rotY(p.yaw)));
-        var bg = sky.colorAt((sy + Math.max(0, Math.min(A.h, p.y))) / docH);
-        var fog = 0.72 - p.z * 0.62;
-        var rgb = sky.mix(I.RGB[p.c], bg, fog).map(function (v) { return Math.round(v / 6) * 6; });
-        I.cubes(A.ctx, p.cells.map(function (c) { return { x: c[0], y: c[1], z: c[2], rgb: rgb }; }),
-          { M: M, s: p.s, x: p.x + (mx - 0.5) * p.z * -40, y: p.y, pivot: p.piv });
-      });
-    }
-    function frame(now) {
-      if (!on) return;
-      var dt = last ? Math.min(0.05, (now - last) / 1000) : 0;
-      last = now;
-      mx += (tmx - mx) * Math.min(1, dt * 3);
-      pieces.forEach(function (p, i) {
-        p.y += p.v * dt; p.yaw += p.ys * dt; p.roll += p.rs * dt * 0.3;
-        if (p.y > A.h + 80) pieces[i] = make(false);
-      });
-      pieces.sort(function (a, b) { return a.z - b.z; });
-      paint();
-      requestAnimationFrame(frame);
-    }
-    window.addEventListener('pointermove', function (e) { tmx = e.clientX / window.innerWidth; });
-    window.addEventListener('resize', resize);
-    resize();
-    if (I.reduce) return;
-    I.visible(zone, function (v) {
-      if (v && !on) { on = true; last = 0; requestAnimationFrame(frame); } else if (!v) on = false;
-    });
-  })();
-
-  function draw() { glyphs(); city(); pano(); }
+  document.querySelectorAll('canvas[data-scene]').forEach(scene);
+  function draw() { city(); pano(); }
   window.addEventListener('resize', draw);
   draw();
 })();

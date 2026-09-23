@@ -17,6 +17,7 @@
   var wrap = canvas.parentNode;
 
   var grid, piece, phase, fallY, fallV, score, streak, pressure, pending, nextId, aim, particles, flashIds, timers, bob = 0;
+  var reduce = I.reduce, mode = 'bot', lastInput = 0, plan = null, planT = 0, shown = 0, wipeT = 0, ledPulse = 0, ledColor = [115, 204, 255];
 
   function empty() {
     var g = [];
@@ -73,6 +74,8 @@
     noClusterFill(cells);
     elOver.hidden = true;
     wrap.classList.remove('is-over');
+    shown = 0;
+    elScore.textContent = '0';
     hud();
     spawn(true);
   }
@@ -83,13 +86,15 @@
       if (pressure >= PRESSURE_MAX) {
         pressure = 0;
         insertLayer();
-        if (overflow()) { hud(); return gameOver(); }
+        if (overflow()) { hud(); return mode === 'bot' ? wipe() : gameOver(); }
       }
     }
     var sh = I.randomShape();
     piece = { cells: sh.cells, c: Math.floor(Math.random() * COLORS) };
     clampAim();
     phase = 'aim';
+    plan = mode === 'bot' ? choose() : null;
+    planT = 0;
     hud();
   }
 
@@ -151,7 +156,7 @@
   function drop() {
     if (phase !== 'aim') return;
     phase = 'fall';
-    fallY = H + 0.7;
+    fallY = Math.min(H + 0.7, Math.max(3, maxHeight() + 2.6));
     fallV = 4;
   }
 
@@ -178,9 +183,76 @@
     }
   }
 
+  function maxHeight() {
+    var m = 0;
+    for (var x = 0; x < W; x++) for (var z = 0; z < D; z++) m = Math.max(m, colH(x, z));
+    return m;
+  }
+
   function next() {
+    if (mode === 'bot' && (overflow() || maxHeight() >= 6)) return wipe();
     if (overflow()) return gameOver();
     spawn(false);
+  }
+
+  function wipe() {
+    phase = 'wipe';
+    piece = null;
+    plan = null;
+    wipeT = 0;
+  }
+
+  function evaluate(cells, ax, az) {
+    var base = 0, temp = {}, placed = [], ok = true;
+    cells.forEach(function (c) { base = Math.max(base, colH(ax + c[0], az + c[2]) - c[1]); });
+    cells.forEach(function (c, i) {
+      var y = base + c[1];
+      if (y >= TOP) { ok = false; return; }
+      var id = -1 - i;
+      grid[ax + c[0]][y][az + c[2]] = { c: piece.c, id: id, vy: y, vel: 0, a: 1 };
+      temp[id] = 1;
+      placed.push([ax + c[0], y, az + c[2]]);
+    });
+    var hits = 0;
+    if (ok) groupsFor(temp, true).forEach(function (g) { hits += g.length; });
+    var top = 0;
+    placed.forEach(function (p) { top = Math.max(top, p[1] + 1); });
+    placed.forEach(function (p) { grid[p[0]][p[1]][p[2]] = null; });
+    if (!ok) return -1e9;
+    return hits * 10 + (hits ? 6 : 0) - top * 1.6 - base * 0.8 + Math.random() * 2.5;
+  }
+
+  function choose() {
+    var best = null, cells = piece.cells;
+    for (var r = 0; r < 4; r++) {
+      var mx = 0, mz = 0;
+      cells.forEach(function (c) { mx = Math.max(mx, c[0]); mz = Math.max(mz, c[2]); });
+      for (var ax = 0; ax <= W - 1 - mx; ax++) for (var az = 0; az <= D - 1 - mz; az++) {
+        var v = evaluate(cells, ax, az);
+        if (!best || v > best.v) best = { v: v, r: r, x: ax, z: az };
+      }
+      cells = I.rotCells(cells);
+    }
+    return best;
+  }
+
+  function botStep(dt) {
+    if (!plan || phase !== 'aim') return;
+    planT += dt;
+    var beat = reduce ? 0.42 : 0.14;
+    if (planT < (reduce ? 0.9 : 0.45)) return;
+    if (planT - (plan.last || 0) < beat) return;
+    plan.last = planT;
+    if (plan.r > 0) { turn(); plan.r--; return; }
+    if (aim.x !== plan.x) { aim.x += aim.x < plan.x ? 1 : -1; clampAim(); return; }
+    if (aim.z !== plan.z) { aim.z += aim.z < plan.z ? 1 : -1; clampAim(); return; }
+    if (!plan.hold) { plan.hold = true; return; }
+    drop();
+  }
+
+  function takeOver() {
+    lastInput = performance.now();
+    if (mode === 'bot') { mode = 'user'; plan = null; }
   }
 
   function compact() {
@@ -276,6 +348,7 @@
     });
     if (chain >= 2) pop('Chain ×' + chain, 'chain', sum.map(function (v) { return v / cnt; }));
     bumpPit(0.6 + chain * 0.25);
+    ledPulse = Math.min(1.6, ledPulse + 0.6 + chain * 0.3);
     later(200, function () {
       var before = pairs();
       compact();
@@ -307,9 +380,10 @@
   }
 
   var shake = 0;
-  function bumpPit(k) { shake = Math.min(1.4, shake + k); }
+  function bumpPit(k) { if (!reduce) shake = Math.min(1.4, shake + k); }
 
   function burst(x, y, z, c) {
+    if (reduce) return;
     var p = I.project(cam, x + 0.5, y + 0.5, z + 0.5);
     for (var i = 0; i < 10; i++) {
       var a = Math.random() * 6.28, sp = 60 + Math.random() * 180;
@@ -353,7 +427,6 @@
   })();
 
   function hud() {
-    elScore.textContent = score;
     var m = multiplier(streak);
     elMult.textContent = '×' + m.toFixed(2);
     elFlame.classList.toggle('on', streak > 0);
@@ -389,10 +462,12 @@
 
   var down = null;
   canvas.addEventListener('pointermove', function (ev) {
+    takeOver();
     if (ev.pointerType === 'mouse' || down) { var p = local(ev); aimFrom(p[0], p[1]); }
     if (down) down.moved += Math.abs(ev.movementX || 0) + Math.abs(ev.movementY || 0);
   });
   canvas.addEventListener('pointerdown', function (ev) {
+    takeOver();
     down = { t: performance.now(), moved: 0, type: ev.pointerType, btn: ev.button };
     if (ev.pointerType !== 'mouse') { canvas.setPointerCapture(ev.pointerId); }
     else { var p = local(ev); aimFrom(p[0], p[1]); }
@@ -410,6 +485,7 @@
     var k = ev.key;
     if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', ' ', 'Enter', 'r', 'R'].indexOf(k) < 0) return;
     ev.preventDefault();
+    takeOver();
     if (phase !== 'aim') return;
     if (k === 'ArrowLeft') { aim.x--; } else if (k === 'ArrowRight') { aim.x++; }
     else if (k === 'ArrowUp') { aim.z--; } else if (k === 'ArrowDown') { aim.z++; }
@@ -420,6 +496,7 @@
   document.querySelectorAll('[data-pit]').forEach(function (b) {
     b.addEventListener('click', function () {
       var a = b.getAttribute('data-pit');
+      takeOver();
       if (a === 'turn') turn(); else if (a === 'drop') drop(); else reset();
     });
   });
@@ -427,9 +504,9 @@
   function resize() {
     var f = I.fit(canvas);
     ctx = f.ctx; cw = f.w; ch = f.h;
-    cam.s = Math.min(cw / 6.6, ch / 12.2);
+    cam.s = Math.min(cw / 5.8, ch / 8.6);
     cam.x = cw / 2;
-    cam.y = ch * 0.56;
+    cam.y = ch * 0.4;
   }
 
   var last = 0, on = false;
@@ -444,8 +521,25 @@
   }
 
   function step(dt) {
+    var now = performance.now();
+    if (mode === 'user' && now - lastInput > 5000 && !down) {
+      mode = 'bot';
+      if (phase === 'over') reset();
+      else if (phase === 'aim') { plan = choose(); planT = 0; }
+    }
+    if (mode === 'bot') botStep(dt);
+    if (phase === 'wipe') {
+      wipeT += dt;
+      if (wipeT > (reduce ? 1.2 : 0.8)) reset();
+    }
+    if (shown !== score) {
+      shown = shown + (score - shown) * Math.min(1, dt * 5);
+      if (Math.abs(score - shown) < 0.5) shown = score;
+      elScore.textContent = Math.round(shown);
+    }
+    ledPulse = Math.max(0, ledPulse - dt * 2.2);
     if (phase === 'fall') {
-      fallV += 70 * dt;
+      fallV += (reduce ? 26 : 70) * dt;
       fallY -= fallV * dt;
       var ly = landing();
       if (fallY <= ly) lock();
@@ -475,23 +569,30 @@
     var j = shake * shake * 3;
     cam.x = sx + (Math.random() - 0.5) * j;
     cam.y = sy + (Math.random() - 0.5) * j;
-    I.pitBack(ctx, cam, { danger: 6 });
-    var items = [];
+    if (window.BP.sky) {
+      var r = wrap.getBoundingClientRect(), dh = Math.max(1, document.documentElement.scrollHeight);
+      ledColor = window.BP.sky.led(window.BP.sky.pageU((window.scrollY + r.top + r.height / 2) / dh));
+    }
+    I.plate(ctx, cam, { led: ledColor, glow: 1 + ledPulse });
+    var items = [], wk = phase === 'wipe' ? wipeT / (reduce ? 1.2 : 0.8) : 0;
     each(function (b, x, y, z) {
-      var f = 0;
+      var f = 0, k = 1;
       if (flashIds[b.id]) f = 0.35 + 0.35 * Math.sin((now - flashIds[b.id]) / 30);
-      items.push({ x: x, y: b.vy, z: z, c: b.c, f: f, a: b.vy < 0 ? Math.max(0, b.a * (1 + b.vy)) : b.a });
+      if (wk) k = Math.max(0, Math.min(1, 1 - (wk * 1.6 - (TOP - y) / TOP * 0.6)));
+      if (k <= 0.02) return;
+      items.push({ x: x, y: b.vy, z: z, c: b.c, f: f, k: k, a: b.vy < 0 ? Math.max(0, b.a * (1 + b.vy)) : b.a });
     });
     if (piece && (phase === 'aim' || phase === 'fall')) {
       var ly = landing();
-      var py = phase === 'fall' ? fallY : H + 0.7 + Math.sin(bob * 2.4) * 0.12;
+      var hover = Math.min(H + 0.7, Math.max(3, maxHeight() + 2.6));
+      if (phase === 'fall' && fallY > hover) fallY = hover;
+      var py = phase === 'fall' ? fallY : hover + Math.sin(bob * 2.4) * 0.12;
       piece.cells.forEach(function (c) {
-        if (phase === 'aim') items.push({ x: aim.x + c[0], y: ly + c[1], z: aim.z + c[2], c: piece.c, ghost: true, a: 0.55 });
+        if (phase === 'aim' && mode === 'user') items.push({ x: aim.x + c[0], y: ly + c[1], z: aim.z + c[2], c: piece.c, ghost: true, a: 0.55 });
         items.push({ x: aim.x + c[0], y: py + c[1], z: aim.z + c[2], c: piece.c });
       });
     }
     I.cubes(ctx, items, cam);
-    I.pitFront(ctx, cam, {});
     particles.forEach(function (p) {
       ctx.globalAlpha = Math.max(0, 1 - p.t / p.life);
       ctx.fillStyle = p.c;

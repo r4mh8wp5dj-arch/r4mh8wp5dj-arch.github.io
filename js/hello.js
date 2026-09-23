@@ -8,8 +8,8 @@
 
   function resize() {
     F = I.fit(canvas);
-    var s = Math.min(F.w / 3.6, F.h / 7.4);
-    cam = { M: I.view(Math.PI / 4 - 0.2, 0.6), s: s, x: F.w / 2, y: F.h * 0.55, pivot: [1, 2.6, 1] };
+    var s = Math.min(F.w / 3.8, F.h / 6.2);
+    cam = { M: I.view(Math.PI / 4 - 0.2, 0.6), s: s, x: F.w / 2, y: F.h * 0.55, pivot: [1, 2, 1] };
     draw();
   }
   function height(x, z) {
@@ -20,16 +20,20 @@
   function next() {
     if (cells.length >= 10) { cells = []; }
     var o = order[idx++ % order.length];
-    falling = { x: o[0], z: o[1], c: o[2], y: 7, v: 0, to: height(o[0], o[1]) };
+    falling = { x: o[0], z: o[1], c: o[2], y: 5.2, v: 0, to: height(o[0], o[1]) };
   }
   function draw() {
     var ctx = F.ctx;
     ctx.clearRect(0, 0, F.w, F.h);
-    I.pitBack(ctx, cam, { w: 2, d: 2, h: 5 });
+    var led = [207, 120, 230];
+    if (window.BP.sky) {
+      var r = canvas.getBoundingClientRect(), dh = Math.max(1, document.documentElement.scrollHeight);
+      led = window.BP.sky.led(window.BP.sky.pageU((window.scrollY + r.top + r.height / 2) / dh));
+    }
+    I.plate(ctx, cam, { n: 2, led: led });
     var items = cells.map(function (c) { return { x: c.x, y: c.y, z: c.z, c: c.c, f: c.f || 0 }; });
     if (falling) items.push({ x: falling.x, y: falling.y, z: falling.z, c: falling.c });
     I.cubes(ctx, items, cam);
-    I.pitFront(ctx, cam, { w: 2, d: 2, h: 5 });
   }
   function frame(now) {
     var dt = last ? Math.min(0.05, (now - last) / 1000) : 0;
