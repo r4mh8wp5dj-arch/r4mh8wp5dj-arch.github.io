@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-sky="0 1">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Block Pit — Rotate. Match. Trigger chains.</title>
-  <meta name="description" content="Block Pit is a 3D falling-block colour-matching puzzle for iOS. Rotate the pit, match three or more, trigger chain reactions. Coming soon.">
+  <title>Block Pit — Drop. Match. Chain.</title>
+  <meta name="description" content="Block Pit is a 3D falling-block colour-matching puzzle for iPhone. Drop pieces into a 4×4 pit, match two or more, set off chains. Coming soon to iOS.">
   <meta name="theme-color" content="#000000">
   <link rel="canonical" href="https://r4mh8wp5dj-arch.github.io/">
   <link rel="icon" type="image/png" href="assets/img/favicon-64.png">
@@ -12,198 +12,180 @@
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://r4mh8wp5dj-arch.github.io/">
   <meta property="og:title" content="Block Pit">
-  <meta property="og:description" content="Rotate. Match. Trigger chains. Coming soon to iOS.">
+  <meta property="og:description" content="Drop. Match. Chain. Coming soon to iOS.">
   <meta property="og:image" content="https://r4mh8wp5dj-arch.github.io/assets/img/logo-1024.png">
   <meta name="twitter:card" content="summary">
   <link rel="preload" href="assets/fonts/Nippo-Variable.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="stylesheet" href="styles.css">
-  <script src="sky.js" defer></script>
+  <script src="js/sky.js"></script>
+  <script src="js/iso.js" defer></script>
+  <script src="js/site.js" defer></script>
+  <script src="js/play.js" defer></script>
 </head>
-<body>
-  <div class="sky" aria-hidden="true">
-    <div class="sky-layer sky-deepspace"></div>
-    <div class="sky-layer sky-twilight"></div>
-    <div class="sky-layer sky-sunset"></div>
-    <div class="sky-layer sky-cumulus"></div>
-    <div class="sky-layer sky-dawn"></div>
-    <canvas id="stars"></canvas>
-  </div>
+<body class="home">
+  <a class="skip" href="#play">Skip to the playable pit</a>
 
-  <header class="wrap top">
-    <a class="wordmark" href="./">Block Pit</a>
+  <header class="bar">
+    <a class="mark" href="./" aria-label="Block Pit home"><img src="assets/img/favicon-64.png" alt="" width="28" height="28"><span>Block Pit</span></a>
     <nav aria-label="Site">
-      <a href="#how">How to play</a>
+      <a href="#play">Play</a>
+      <a href="#chain">Chain</a>
       <a href="#skies">Skies</a>
       <a href="contact.html">Contact</a>
     </nav>
   </header>
 
+  <p class="sky-now" aria-hidden="true">Sky <b>Deep Space</b></p>
+
   <main>
-    <section class="wrap hero">
-      <h1 class="title">Block Pit</h1>
-      <p class="tagline">Drop. Match. Chain.</p>
-      <p class="sub">A 4×4 pit. Match two. Chain everything.</p>
-      <p><span class="badge glass">COMING SOON TO iOS</span></p>
+    <section class="hero" id="top">
+      <canvas class="rain-back" aria-hidden="true"></canvas>
+      <div class="hero-in" data-ink>
+        <p class="kicker">A falling-block puzzle for iPhone</p>
+        <h1 class="title"><span class="t1">Block</span><span class="t2">Pit</span></h1>
+        <p class="tag"><b class="k-r">Drop.</b> <b class="k-y">Match.</b> <b class="k-c">Chain.</b></p>
+        <p class="soon"><i aria-hidden="true"></i>Coming soon to iOS</p>
+      </div>
+      <canvas class="rain-front" aria-hidden="true"></canvas>
+      <a class="fall-in" href="#drop" data-ink>Fall in <span aria-hidden="true">›</span></a>
+    </section>
 
-      <div class="scene stack" aria-hidden="true">
-        <div class="iso pit">
-          <div class="floor"></div>
-            <div class="cube c-blue" style="--i:0;--j:0;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-yellow" style="--i:0;--j:0;--l:1"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-red" style="--i:0;--j:0;--l:2"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-purple" style="--i:1;--j:0;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-green" style="--i:2;--j:0;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-cyan" style="--i:2;--j:0;--l:1"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-yellow" style="--i:3;--j:0;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-red" style="--i:3;--j:0;--l:1"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-blue" style="--i:3;--j:0;--l:2"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-cyan" style="--i:0;--j:1;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-green" style="--i:0;--j:1;--l:1"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-red" style="--i:1;--j:1;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-blue" style="--i:1;--j:1;--l:1"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-purple" style="--i:1;--j:1;--l:2"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-yellow" style="--i:1;--j:1;--l:3"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-yellow" style="--i:2;--j:1;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-green" style="--i:3;--j:1;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-purple" style="--i:3;--j:1;--l:1"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-cyan" style="--i:3;--j:1;--l:2"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-red" style="--i:0;--j:2;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-cyan" style="--i:1;--j:2;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-blue" style="--i:1;--j:2;--l:1"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-purple" style="--i:2;--j:2;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-green" style="--i:2;--j:2;--l:1"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-red" style="--i:2;--j:2;--l:2"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-blue" style="--i:3;--j:2;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-purple" style="--i:3;--j:2;--l:1"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-green" style="--i:0;--j:3;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-cyan k-pulse" style="--i:0;--j:3;--l:1"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-yellow" style="--i:1;--j:3;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-cyan k-pulse" style="--i:1;--j:3;--l:1"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-red" style="--i:2;--j:3;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-purple" style="--i:3;--j:3;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-green" style="--i:3;--j:3;--l:1"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-red" style="--i:1;--j:1;--l:4.4"><i class="t"></i><i class="y"></i><i class="x"></i></div>
+    <section class="drop" id="drop" aria-labelledby="drop-h">
+      <h2 class="drop-word" id="drop-h" aria-label="Drop"><span aria-hidden="true">Drop</span></h2>
+      <div class="drop-body">
+        <p class="drop-lead rv" data-ink>Six shapes fall toward a 4×4 pit, eight blocks deep.</p>
+        <div class="drop-stage">
+          <canvas id="drop-canvas" aria-label="A T piece drifts in, turns twice and lands in the pit." role="img"></canvas>
+          <span class="cue" data-ink>Drag</span>
+          <span class="cue" data-ink>Tap to turn</span>
+          <span class="cue cue-last" data-ink>Let go</span>
+        </div>
+        <ul class="roster rv" aria-label="The six piece shapes" data-ink>
+          <li><canvas data-shape="single" data-c="0" aria-hidden="true"></canvas>Single</li>
+          <li><canvas data-shape="domino" data-c="1" aria-hidden="true"></canvas>Domino</li>
+          <li><canvas data-shape="three" data-c="2" aria-hidden="true"></canvas>Three</li>
+          <li><canvas data-shape="ell" data-c="3" aria-hidden="true"></canvas>L</li>
+          <li><canvas data-shape="square" data-c="4" aria-hidden="true"></canvas>Square</li>
+          <li><canvas data-shape="tee" data-c="5" aria-hidden="true"></canvas>T</li>
+        </ul>
+        <p class="roster-note rv" data-ink>Every piece is a single colour.</p>
+      </div>
+    </section>
+
+    <section class="play" id="play" aria-labelledby="play-h">
+      <div class="play-head rv" data-ink>
+        <p class="live"><i aria-hidden="true"></i>This pit is live</p>
+        <h2 id="play-h">Match <em>two</em></h2>
+        <p>Two blocks of one colour touching, in any direction, burst.</p>
+      </div>
+
+      <div class="machine">
+        <div class="pit-wrap">
+          <canvas id="pit" tabindex="0" aria-label="Playable Block Pit. Arrow keys aim, R turns, Space drops."></canvas>
+          <div class="pit-pops" aria-hidden="true"></div>
+          <div class="pit-over" hidden>
+            <p>Pit full.</p>
+            <p class="over-score">Score <b>0</b></p>
+            <button type="button" data-pit="reset">Again</button>
+          </div>
+        </div>
+
+        <div class="hud-r" data-ink>
+          <div class="hud-score">
+            <small>Score</small>
+            <b id="hud-score" aria-live="polite">0</b>
+          </div>
+          <svg id="hud-pressure" class="pcol" aria-label="Pressure" role="img"></svg>
+          <div class="hud-flame">
+            <svg viewBox="-16 -32 32 52" aria-hidden="true">
+              <defs>
+                <linearGradient id="fg" x1="0" y1="1" x2="0" y2="0">
+                  <stop offset="0" stop-color="#FF4D5E"/>
+                  <stop offset="0.5" stop-color="#FF8C1A"/>
+                  <stop offset="1" stop-color="#FFD27A"/>
+                </linearGradient>
+              </defs>
+              <path fill="url(#fg)" d="M0 -30 C 10 -18 16 -10 14 2 C 13 12 7 18 0 18 C -7 18 -13 12 -14 2 C -15 -8 -8 -12 -6 -20 C -2 -14 0 -12 2 -12 C 2 -18 0 -24 0 -30 Z"/>
+              <path fill="#FFF1C9" d="M0 -12 C 6 -6 8 0 7 5 C 6 11 3 13 0 13 C -3 13 -6 11 -7 5 C -7 0 -3 -4 0 -12 Z"/>
+            </svg>
+            <b id="hud-mult">×0.90</b>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls" data-ink>
+        <p class="how how-mouse">Move to aim <span>·</span> Click to drop <span>·</span> Right-click or R to turn</p>
+        <p class="how how-touch">Drag to aim <span>·</span> Lift to drop <span>·</span> Tap to turn</p>
+        <div class="btns">
+          <button type="button" data-pit="turn">Turn</button>
+          <button type="button" data-pit="drop" class="go">Drop</button>
+          <button type="button" data-pit="reset" class="ghost">Restart</button>
         </div>
       </div>
     </section>
 
-    <section class="wrap section" id="how">
-      <div class="section-head">
-        <p class="eyebrow">01 — 03</p>
-        <h2 class="h2">How it works</h2>
-        <p class="lead">A 4×4 pit, eight blocks deep. Pieces fall. You decide where they land.</p>
+    <section class="chain" id="chain" aria-labelledby="chain-h">
+      <div class="cascade rv" data-ink>
+        <h2 id="chain-h">Chain</h2>
+        <span class="x x2" aria-hidden="true">×2</span>
+        <span class="x x3" aria-hidden="true">×3</span>
+        <span class="x x4" aria-hidden="true">×4</span>
+        <span class="x x5" aria-hidden="true">×5</span>
       </div>
+      <p class="chain-line rv" data-ink>Whatever sat above falls into the gap, and new matches fire on their own.</p>
 
-      <div class="stage glass">
-        <div class="scene" aria-hidden="true">
-          <div class="iso pit">
-            <div class="floor"></div>
-            <div class="cube c-red" style="--i:0;--j:0;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-purple" style="--i:0;--j:0;--l:1"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-green" style="--i:1;--j:0;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-yellow" style="--i:1;--j:0;--l:1"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-blue" style="--i:2;--j:0;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-cyan" style="--i:3;--j:0;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-red" style="--i:3;--j:0;--l:1"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-green" style="--i:3;--j:0;--l:2"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-yellow" style="--i:0;--j:1;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-blue" style="--i:0;--j:1;--l:1"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-cyan" style="--i:0;--j:1;--l:2"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-purple" style="--i:1;--j:1;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-red" style="--i:1;--j:1;--l:1"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-green" style="--i:2;--j:1;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-cyan" style="--i:2;--j:1;--l:1"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-yellow" style="--i:2;--j:1;--l:2"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-purple" style="--i:2;--j:1;--l:3"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-blue" style="--i:3;--j:1;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-cyan" style="--i:0;--j:2;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-green" style="--i:0;--j:2;--l:1"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-red" style="--i:1;--j:2;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-purple" style="--i:1;--j:2;--l:1"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-blue" style="--i:1;--j:2;--l:2"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-yellow" style="--i:2;--j:2;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-red" style="--i:2;--j:2;--l:1"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-purple" style="--i:3;--j:2;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-green" style="--i:3;--j:2;--l:1"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-yellow" style="--i:3;--j:2;--l:2"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-blue" style="--i:0;--j:3;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-cyan" style="--i:0;--j:3;--l:1"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-red" style="--i:1;--j:3;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-green" style="--i:2;--j:3;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-blue" style="--i:2;--j:3;--l:1"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-purple" style="--i:2;--j:3;--l:2"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-yellow" style="--i:3;--j:3;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-cyan" style="--i:3;--j:3;--l:1"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-            <div class="cube c-red" style="--i:2;--j:1;--l:4.5"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-          </div>
-          <div class="pop pop--points">+60</div>
-          <div class="pop pop--chain">Chain ×2</div>
-        </div>
-
-        <div class="steps">
-          <div class="step">
-            <div class="step-n">01</div>
-            <h3>Drop</h3>
-            <p>Drag a piece over the pit, tap to rotate it, let it fall.</p>
-          </div>
-          <div class="step">
-            <div class="step-n">02</div>
-            <h3>Match</h3>
-            <p>Three or more of one colour touching, in any direction, and they burst.</p>
-          </div>
-          <div class="step">
-            <div class="step-n">03</div>
-            <h3>Trigger chains</h3>
-            <p>Whatever sat above drops into the gap. New matches fire on their own. Streaks multiply the score.</p>
-          </div>
-        </div>
-      </div>
+      <figure class="curve" data-ink>
+        <figcaption>
+          <span class="read">Streak <b id="streak-n">1</b></span>
+          <span class="read big"><b id="streak-m">×1.20</b></span>
+          <span class="cap-line">Score on drop after drop and the multiplier climbs toward ×2.4.</span>
+        </figcaption>
+        <svg id="streak-svg" viewBox="0 0 1000 440" role="img" aria-label="The streak multiplier rises quickly, passes ×2.0 around a streak of six and levels off at ×2.4."></svg>
+      </figure>
     </section>
 
-    <section class="wrap section" id="skies">
-      <div class="section-head">
-        <p class="eyebrow">Sky ascension</p>
-        <h2 class="h2">Five skies</h2>
-        <p class="lead">Keep placing and the pit climbs — from a green dawn to the edge of space.</p>
+    <section class="pressure" id="pressure" aria-labelledby="press-h">
+      <div class="stick">
+        <div class="press-copy" data-ink>
+          <h2 id="press-h"><span>Pres</span><span>sure</span></h2>
+          <p>Every new piece fills the column, and when it tops out a fresh layer pushes the whole pit up.</p>
+        </div>
+        <svg id="press-col" class="pcol big" role="img" aria-label="The pressure column, eight segments tall."></svg>
+        <canvas class="press-pit" aria-hidden="true"></canvas>
       </div>
+      <div class="clouds" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    </section>
 
-      <div class="skies">
-        <div class="sky-card glass">
-          <div class="swatch sw-dawn"></div>
-          <div class="sky-name"><b>Dawn</b><small>Start</small></div>
-        </div>
-        <div class="sky-card glass">
-          <div class="swatch sw-cumulus"></div>
-          <div class="sky-name"><b>Cumulus</b><small>20 placements</small></div>
-        </div>
-        <div class="sky-card glass">
-          <div class="swatch sw-sunset"></div>
-          <div class="sky-name"><b>Sunset</b><small>50</small></div>
-        </div>
-        <div class="sky-card glass">
-          <div class="swatch sw-twilight"></div>
-          <div class="sky-name"><b>Twilight</b><small>100</small></div>
-        </div>
-        <div class="sky-card glass">
-          <div class="swatch sw-deepspace"></div>
-          <div class="sky-name"><b>Deep Space</b><small>170</small></div>
-        </div>
+    <section class="skies" id="skies" aria-labelledby="skies-h">
+      <div class="skies-head rv" data-ink>
+        <h2 id="skies-h">Five skies</h2>
+        <p>Keep placing and the pit climbs out of the morning and into the dark.</p>
       </div>
+      <ol class="floors" reversed>
+        <li class="rv" data-ink><span class="n">170</span><span class="port p-ds"></span><span class="nm">Deep Space</span><span class="ds">Nothing but the pit.</span></li>
+        <li class="rv" data-ink><span class="n">100</span><span class="port p-tw"></span><span class="nm">Twilight</span><span class="ds">The first stars come out.</span></li>
+        <li class="rv" data-ink><span class="n">50</span><span class="port p-su"></span><span class="nm">Sunset</span><span class="ds">Violet above, fire below.</span></li>
+        <li class="rv" data-ink><span class="n">20</span><span class="port p-cu"></span><span class="nm">Cumulus</span><span class="ds">Blue sky on a warm horizon.</span></li>
+        <li class="rv" data-ink><span class="n">0</span><span class="port p-da"></span><span class="nm">Dawn</span><span class="ds">Green hills, gold light.</span></li>
+      </ol>
+      <p class="floors-key" data-ink>Placements</p>
+    </section>
 
-      <div class="palette" aria-label="The six block colours">
-        <div class="scene"><div class="iso"><div class="cube c-red"    style="--i:0;--j:0;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div></div></div>
-        <div class="scene"><div class="iso"><div class="cube c-blue"   style="--i:0;--j:0;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div></div></div>
-        <div class="scene"><div class="iso"><div class="cube c-green"  style="--i:0;--j:0;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div></div></div>
-        <div class="scene"><div class="iso"><div class="cube c-yellow" style="--i:0;--j:0;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div></div></div>
-        <div class="scene"><div class="iso"><div class="cube c-purple" style="--i:0;--j:0;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div></div></div>
-        <div class="scene"><div class="iso"><div class="cube c-cyan"   style="--i:0;--j:0;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div></div></div>
+    <section class="soon-s" id="soon" aria-labelledby="soon-h">
+      <div class="soon-in rv" data-ink>
+        <img class="icon" src="assets/img/logo-320.png" alt="Block Pit app icon" width="140" height="140">
+        <h2 id="soon-h">The pit opens soon.</h2>
+        <p class="soon-sub">Coming soon to iOS.</p>
+        <a class="cta" href="https://www.instagram.com/playblockpit" target="_blank" rel="me noopener">Follow @playblockpit <span aria-hidden="true">›</span></a>
+        <p class="credit">Made by Emir. One developer, one pit.</p>
       </div>
+      <canvas class="city" aria-hidden="true"></canvas>
     </section>
   </main>
 
-  <footer class="wrap foot">
+  <footer class="foot">
     <nav aria-label="Footer">
-      <a href="https://www.instagram.com/playblockpit" target="_blank" rel="me noopener">Instagram @playblockpit</a>
+      <a href="https://www.instagram.com/playblockpit" target="_blank" rel="me noopener">Instagram</a>
       <a href="contact.html">Contact</a>
       <a href="privacy.html">Privacy Policy</a>
     </nav>

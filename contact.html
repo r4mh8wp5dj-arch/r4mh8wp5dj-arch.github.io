@@ -1,70 +1,48 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-sky="0.26 0.6">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Contact — Block Pit</title>
-  <meta name="description" content="Get in touch with the Block Pit team by email or on Instagram.">
+  <meta name="description" content="Get in touch with Block Pit by email or on Instagram.">
   <meta name="theme-color" content="#000000">
   <link rel="canonical" href="https://r4mh8wp5dj-arch.github.io/contact.html">
   <link rel="icon" type="image/png" href="assets/img/favicon-64.png">
   <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
   <link rel="preload" href="assets/fonts/Nippo-Variable.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="stylesheet" href="styles.css">
-  <script src="sky.js" defer></script>
+  <script src="js/sky.js"></script>
+  <script src="js/iso.js" defer></script>
+  <script src="js/hello.js" defer></script>
 </head>
 <body>
-  <div class="sky" aria-hidden="true">
-    <div class="sky-layer sky-deepspace"></div>
-    <div class="sky-layer sky-twilight"></div>
-    <div class="sky-layer sky-sunset"></div>
-    <div class="sky-layer sky-cumulus"></div>
-    <div class="sky-layer sky-dawn"></div>
-    <canvas id="stars"></canvas>
-  </div>
-
-  <header class="wrap top">
-    <a class="wordmark" href="./">Block Pit</a>
+  <header class="bar">
+    <a class="mark" href="./" aria-label="Block Pit home"><img src="assets/img/favicon-64.png" alt="" width="28" height="28"><span>Block Pit</span></a>
     <nav aria-label="Site">
-      <a href="./#how">How to play</a>
+      <a href="./#play">Play</a>
+      <a href="./#chain">Chain</a>
       <a href="./#skies">Skies</a>
       <a href="contact.html">Contact</a>
     </nav>
   </header>
 
-  <main class="wrap mid doc contact">
-    <article class="card glass contact-card">
-      <div class="scene contact-art" aria-hidden="true">
-        <div class="iso">
-          <div class="cube c-green"  style="--i:0;--j:1;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-          <div class="cube c-yellow" style="--i:1;--j:1;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-          <div class="cube c-blue"   style="--i:0;--j:0;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-          <div class="cube c-red"    style="--i:1;--j:0;--l:0"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-          <div class="cube c-purple" style="--i:1;--j:1;--l:1"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-          <div class="cube c-cyan"   style="--i:0;--j:0;--l:1"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-          <div class="cube c-yellow" style="--i:0;--j:0;--l:2"><i class="t"></i><i class="y"></i><i class="x"></i></div>
-        </div>
-      </div>
-      <div class="contact-body">
-      <h1>Contact</h1>
-      <p class="meta">Questions, press, or just want to say hi.</p>
-
-      <a class="big" href="mailto:hello@blockpit.example">hello@blockpit.example</a>
-
-      <p class="note">Placeholder address. Swap in <code>hello@</code> your real domain once it is live — it appears here and in the Privacy Policy.</p>
-
-      <nav class="links" aria-label="Social">
+  <main class="page hello">
+    <div class="hello-copy" data-ink>
+      <h1><span>Say</span><span>hi.</span></h1>
+      <p class="lead">Questions, press, or a high score worth bragging about.</p>
+      <a class="mail" href="mailto:hello@blockpit.example">hello@blockpit.example</a>
+      <div class="hello-links">
         <a href="https://www.instagram.com/playblockpit" target="_blank" rel="me noopener">Instagram @playblockpit</a>
-      </nav>
-
-      <p class="contact-foot">For data requests, see the <a href="privacy.html">Privacy Policy</a>.</p>
+        <a href="privacy.html">Data requests</a>
       </div>
-    </article>
+      <p class="todo">Placeholder address. Swap in <code>hello@</code> your real domain once it is live; it appears here and in the Privacy Policy.</p>
+    </div>
+    <canvas class="stack-art" aria-hidden="true"></canvas>
   </main>
 
-  <footer class="wrap foot">
+  <footer class="foot">
     <nav aria-label="Footer">
-      <a href="https://www.instagram.com/playblockpit" target="_blank" rel="me noopener">Instagram @playblockpit</a>
+      <a href="https://www.instagram.com/playblockpit" target="_blank" rel="me noopener">Instagram</a>
       <a href="./">Home</a>
       <a href="privacy.html">Privacy Policy</a>
     </nav>
