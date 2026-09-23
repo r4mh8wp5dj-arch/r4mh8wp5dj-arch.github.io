@@ -590,6 +590,13 @@
       var fit = I.fitCam(VIEW, cw, ch, 4, -0.6, opts.camTop || (cw < 500 ? 6.2 : 7.3), cw < 500 ? 0.03 : 0.06, [2, 2, 2]);
       var yaw = YAW0 + spin.from + (spin.to - spin.from) * easeInOut((clock - spin.t) / spin.dur);
       cam.M = I.view(yaw, ELEV); cam.s = fit.s; cam.x = fit.x + cw * (opts.shiftX || 0); cam.y = fit.y; cam.pivot = fit.pivot;
+      if (opts.gaugeBeside) {
+        var gx = -1e9, gy = 0;
+        [[-0.35, -0.35], [4.35, -0.35], [4.35, 4.35], [-0.35, 4.35]].forEach(function (q) { var pp = I.project(cam, q[0], 0, q[1]); if (pp[0] > gx) { gx = pp[0]; gy = pp[1]; } });
+        var gl = Math.round(gx + opts.gaugeBeside) + 'px', gt = Math.round(gy - gauges.offsetHeight) + 'px';
+        if (gauges.style.left !== gl) gauges.style.left = gl;
+        if (gauges.style.top !== gt) gauges.style.top = gt;
+      }
       var chanOpts = { led: led, palette: channelPalette(led), gain: chan.gain, flow: chan.flow };
       I.plate(ctx, cam, chanOpts);
 
@@ -1005,7 +1012,8 @@
     streak: false,
     camTop: 10.2,
     hoverCap: 10.4,
-    shiftX: -0.1,
+    shiftX: -0.06,
+    gaugeBeside: 10,
     script: {
       grid: HOLD,
       pressure: 5,
