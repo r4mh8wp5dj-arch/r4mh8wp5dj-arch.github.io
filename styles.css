@@ -465,13 +465,20 @@ main, .foot { position: relative; z-index: 1; }
   .title { font-size: min(10.4vw, 2.6rem); gap: 14px; }
   .title-icon { width: 56px; height: 56px; }
   #hud-gauges { width: 48px; height: 300px; }
-  #hud-score-cv { width: 96px; height: 44px; margin-left: -20px; }
+  #hud-score-cv { width: 80px; height: 44px; margin-left: -12px; }
   .hud-score { width: 56px; }
-  .hud { gap: 14px; width: 120px; }
-  .gnote { left: 54px; font-size: .7rem; }
+  .machine { gap: 4px; }
+  .hud { gap: 22px; width: 56px; }
+  .gnote { left: 4px; width: 48px; text-align: center; font-size: .62rem; }
+  .gnote b { font-size: .66rem; margin: 0; }
   .gnote span { display: none; }
-  .gnote-press { top: 12px; }
-  .gnote-streak { top: 172px; }
+  .gnote-press { top: -16px; }
+  .gnote-streak { top: 128px; }
+  .bar .mark, .bar nav a { min-height: 44px; display: inline-flex; align-items: center; }
+  .bar nav .bar-notify { min-height: 44px; padding: 0 16px; }
+  .foot nav a, .hello-links a, .toc a { min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; }
+  .toc a { display: grid; align-content: center; }
+  .mail { min-height: 44px; display: inline-flex; align-items: center; }
   .hud-score b { font-size: 1.5rem; }
 }
 
