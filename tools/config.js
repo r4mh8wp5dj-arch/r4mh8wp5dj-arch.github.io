@@ -24,7 +24,6 @@ function apply(html, file) {
     open = open.replace(/href="[^"]*"/, `href="https://www.instagram.com/${cfg.instagram}"`);
     return open + text.replace(/@[\w.]+/, '@' + cfg.instagram) + close;
   });
-  html = html.replace(/(https:\/\/buttondown\.com\/api\/emails\/embed-subscribe\/)[\w-]+/g, `$1${cfg.buttondown}`);
   return html;
 }
 

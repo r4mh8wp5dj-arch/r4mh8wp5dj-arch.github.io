@@ -16,7 +16,7 @@ Static landing page for the Block Pit iOS game, served by GitHub Pages from `mai
 ## Workflow
 
 - `npm install` once (dev tools only; nothing ships from `node_modules`).
-- `npm run config` applies `site.config.json` (base URL, emails, Instagram, Buttondown) to every page.
+- `npm run config` applies `site.config.json` (base URL, emails, App Store and social links) to every page.
 - `npm run stamp` writes the current commit hash into asset URLs (`?v=`) so browsers never mix old and new files.
 - `npm run build` runs both. Run it before committing a change that touches `js/`, `styles.css` or the config.
 - `npm run serve` starts a server on `0.0.0.0:8765` for testing from a phone on the same Wi-Fi.
