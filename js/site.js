@@ -92,8 +92,7 @@
     var F, cam, led, on = false, t0 = 0;
     function resize() {
       F = I.fit(cv);
-      var s = Math.min(F.w / 7, F.h / 6.4);
-      cam = { M: I.view(Math.PI / 4 - 0.2, 0.6), s: s, x: F.w / 2, y: F.h * 0.6, pivot: [2, 1, 2] };
+      cam = I.fitCam(I.view(Math.PI / 4 - 0.2, 0.6), F.w, F.h, 4, -0.6, 3.7, 0.06, [2, 1, 2]);
       led = ledFor(cv);
     }
     var api = {
@@ -117,8 +116,10 @@
     };
     function draw(t) {
       F.ctx.clearRect(0, 0, F.w, F.h);
-      I.plate(F.ctx, cam, { led: led, glow: 0.8 });
+      var ch = { led: led, flow: t / 12 };
+      I.plate(F.ctx, cam, ch);
       def.draw(api, t);
+      I.plateFront(F.ctx, cam, ch);
       cv.style.opacity = I.reduce ? 1 : (seg(t, 0, 0.2) * (1 - seg(t, def.dur - 0.3, def.dur))).toFixed(3);
     }
     function frame(now) {
@@ -141,13 +142,13 @@
     var cv = document.querySelector('.pano-sky');
     if (!cv || !SKY) return;
     var F = I.fit(cv), ctx = F.ctx;
-    var lw = 360, lh = 90, off = document.createElement('canvas');
+    var lw = 720, lh = 2, off = document.createElement('canvas');
     off.width = lw; off.height = lh;
     var octx = off.getContext('2d'), img = octx.createImageData(lw, lh), R = rng(9);
     for (var x = 0; x < lw; x++) {
-      var u = (x + 0.5) / lw;
+      var c = SKY.stripColor((x + 0.5) / lw);
       for (var y = 0; y < lh; y++) {
-        var c = SKY.stripColor(u, y / (lh - 1)), k = (y * lw + x) * 4, dn = (R() - 0.5) * 2;
+        var k = (y * lw + x) * 4, dn = (R() - 0.5) * 1.5;
         img.data[k] = c[0] + dn; img.data[k + 1] = c[1] + dn; img.data[k + 2] = c[2] + dn; img.data[k + 3] = 255;
       }
     }
@@ -161,11 +162,11 @@
     ctx.drawImage(off, 0, 0, F.w, F.h);
     var n = Math.round(F.w * F.h / 55), S = rng(5);
     for (var i = 0; i < n; i++) {
-      var sx = S() * F.w, sy = Math.pow(S(), 1.25) * F.h, big = S() < 0.1, r = S(), a = S(), rad = S();
+      var sx = S() * F.w, sy = S() * F.h, big = S() < 0.1, r = S(), a = S(), rad = S();
       var uu = sx / F.w, dens = SKY.starDensity(uu);
       if (r > dens) continue;
-      ctx.fillStyle = 'rgb(' + SKY.starTint(uu).map(Math.round).join(',') + ')';
-      ctx.globalAlpha = (big ? 0.9 : 0.4 + a * 0.4) * (1 - sy / F.h * 0.55) * Math.min(1, (dens - r) * 14);
+      ctx.fillStyle = '#fff';
+      ctx.globalAlpha = (big ? 1 : 0.35 + a * 0.65) * SKY.starAlpha(uu) * Math.min(1, (dens - r) * 14);
       ctx.beginPath();
       ctx.arc(sx, sy, big ? 1.1 + rad * 0.6 : 0.45 + rad * 0.4, 0, 6.2832);
       ctx.fill();

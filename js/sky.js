@@ -1,19 +1,20 @@
 (function () {
   var THEMES = [
-    { id: 'dawn', led: '#F28C6B', stars: '#FFFFFF', stops: [[0, '#3D7BC8'], [0.42, '#6E9FD6'], [0.62, '#A9C3D8'], [0.7, '#AEBDA6'], [0.8, '#8E9E78'], [1, '#6F7F5C']] },
-    { id: 'cumulus', led: '#FAA751', stars: '#FFFFFF', stops: [[0, '#5A86C8'], [0.38, '#8BB0DE'], [0.62, '#BCD3EA'], [0.8, '#E3EAF1'], [1, '#F1E4D6']] },
-    { id: 'sunset', led: '#FA707A', stars: '#FFE3B8', stops: [[0, '#47296B'], [0.38, '#9C4873'], [0.62, '#D9616B'], [0.82, '#F2874F'], [1, '#FA9E58']] },
-    { id: 'twilight', led: '#CF78E6', stars: '#FFE3B8', stops: [[0, '#120F2E'], [0.5, '#291B47'], [1, '#452B5B']] },
-    { id: 'deepspace', led: '#73CCFF', stars: '#FFFFFF', stops: [[0, '#000000'], [0.5, '#06112A'], [1, '#130B28']] }
+    { id: 'dawn', led: '#F28C6B', stars: 0, starAlpha: 0, colors: ['#4E8AD0', '#6FA0D4', '#A8BCC4', '#7E9C58', '#4E6B30'] },
+    { id: 'cumulus', led: '#FAA751', stars: 0, starAlpha: 0, colors: ['#2A4C94', '#4A7FC0', '#8FB8DC', '#E8B77A', '#F2A24E'] },
+    { id: 'sunset', led: '#FA707A', stars: 0, starAlpha: 0, colors: ['#47296B', '#D9616B', '#FA944D'] },
+    { id: 'twilight', led: '#CF78E6', stars: 0.35, starAlpha: 0.55, colors: ['#120F2E', '#331F4D', '#573361'] },
+    { id: 'deepspace', led: '#73CCFF', stars: 1, starAlpha: 1, colors: ['#000000', '#0A1A3D', '#1A0D33'] }
   ];
-  var BLEND = 0.25;
+  var BLEND = 0.34;
+  var GROUND = 1;
 
   var root = document.documentElement;
   var range = (root.getAttribute('data-sky') || '0 1').split(' ').map(Number);
   var R0 = range[0], R1 = range[1];
 
   function hex(h) { return [parseInt(h.substr(1, 2), 16), parseInt(h.substr(3, 2), 16), parseInt(h.substr(5, 2), 16)]; }
-  THEMES.forEach(function (t) { t.pts = t.stops.map(function (s) { return [s[0], hex(s[1])]; }); t.star = hex(t.stars); });
+  THEMES.forEach(function (t) { t.pts = t.colors.map(function (c, i) { return [i / (t.colors.length - 1), hex(c)]; }); });
 
   function toLin(v) { v /= 255; return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }
   function toSrgb(v) { v = v <= 0.0031308 ? v * 12.92 : 1.055 * Math.pow(v, 1 / 2.4) - 0.055; return Math.max(0, Math.min(255, v * 255)); }
@@ -39,24 +40,17 @@
     if (f >= 1) return b.slice();
     var A = toLch(a), B = toLch(b);
     var la = [A[0], A[1] * Math.cos(A[2]), A[1] * Math.sin(A[2])], lb = [B[0], B[1] * Math.cos(B[2]), B[1] * Math.sin(B[2])];
-    var lab = [la[0] + (lb[0] - la[0]) * f, la[1] + (lb[1] - la[1]) * f, la[2] + (lb[2] - la[2]) * f];
-    var dh = B[2] - A[2];
-    if (dh > Math.PI) dh -= 2 * Math.PI;
-    if (dh < -Math.PI) dh += 2 * Math.PI;
-    var C = A[1] + (B[1] - A[1]) * f, h = A[2] + dh * f;
-    var lch = [A[0] + (B[0] - A[0]) * f, C * Math.cos(h), C * Math.sin(h)];
-    var w = Math.max(0, Math.min(1, (Math.min(A[1], B[1]) - 0.02) / 0.05));
-    w = w * w * (3 - 2 * w);
-    var o = [lab[0] + (lch[0] - lab[0]) * w, lab[1] + (lch[1] - lab[1]) * w, lab[2] + (lch[2] - lab[2]) * w];
+    var o = [la[0] + (lb[0] - la[0]) * f, la[1] + (lb[1] - la[1]) * f, la[2] + (lb[2] - la[2]) * f];
     return fromLch([o[0], Math.sqrt(o[1] * o[1] + o[2] * o[2]), Math.atan2(o[2], o[1])]);
   }
+  function lerp(a, b, f) { return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f]; }
   function soft(t) { t = Math.max(0, Math.min(1, t)); return t * t * t * (t * (t * 6 - 15) + 10); }
 
   function sampleTheme(i, v) {
     var p = THEMES[i].pts;
     v = Math.max(0, Math.min(1, v));
     for (var k = 1; k < p.length; k++) {
-      if (v <= p[k][0]) return mix(p[k - 1][1], p[k][1], (v - p[k - 1][0]) / (p[k][0] - p[k - 1][0]));
+      if (v <= p[k][0]) return lerp(p[k - 1][1], p[k][1], (v - p[k - 1][0]) / (p[k][0] - p[k - 1][0]));
     }
     return p[p.length - 1][1].slice();
   }
@@ -68,18 +62,23 @@
     return { a: i, b: i, w: 0 };
   }
 
-  function stripColor(u, v) {
-    var q = weights(u);
-    return q.w === 0 ? sampleTheme(q.a, v) : mix(sampleTheme(q.a, v), sampleTheme(q.b, v), q.w);
+  function stripColor(u) {
+    var p = Math.max(0, Math.min(4.9999, u * 5)), q = weights(u);
+    var a = sampleTheme(q.a, 1 - (p - q.a)), b = sampleTheme(q.b, 1 - (p - q.b));
+    return q.w === 0 ? a : mix(a, b, q.w);
   }
-  function starDensity(u) { return 0.24 * soft((u - 0.575) / 0.13) + 0.76 * soft((u - 0.77) / 0.15); }
-  function starTint(u) { return mix(THEMES[3].star, THEMES[4].star, soft((u - 0.74) / 0.18)); }
+  function blendNum(u, key) {
+    var q = weights(u);
+    return THEMES[q.a][key] + (THEMES[q.b][key] - THEMES[q.a][key]) * q.w;
+  }
+  function starDensity(u) { return blendNum(u, 'stars'); }
+  function starAlpha(u) { return blendNum(u, 'starAlpha'); }
   function led(u) {
     var q = weights(u);
     return mix(hex(THEMES[q.a].led), hex(THEMES[q.b].led), q.w);
   }
 
-  function pageU(t) { return 1 - (R0 + (R1 - R0) * Math.max(0, Math.min(1, t))); }
+  function pageU(t) { return 1 - (R0 + (R1 - R0) * Math.max(0, Math.min(1, t / GROUND))); }
   function colorAt(t) {
     var u = pageU(t), q = weights(u), p = u * 5;
     function v(i) { var x = i + 1 - p; return i === 1 ? 1 - x : x; }
@@ -91,17 +90,20 @@
     return 0.2126 * l[0] + 0.7152 * l[1] + 0.0722 * l[2];
   }
 
-  var grad = [];
-  for (var i = 0; i <= 160; i++) {
-    var c = colorAt(i / 160);
-    grad.push('rgb(' + c.map(Math.round).join(',') + ') ' + (i / 1.6).toFixed(3) + '%');
+  function paintSky() {
+    var grad = [];
+    for (var i = 0; i <= 160; i++) {
+      var c = colorAt(i / 160);
+      grad.push('rgb(' + c.map(Math.round).join(',') + ') ' + (i / 1.6).toFixed(3) + '%');
+    }
+    root.style.background = 'linear-gradient(to bottom,' + grad.join(',') + ')';
   }
-  root.style.background = 'linear-gradient(to bottom,' + grad.join(',') + ')';
+  paintSky();
 
   window.BP = window.BP || {};
   window.BP.sky = {
     colorAt: colorAt, lum: lum, mix: mix, stripColor: stripColor, starDensity: starDensity,
-    starTint: starTint, led: led, pageU: pageU, hex: hex
+    starAlpha: starAlpha, led: led, pageU: pageU, hex: hex
   };
 
   document.addEventListener('DOMContentLoaded', function () {
@@ -139,6 +141,12 @@
       canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       docH = Math.max(1, document.documentElement.scrollHeight);
+      var city = document.querySelector('.city'), foot = document.querySelector('.foot');
+      if (city && R1 === 1) {
+        var cr = city.getBoundingClientRect(), fh = foot ? foot.offsetHeight : 0;
+        GROUND = Math.max(0.5, Math.min(1, (docH - fh - cr.height * 0.45) / docH));
+        paintSky();
+      }
       seed();
       dirty = true;
       onScroll();
@@ -148,13 +156,14 @@
       var dt = last ? Math.min(0.1, (now - last) / 1000) : 0;
       last = now;
       ctx.clearRect(0, 0, W, H);
-      var bands = [], tints = [];
+      var bands = [], alphas = [];
       for (var b = 0; b <= 20; b++) {
         var u = pageU((sy + H * b / 20) / docH);
         bands.push(starDensity(u));
-        tints.push('rgb(' + starTint(u).map(Math.round).join(',') + ')');
+        alphas.push(starAlpha(u));
       }
       if (Math.max.apply(null, bands) <= 0.005) return;
+      ctx.fillStyle = '#fff';
       var tt = now / 1000;
       for (var i = 0; i < stars.length; i++) {
         var s = stars[i];
@@ -166,8 +175,7 @@
         var bi = Math.max(0, Math.min(20, Math.round(s.y / H * 20))), band = bands[bi];
         if (s.k > band) continue;
         var tw = reduce ? 1 : 0.7 + 0.3 * Math.sin(s.p + tt * s.f);
-        ctx.fillStyle = tints[bi];
-        ctx.globalAlpha = s.a * tw * Math.min(1, (band - s.k) * 12);
+        ctx.globalAlpha = s.a * tw * alphas[bi] * Math.min(1, (band - s.k) * 12);
         ctx.beginPath();
         ctx.arc(s.x, s.y, s.r, 0, 6.2832);
         ctx.fill();

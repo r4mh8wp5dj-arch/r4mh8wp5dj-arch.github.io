@@ -96,9 +96,11 @@
         ctx.lineTo(pts[V[2]][0], pts[V[2]][1]);
         ctx.lineTo(pts[V[3]][0], pts[V[3]][1]);
         ctx.closePath();
-        if (it2.ghost) {
-          ctx.strokeStyle = tone(rgb, 1.25, key);
-          ctx.lineWidth = lw * 1.4;
+        if (it2.flat) {
+          ctx.fillStyle = 'rgb(' + rgb.join(',') + ')';
+          ctx.fill();
+          ctx.strokeStyle = ctx.fillStyle;
+          ctx.lineWidth = 1;
           ctx.stroke();
           continue;
         }
@@ -227,21 +229,100 @@
       path(ctx, cam, [[0, 0, k], [n, 0, k]], false); ctx.stroke();
     }
 
-    var ring = rr(open + 0.055, 0.135, rimY + 0.002, c, 6);
-    var col = 'rgb(' + led.map(Math.round).join(',') + ')';
-    var core = 'rgb(' + led.map(function (v) { return Math.round(v + (255 - v) * 0.45); }).join(',') + ')';
-    ctx.lineJoin = 'round';
-    ctx.shadowColor = col;
-    ctx.shadowBlur = Math.max(4, s * 0.45) * glow;
-    ctx.strokeStyle = col;
-    ctx.lineWidth = Math.max(1.4, s * 0.1);
-    path(ctx, cam, ring);
-    ctx.stroke();
-    ctx.shadowBlur = 0;
-    ctx.strokeStyle = core;
-    ctx.lineWidth = Math.max(0.7, s * 0.045);
-    ctx.stroke();
+    ring(ctx, cam, o, false);
     ctx.restore();
+  }
+
+  function ringPoints(o) {
+    var n = o.n || 4, c = n / 2, open = c + 0.02;
+    var pts = rr(open + 0.055, 0.135, 0.082, c, 8), acc = [0];
+    for (var i = 1; i <= pts.length; i++) {
+      var a = pts[i - 1], b = pts[i % pts.length];
+      acc.push(acc[i - 1] + Math.hypot(b[0] - a[0], b[2] - a[2]));
+    }
+    return { pts: pts, acc: acc, len: acc[acc.length - 1] };
+  }
+
+  function channelPalette(o) {
+    if (o.palette) return o.palette;
+    var led = o.led || [115, 204, 255];
+    return [0.55, 0.7, 0.85, 1].map(function (k) { return led.map(function (v) { return v * k; }); });
+  }
+
+  function ring(ctx, cam, o, front) {
+    var n = o.n || 4, c = n / 2, s = cam.s, rimY = 0.08, outer = c + 0.35, open = c + 0.02;
+    var gain = o.gain == null ? 1 : o.gain, flow = o.flow || 0;
+    var pal = channelPalette(o), R = ringPoints(o);
+    ctx.save();
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'butt';
+    if (front) {
+      ctx.save();
+      path(ctx, cam, rr(outer, 0.16, rimY, c, 5));
+      ctx.clip();
+      [[1, 0], [0, 1], [-1, 0], [0, -1]].forEach(function (d) {
+        if (tf(cam.M, d[0], 0, d[1])[2] <= 0) return;
+        var a = [c + d[0] * open - d[1] * outer, rimY, c + d[1] * open + d[0] * outer];
+        var b = [c + d[0] * open + d[1] * outer, rimY, c + d[1] * open - d[0] * outer];
+        var e = [c + d[0] * outer + d[1] * outer, rimY, c + d[1] * outer - d[0] * outer];
+        var f = [c + d[0] * outer - d[1] * outer, rimY, c + d[1] * outer + d[0] * outer];
+        path(ctx, cam, [a, b, e, f]);
+        ctx.fillStyle = shade(PLATE, 1.08);
+        ctx.fill();
+      });
+      ctx.restore();
+    }
+    var groups = [[], [], [], []], N = 96, pts = R.pts;
+    for (var k = 0; k < N; k++) {
+      var d0 = k / N * R.len, d1 = (k + 1) / N * R.len;
+      var p0 = at(d0), p1 = at(d1);
+      var mx = (p0[0] + p1[0]) / 2 - c, mz = (p0[2] + p1[2]) / 2 - c;
+      var isFront = tf(cam.M, mx, 0, mz)[2] > 0;
+      if (front && !isFront) continue;
+      var idx = ((Math.floor(((k + 0.5) / N + flow) * 12) % 4) + 4) % 4;
+      groups[idx].push([p0, p1]);
+    }
+    function at(d) {
+      for (var i = 1; i < R.acc.length; i++) {
+        if (d <= R.acc[i]) {
+          var f = (d - R.acc[i - 1]) / (R.acc[i] - R.acc[i - 1] || 1), a = pts[i - 1], b = pts[i % pts.length];
+          return [a[0] + (b[0] - a[0]) * f, a[1], a[2] + (b[2] - a[2]) * f];
+        }
+      }
+      return pts[0];
+    }
+    groups.forEach(function (segs, gi) {
+      if (!segs.length) return;
+      var base = pal[gi].map(function (v) { return Math.min(255, v * gain); });
+      var col = 'rgb(' + base.map(Math.round).join(',') + ')';
+      var core = 'rgb(' + base.map(function (v) { return Math.round(v + (255 - v) * 0.45); }).join(',') + ')';
+      [[col, Math.max(1.4, s * 0.1), Math.max(4, s * 0.4) * Math.min(2, gain)], [core, Math.max(0.7, s * 0.045), 0]].forEach(function (pass) {
+        ctx.strokeStyle = pass[0];
+        ctx.lineWidth = pass[1];
+        ctx.shadowColor = col;
+        ctx.shadowBlur = pass[2];
+        ctx.beginPath();
+        segs.forEach(function (sg) {
+          var q0 = project(cam, sg[0][0], sg[0][1], sg[0][2]), q1 = project(cam, sg[1][0], sg[1][1], sg[1][2]);
+          ctx.moveTo(q0[0], q0[1]);
+          ctx.lineTo(q1[0], q1[1]);
+        });
+        ctx.stroke();
+      });
+    });
+    ctx.restore();
+  }
+
+  function plateFront(ctx, cam, o) { ring(ctx, cam, o || {}, true); }
+
+  function fitCam(M, w, h, n, y0, y1, pad, pivot) {
+    var b = [1e9, -1e9, 1e9, -1e9], lo = -0.4, hi = n + 0.4;
+    [lo, hi].forEach(function (x) { [y0, y1].forEach(function (y) { [lo, hi].forEach(function (z) {
+      var v = tf(M, x - pivot[0], y - pivot[1], z - pivot[2]);
+      b[0] = Math.min(b[0], v[0]); b[1] = Math.max(b[1], v[0]); b[2] = Math.min(b[2], v[1]); b[3] = Math.max(b[3], v[1]);
+    }); }); });
+    var s = Math.min(w * (1 - pad) / (b[1] - b[0]), h * (1 - pad) / (b[3] - b[2]));
+    return { M: M, s: s, x: w / 2 - (b[0] + b[1]) / 2 * s, y: h / 2 + (b[2] + b[3]) / 2 * s, pivot: pivot };
   }
 
   function rotCells(cells) {
@@ -288,7 +369,7 @@
     HEX: HEX, RGB: RGB, SHAPES: SHAPES,
     mul: mul, rotX: rotX, rotY: rotY, rotZ: rotZ, view: view, tf: tf,
     cubes: cubes, project: project, unproject: unproject, poly: poly,
-    plate: plate, rotCells: rotCells, randomShape: randomShape,
+    plate: plate, plateFront: plateFront, fitCam: fitCam, rotCells: rotCells, randomShape: randomShape,
     fit: fit, visible: visible,
     reduce: window.matchMedia('(prefers-reduced-motion: reduce)').matches
   };
