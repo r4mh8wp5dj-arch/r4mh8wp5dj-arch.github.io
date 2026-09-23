@@ -16,11 +16,12 @@
   <meta property="og:image" content="https://r4mh8wp5dj-arch.github.io/assets/img/logo-1024.png">
   <meta name="twitter:card" content="summary">
   <link rel="preload" href="assets/fonts/Nippo-Variable.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="styles.css?v=7">
-  <script src="js/sky.js?v=7"></script>
-  <script src="js/iso.js?v=7" defer></script>
-  <script src="js/site.js?v=7" defer></script>
-  <script src="js/play.js?v=7" defer></script>
+  <link rel="stylesheet" href="styles.css?v=8">
+  <script src="js/sky.js?v=8"></script>
+  <script src="js/iso.js?v=8" defer></script>
+  <script src="js/site.js?v=8" defer></script>
+  <script src="js/play.js?v=8" defer></script>
+  <script src="js/notify.js?v=8" defer></script>
 </head>
 <body class="home">
   <div class="announce">Coming soon to the App Store</div>
@@ -39,9 +40,20 @@
         <h1 class="title"><img class="title-icon" src="assets/img/logo-320.png" alt="" width="84" height="84"><span>Block Pit</span></h1>
         <p class="tag"><b class="k-r">Drop.</b> <b class="k-y">Match.</b> <b class="k-c">Chain.</b></p>
         <p class="pitch">A 3D puzzle for iPhone. Pieces fall into a 4×4 pit, and two blocks of one colour touching burst.</p>
-        <div class="get">
-          <span class="soon"><i aria-hidden="true"></i>Coming soon to iOS</span>
-          <a class="follow" href="https://www.instagram.com/playblockpit" target="_blank" rel="me noopener">Follow on Instagram</a>
+        <p class="soon"><i aria-hidden="true"></i>Coming soon to iOS</p>
+        <div class="notify" data-notify>
+          <div class="notify-row">
+            <button type="button" class="btn btn-go" data-notify-open aria-expanded="false" aria-controls="notify-1">Notify Me</button>
+            <form id="notify-1" class="notify-form" action="https://buttondown.com/api/emails/embed-subscribe/playblockpit" method="post" novalidate hidden>
+              <label class="vh" for="notify-1-email">Email address</label>
+              <input type="email" name="email" id="notify-1-email" autocomplete="email" inputmode="email" placeholder="you@example.com" required>
+              <button type="submit" class="btn btn-go">Notify Me</button>
+            </form>
+            <a class="btn btn-line" href="https://www.instagram.com/playblockpit" target="_blank" rel="me noopener">Follow on Instagram</a>
+          </div>
+          <p class="notify-msg" role="status" aria-live="polite" hidden></p>
+          <button type="button" class="btn btn-line notify-verify" hidden>Continue on Buttondown</button>
+          <p class="consent" hidden>We'll only email you when Block Pit launches. Unsubscribe anytime. <a href="privacy.html#launch-notification">Privacy Policy</a></p>
         </div>
       </div>
 
@@ -125,8 +137,21 @@
       <div class="end-in" data-ink>
         <img class="icon" src="assets/img/logo-320.png" alt="Block Pit app icon" width="112" height="112">
         <h2>Coming soon to iOS</h2>
-        <p>Made by one developer, one pit.</p>
-        <a class="follow" href="https://www.instagram.com/playblockpit" target="_blank" rel="me noopener">Follow @playblockpit</a>
+        <p>Coming to iPhone. Made by one developer, one pit.</p>
+        <div class="notify" data-notify>
+          <div class="notify-row">
+            <button type="button" class="btn btn-go" data-notify-open aria-expanded="false" aria-controls="notify-2">Notify Me</button>
+            <form id="notify-2" class="notify-form" action="https://buttondown.com/api/emails/embed-subscribe/playblockpit" method="post" novalidate hidden>
+              <label class="vh" for="notify-2-email">Email address</label>
+              <input type="email" name="email" id="notify-2-email" autocomplete="email" inputmode="email" placeholder="you@example.com" required>
+              <button type="submit" class="btn btn-go">Notify Me</button>
+            </form>
+            <a class="btn btn-line" href="https://www.instagram.com/playblockpit" target="_blank" rel="me noopener">Follow @playblockpit</a>
+          </div>
+          <p class="notify-msg" role="status" aria-live="polite" hidden></p>
+          <button type="button" class="btn btn-line notify-verify" hidden>Continue on Buttondown</button>
+          <p class="consent" hidden>We'll only email you when Block Pit launches. Unsubscribe anytime. <a href="privacy.html#launch-notification">Privacy Policy</a></p>
+        </div>
       </div>
       <canvas class="city" aria-hidden="true"></canvas>
     </section>
