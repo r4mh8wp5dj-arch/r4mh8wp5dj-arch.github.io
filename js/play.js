@@ -121,7 +121,7 @@
         aim = { x: st.x, z: st.z };
         clampAim();
         phase = 'aim';
-        plan = { r: 0, x: st.x, z: st.z };
+        plan = schedule({ r: 0, x: st.x, z: st.z });
         planT = 0;
         return;
       }
@@ -184,10 +184,16 @@
       return out;
     }
 
+    function orientKey(cells) {
+      return cells.map(function (c) { return c.join(','); }).sort().join(';');
+    }
     function turn() {
-      if (phase !== 'aim') return;
-      piece.cells = I.rotCells(piece.cells);
+      if (phase !== 'aim') return false;
+      var next = I.rotCells(piece.cells);
+      if (orientKey(next) === orientKey(piece.cells)) return false;
+      piece.cells = next;
       clampAim();
+      return true;
     }
     function drop() {
       if (phase !== 'aim') return;
@@ -277,30 +283,47 @@
       return (hits * 10 + (hits ? 6 : 0)) * (1 - sl) - top * 1.2 * (1 - sl) + top * 1.6 * sl - (hits ? 9 : 0) * sl + Math.random() * 4;
     }
     function choose() {
-      var best = null, cells = piece.cells;
+      var best = null, cells = piece.cells, orients = {}, spots = {};
       for (var r = 0; r < 4; r++) {
-        var mx = 0, mz = 0;
-        cells.forEach(function (c) { mx = Math.max(mx, c[0]); mz = Math.max(mz, c[2]); });
-        for (var ax = 0; ax <= W - 1 - mx; ax++) for (var az = 0; az <= D - 1 - mz; az++) {
-          var v = evaluate(cells, ax, az);
-          if (!best || v > best.v) best = { v: v, r: r, x: ax, z: az };
+        var ok = orientKey(cells);
+        if (!orients[ok]) {
+          orients[ok] = 1;
+          var mx = 0, mz = 0;
+          cells.forEach(function (c) { mx = Math.max(mx, c[0]); mz = Math.max(mz, c[2]); });
+          for (var ax = 0; ax <= W - 1 - mx; ax++) for (var az = 0; az <= D - 1 - mz; az++) {
+            var spot = finalCells(cells, ax, az).map(function (f) { return f.slice(0, 3).join(','); }).sort().join(';');
+            if (spots[spot]) continue;
+            spots[spot] = 1;
+            var v = evaluate(cells, ax, az) - r * 1.5;
+            if (!best || v > best.v) best = { v: v, r: r, x: ax, z: az };
+          }
         }
         cells = I.rotCells(cells);
       }
-      return best;
+      return schedule(best);
+    }
+    function pause(a, b) { return (a + Math.random() * (b - a)) * (reduce ? 2.2 : 1); }
+    function schedule(target) {
+      var q = [], x = aim.x, z = aim.z;
+      for (var t = 0; t < target.r; t++) q.push({ a: 'turn', w: pause(0.26, 0.38) });
+      while (x !== target.x) { x += x < target.x ? 1 : -1; q.push({ a: 'x', v: x, w: pause(0.13, 0.2) + (Math.random() < 0.15 ? 0.25 : 0) }); }
+      while (z !== target.z) { z += z < target.z ? 1 : -1; q.push({ a: 'z', v: z, w: pause(0.13, 0.2) + (Math.random() < 0.15 ? 0.25 : 0) }); }
+      q.push({ a: 'drop', w: pause(0.25, 0.42) });
+      return { q: q, wait: pause(0.45, 0.8), x: target.x, z: target.z };
     }
     function botStep(dt) {
       if (!plan || phase !== 'aim') return;
       planT += dt;
-      var beat = reduce ? 0.42 : 0.16;
-      if (planT < (reduce ? 0.9 : 0.5)) return;
-      if (planT - (plan.last || 0) < beat) return;
-      plan.last = planT;
-      if (plan.r > 0) { turn(); plan.r--; return; }
-      if (aim.x !== plan.x) { aim.x += aim.x < plan.x ? 1 : -1; clampAim(); return; }
-      if (aim.z !== plan.z) { aim.z += aim.z < plan.z ? 1 : -1; clampAim(); return; }
-      if ((plan.hold = (plan.hold || 0) + 1) < 3) return;
-      drop();
+      if (planT < plan.wait) return;
+      var act = plan.q[0];
+      if (!act) return;
+      if (planT < plan.wait + act.w) return;
+      plan.q.shift();
+      plan.wait = planT;
+      if (act.a === 'turn') turn();
+      else if (act.a === 'x') { aim.x = act.v; clampAim(); }
+      else if (act.a === 'z') { aim.z = act.v; clampAim(); }
+      else { aim.x = plan.x; aim.z = plan.z; clampAim(); drop(); }
     }
 
     function compact() {
