@@ -283,7 +283,12 @@
         cloud(112, 68, 34, hex('#FFF1DE'), hex('#F6D7B2'), hex('#E0A56A'));
       } else if (theme === 'sunset') {
         dithered(0, 80, ['#47296B', '#8E3F7C', '#D9616B', '#FA944D', '#FFB35C'], 12);
-        disc(64, 86, 22, function (u, v, x, y) { var th = (BAYER[(y % 4) * 4 + (x % 4)] + 0.5) / 16; return v < -0.7 + th * 0.12 ? hex('#FFF0C2') : v < -0.45 + th * 0.12 ? hex('#FFE29A') : hex('#FFD27A'); });
+        disc(64, 83, 26, function () { return hex('#FDB36A'); });
+        disc(64, 83, 23.5, function () { return hex('#FFC57A'); });
+        disc(64, 83, 21, function (u, v) {
+          var d = Math.sqrt(u * u + v * v);
+          return d > 0.9 && v < -0.35 ? hex('#FFEDB8') : hex('#FFD978');
+        });
       } else if (theme === 'twilight') {
         dithered(0, 80, ['#120F2E', '#331F4D', '#573361'], 12);
         for (var i2 = 0; i2 < 70; i2++) { var big = R() < 0.1; star(Math.floor(R() * PW), Math.floor(R() * 74), big, hex(R() < 0.5 ? '#FFE3B8' : '#E8CFA8'), hex('#8A6E8E')); }
