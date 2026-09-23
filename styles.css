@@ -257,42 +257,8 @@ main, .foot { position: relative; z-index: 1; }
 .cp-art { order: 0; display: block; width: 100%; height: var(--art-h, 150px); image-rendering: pixelated; border-radius: 10px; border: 1px solid rgba(255, 255, 255, .22); box-shadow: 0 14px 34px rgba(10, 16, 40, .22); }
 .checkpoints b { order: 2; font-weight: 700; font-size: 1.02rem; }
 .checkpoints small { order: 3; font-size: .86rem; color: var(--ink-2); }
-.skies-hint { margin-top: 30px; font-weight: 700; }
-.hint-right { display: none; }
 
-.rail { position: fixed; left: 18px; top: 22vh; height: 56vh; width: 140px; margin: 0; padding: 0; list-style: none; z-index: 5; pointer-events: none; transition: opacity .8s ease; }
-.rail.is-idle { opacity: .28; }
-.rail.is-hero, .rail.is-hero.is-idle { opacity: 0; }
-.rail.is-away, .rail.is-away.is-idle { opacity: 0; }
-.rail.on-light .rail-line { background: rgba(10, 26, 61, .28); }
-.rail-line { position: absolute; left: 4px; top: 0; bottom: 0; width: 2px; border-radius: 2px; background: rgba(255, 255, 255, .22); }
-.rail-mark { position: absolute; left: -5px; top: -6px; width: 12px; height: 12px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 3px rgba(244, 185, 66, .28), 0 0 14px rgba(244, 185, 66, .7); will-change: transform; transition: transform .35s var(--ease); }
-.rail-stop { position: absolute; left: 16px; top: calc(var(--at) * 25%); transform: translateY(-50%); display: grid; gap: 0; opacity: .5; transition: opacity .3s, color .5s; }
-.rail-stop::before { content: ""; position: absolute; left: -15px; top: 50%; width: 6px; height: 6px; margin-top: -3px; border-radius: 50%; background: currentColor; opacity: .7; }
-.rail-stop b { font-weight: 700; font-size: .78rem; line-height: 1.2; }
-.rail-stop small { font-size: .68rem; line-height: 1.2; color: var(--ink-2); }
-.rail-stop.on-light { opacity: .78; color: #0A1A3D; }
-.rail-stop.on-light small { color: rgba(10, 26, 61, .82); }
-.rail-stop.is-on { opacity: 1; }
-.rail-stop.is-on b { color: var(--gold); }
-.rail-stop.is-on.on-light b { color: #8A5A00; }
-.rail-stop.on-light { text-shadow: 0 0 6px rgba(255, 255, 255, .75), 0 0 14px rgba(255, 255, 255, .45); }
-.rail-stop:not(.on-light) { text-shadow: 0 0 10px rgba(0, 0, 0, .45); }
-@media (max-width: 1419px) {
-  .rail { width: 14px; left: 14px; }
-  .rail-stop b, .rail-stop small { display: none; }
-  .rail-stop { width: 10px; height: 10px; left: 0; }
-  .rail-stop::before { left: 1px; width: 8px; height: 8px; margin-top: -4px; }
-}
 @media (max-width: 700px) {
-  .rail { left: auto; right: 4px; top: 30vh; height: 40vh; width: 10px; opacity: .55; }
-  .rail.is-idle { opacity: .3; }
-  .rail.is-hero, .rail.is-hero.is-idle { opacity: 0; }
-  .rail-line { left: 4px; width: 1.5px; }
-  .rail-mark { left: 1px; top: -4px; width: 8px; height: 8px; box-shadow: 0 0 8px rgba(244, 185, 66, .7); }
-  .rail-stop::before { left: 2px; width: 6px; height: 6px; margin-top: -3px; }
-  .hint-left { display: none; }
-  .hint-right { display: inline; }
   .checkpoints { grid-template-columns: minmax(0, 1fr); flex-direction: column-reverse; display: flex; gap: 14px; }
   .checkpoints::before { display: none; }
   .checkpoints li { grid-template-columns: 120px minmax(0, 1fr); grid-template-rows: auto auto; justify-items: start; text-align: left; column-gap: 16px; align-items: center; }
@@ -300,9 +266,6 @@ main, .foot { position: relative; z-index: 1; }
   .cp-art { grid-row: 1 / 3; height: 80px; border-radius: 14px; }
   .checkpoints b { align-self: end; }
   .checkpoints small { align-self: start; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .rail-mark { transition: none; }
 }
 
 .end { position: relative; min-height: 88vh; display: grid; justify-items: center; align-content: start; padding: 10vh var(--gut) 0; text-align: center; }
