@@ -423,6 +423,12 @@ main, .foot { position: relative; z-index: 1; }
   #hud-score-cv { width: 80px; height: 44px; margin-left: -12px; }
   .hud-score { width: 56px; }
   .machine { gap: 4px; }
+  .pit-wrap { aspect-ratio: 5 / 5.8; }
+  .how { gap: 18px; padding-top: 6vh; padding-bottom: 6vh; }
+  .how article { padding: 14px 18px 24px; }
+  .scene { margin-bottom: 14px; max-width: 300px; }
+  .foot-mail a { display: inline-flex; align-items: center; min-height: 44px; }
+  .foot-mail { gap: 0; }
   .hud { gap: 22px; width: 56px; }
   .gnote { left: -6px; width: 68px; text-align: center; font-size: .8rem; }
   .gnote b { font-size: .82rem; margin: 0; }

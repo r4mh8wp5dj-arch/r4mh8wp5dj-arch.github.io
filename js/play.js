@@ -154,7 +154,7 @@
     piece.cells.forEach(function (c) { base = Math.max(base, colH(aim.x + c[0], aim.z + c[2]) - c[1]); });
     return base;
   }
-  function hoverY() { return Math.min(5.2, Math.max(2.8, maxHeight() + 2.2)); }
+  function hoverY() { return Math.min(cw < 500 ? 4.3 : 5.2, Math.max(2.8, maxHeight() + 2.2)); }
   function finalCells(cells, ax, az) {
     var cols = {};
     cells.forEach(function (c) { var k = (ax + c[0]) + ',' + (az + c[2]); (cols[k] = cols[k] || []).push(c); });
@@ -559,7 +559,7 @@
       var r = wrap.getBoundingClientRect(), dh = Math.max(1, document.documentElement.scrollHeight);
       led = sky.led(sky.pageU((window.scrollY + r.top + r.height / 2) / dh));
     }
-    var fit = I.fitCam(VIEW, cw, ch, 4, -0.6, 7.3, 0.06, [2, 2, 2]);
+    var fit = I.fitCam(VIEW, cw, ch, 4, -0.6, cw < 500 ? 6.2 : 7.3, cw < 500 ? 0.03 : 0.06, [2, 2, 2]);
     var yaw = YAW0 + spin.from + (spin.to - spin.from) * easeInOut((clock - spin.t) / spin.dur);
     cam.M = I.view(yaw, ELEV); cam.s = fit.s; cam.x = fit.x; cam.y = fit.y; cam.pivot = fit.pivot;
     var chanOpts = { led: led, palette: channelPalette(led), gain: chan.gain, flow: chan.flow };
