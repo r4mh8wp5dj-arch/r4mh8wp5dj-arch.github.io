@@ -109,4 +109,18 @@
     });
   });
   if (location.hash === '#notify') setTimeout(function () { jump(false); }, 60);
+
+  var params = new URLSearchParams(location.search);
+  if (params.get('subscribed') === '1') {
+    var hero = document.getElementById('notify');
+    if (hero) {
+      var m = hero.querySelector('.notify-msg');
+      m.textContent = 'You\u2019re in. See you when the pit opens.';
+      m.className = 'notify-msg is-ok';
+      m.hidden = false;
+    }
+    params.delete('subscribed');
+    var q = params.toString();
+    history.replaceState(null, '', location.pathname + (q ? '?' + q : '') + location.hash);
+  }
 })();
