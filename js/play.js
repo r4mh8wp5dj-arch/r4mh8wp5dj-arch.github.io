@@ -16,6 +16,7 @@
     var grid, piece, phase, fallY, fallV, score, streak, pressure, pending, nextId, aim, frags, flashes, timers;
     var plan = null, planT = 0, shown = 0, wipeT = 0, clock = 0, freeze = 0, bob = 0;
     var spin = { from: 0, to: 0, t: -10, next: 2.5, dur: 0.7, n: 0 }, count = { from: 0, to: 0, t: -1 }, flashS = { v: 1, vel: 0, until: -1 };
+    var ghostSim = { key: '', over: false }, DANGER_RED = [230, 31, 26];
     var ghostKey = '', ghostPop = -1, pressFill = { row: -1, t: 0 }, pressBurst = -1, lastPressure = 0;
     var chan = { gain: 1, from: 1, peak: 1, t: -1, heat: 0, tier: 0, tierT: 0, flow: 0 };
     var streakView = { i: 0, v: 0, pulse: 0, pv: 0, pt: -1 };
@@ -648,6 +649,8 @@
         if (key !== ghostKey) { ghostKey = key; ghostPop = clock; }
         var pe = clock - ghostPop, gs = pe < 0.06 ? 1 + 0.16 * easeOutQ(pe / 0.06) : pe < 0.2 ? 1.16 - 0.16 * easeOutQ((pe - 0.06) / 0.14) : 1;
         var col = I.RGB[piece.c], set = {}, gc = [0, 0, 0], lowest = {};
+        var high = fc.some(function (f) { return f[1] >= H; });
+        if (key + '|' + piece.c !== ghostSim.key) ghostSim = { key: key + '|' + piece.c, over: high && endsInOverflow(piece.cells, piece.c, aim.x, aim.z) };
         fc.forEach(function (f) {
           set[f.slice(0, 3).join(',')] = 1;
           gc[0] += f[0]; gc[1] += f[1]; gc[2] += f[2];
@@ -658,7 +661,7 @@
         fc.forEach(function (f) {
           var hide = {};
           I.faces.forEach(function (face, fi) { if (set[(f[0] + face.n[0]) + ',' + (f[1] + face.n[1]) + ',' + (f[2] + face.n[2])]) hide[fi] = true; });
-          items.push({ x: f[0] + (f[0] - gc[0]) * (gs - 1), y: f[1] + (f[1] - gc[1]) * (gs - 1), z: f[2] + (f[2] - gc[2]) * (gs - 1), rgb: col, flat: true, a: 0.32, k: 0.86 * gs, hide: hide });
+          items.push({ x: f[0] + (f[0] - gc[0]) * (gs - 1), y: f[1] + (f[1] - gc[1]) * (gs - 1), z: f[2] + (f[2] - gc[2]) * (gs - 1), rgb: ghostSim.over && f[1] >= H ? DANGER_RED : col, flat: true, a: 0.32, k: 0.86 * gs, hide: hide });
         });
         Object.keys(lowest).forEach(function (k2) {
           var xz = k2.split(',').map(Number), ty = lowest[k2] + 0.018;
