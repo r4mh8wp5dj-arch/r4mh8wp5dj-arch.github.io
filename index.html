@@ -41,11 +41,11 @@
   }
   </script>
   <link rel="preload" href="assets/fonts/Nippo-Variable.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="styles.css?v=75433e3">
-  <script src="js/sky.js?v=75433e3"></script>
-  <script src="js/iso.js?v=75433e3" defer></script>
-  <script src="js/site.js?v=75433e3" defer></script>
-  <script src="js/play.js?v=75433e3" defer></script>
+  <link rel="stylesheet" href="styles.css?v=7aad54e">
+  <script src="js/sky.js?v=7aad54e"></script>
+  <script src="js/iso.js?v=7aad54e" defer></script>
+  <script src="js/site.js?v=7aad54e" defer></script>
+  <script src="js/play.js?v=7aad54e" defer></script>
 </head>
 <body class="home">
   <svg class="sprite" aria-hidden="true" focusable="false">
@@ -152,12 +152,24 @@
   </main>
 
   <footer class="foot">
-    <nav aria-label="Footer">
-      <a data-ig href="https://www.instagram.com/playblockpit" target="_blank" rel="me noopener">Instagram</a>
+    <div class="foot-top">
+      <ul class="social" aria-label="Block Pit on social media">
+        <li><a data-social="instagram" href="https://www.instagram.com/playblockpit" target="_blank" rel="me noopener" aria-label="Block Pit on Instagram"><svg aria-hidden="true" focusable="false"><use href="#i-instagram"></use></svg></a></li>
+        <li><a data-social="tiktok" href="[TIKTOK_URL]" target="_blank" rel="me noopener" aria-label="Block Pit on TikTok"><svg aria-hidden="true" focusable="false"><use href="#i-tiktok"></use></svg></a></li>
+        <li><a data-social="facebook" href="[FACEBOOK_URL]" target="_blank" rel="me noopener" aria-label="Block Pit on Facebook"><svg aria-hidden="true" focusable="false"><use href="#i-facebook"></use></svg></a></li>
+      </ul>
+      <div class="foot-mail">
+        <p>Support: <a data-email="support" href="mailto:support@playblockpit.com">support@playblockpit.com</a></p>
+        <p>Press &amp; business: <a data-email="hello" href="mailto:hello@playblockpit.com">hello@playblockpit.com</a></p>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <nav aria-label="Footer">
       <a href="contact.html">Contact</a>
       <a href="privacy.html">Privacy Policy</a>
-    </nav>
-    <small>© 2026 Block Pit</small>
+      </nav>
+      <small>© 2026 Block Pit</small>
+    </div>
   </footer>
 </body>
 </html>

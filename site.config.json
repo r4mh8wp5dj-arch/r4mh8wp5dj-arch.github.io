@@ -3,7 +3,8 @@
   "appStore": "https://apps.apple.com/app/id[APP_ID]",
   "email": {
     "support": "support@playblockpit.com",
-    "hello": "hello@playblockpit.com"
+    "hello": "hello@playblockpit.com",
+    "privacy": "privacy@playblockpit.com"
   },
   "social": {
     "instagram": "https://www.instagram.com/playblockpit",
