@@ -74,31 +74,30 @@
   function hex(h) { return [parseInt(h.substr(1, 2), 16), parseInt(h.substr(3, 2), 16), parseInt(h.substr(5, 2), 16)]; }
   function sample(stops, t) {
     var x = t * (stops.length - 1), i = Math.min(stops.length - 2, Math.floor(x)), f = x - i;
-    var a = hex(stops[i]), b = hex(stops[i + 1]);
-    return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f];
+    return window.BP.sky.mix(hex(stops[i]), hex(stops[i + 1]), f);
   }
   function ease(t) { t = Math.max(0, Math.min(1, t)); return t * t * (3 - 2 * t); }
   function across(u, vals) {
     var p = u * vals.length - 0.5, i = Math.floor(p), f = p - i;
     if (i < 0) return [vals[0], vals[0], 0];
     if (i >= vals.length - 1) return [vals[vals.length - 1], vals[vals.length - 1], 0];
-    return [vals[i], vals[i + 1], ease((f - 0.22) / 0.56)];
+    return [vals[i], vals[i + 1], ease(f)];
   }
 
   function pano() {
     var cv = document.querySelector('.pano-sky');
     if (!cv) return;
     var F = I.fit(cv), ctx = F.ctx;
-    var lw = 240, lh = 64, off = document.createElement('canvas');
+    var mix = window.BP.sky.mix, lw = 320, lh = 96, off = document.createElement('canvas');
     off.width = lw; off.height = lh;
     var octx = off.getContext('2d'), img = octx.createImageData(lw, lh);
     for (var x = 0; x < lw; x++) {
       var m = across((x + 0.5) / lw, SKIES);
       for (var y = 0; y < lh; y++) {
-        var t = y / (lh - 1), a = sample(m[0], t), b = sample(m[1], t), k = (y * lw + x) * 4;
-        img.data[k] = a[0] + (b[0] - a[0]) * m[2];
-        img.data[k + 1] = a[1] + (b[1] - a[1]) * m[2];
-        img.data[k + 2] = a[2] + (b[2] - a[2]) * m[2];
+        var t = y / (lh - 1), c = mix(sample(m[0], t), sample(m[1], t), m[2]), k = (y * lw + x) * 4, dn = (Math.random() - 0.5) * 2;
+        img.data[k] = c[0] + dn;
+        img.data[k + 1] = c[1] + dn;
+        img.data[k + 2] = c[2] + dn;
         img.data[k + 3] = 255;
       }
     }
@@ -143,16 +142,20 @@
     }
     function resize() {
       A = I.fit(cv);
-      var n = Math.round(Math.max(16, Math.min(46, A.w * A.h / 30000)));
+      var n = Math.round(Math.max(14, Math.min(36, A.w * A.h / 36000)));
       pieces = [];
       for (var i = 0; i < n; i++) pieces.push(make(true));
       paint();
     }
     function paint() {
       A.ctx.clearRect(0, 0, A.w, A.h);
+      var sky = window.BP.sky, docH = Math.max(1, document.documentElement.scrollHeight), sy = window.scrollY;
       pieces.forEach(function (p) {
         var M = I.mul(I.rotX(0.5), I.mul(I.rotZ(p.roll), I.rotY(p.yaw)));
-        I.cubes(A.ctx, p.cells.map(function (c) { return { x: c[0], y: c[1], z: c[2], c: p.c, a: 0.18 + p.z * 0.5 }; }),
+        var bg = sky.colorAt((sy + Math.max(0, Math.min(A.h, p.y))) / docH);
+        var fog = 0.72 - p.z * 0.62;
+        var rgb = sky.mix(I.RGB[p.c], bg, fog).map(function (v) { return Math.round(v / 6) * 6; });
+        I.cubes(A.ctx, p.cells.map(function (c) { return { x: c[0], y: c[1], z: c[2], rgb: rgb }; }),
           { M: M, s: p.s, x: p.x + (mx - 0.5) * p.z * -40, y: p.y, pivot: p.piv });
       });
     }

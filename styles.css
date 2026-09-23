@@ -95,7 +95,7 @@ main, .foot { position: relative; z-index: 1; }
 
 /* Rain */
 
-.rain-zone { position: absolute; inset: 0 0 auto 0; height: 100vh; height: 100svh; overflow: hidden; pointer-events: none; z-index: 0; }
+.rain-zone { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
 .rain { width: 100%; height: 100%; display: block; }
 .hero, .how, .skies, .end { position: relative; z-index: 1; }
 
@@ -245,7 +245,7 @@ main, .foot { position: relative; z-index: 1; }
 .pano { margin-top: 36px; }
 .pano-sky { display: block; width: 100%; height: clamp(150px, 22vw, 260px); border-radius: 18px; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .15); }
 .pano-labels { list-style: none; margin: 14px 0 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
-.pano-labels li { display: grid; gap: 2px; }
+.pano-labels li { display: grid; gap: 2px; text-align: center; }
 .pano-labels b { font-weight: 700; font-size: 1.02rem; }
 .pano-labels small { font-size: .88rem; color: var(--ink-2); }
 

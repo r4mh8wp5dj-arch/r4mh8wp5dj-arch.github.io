@@ -1,12 +1,11 @@
 (function () {
   var STOPS = [
-    [0.00, '#000000'], [0.07, '#0A1A3D'], [0.15, '#1A0D33'],
-    [0.23, '#120F2E'], [0.31, '#331F4D'], [0.39, '#573361'],
-    [0.45, '#47296B'], [0.53, '#D9616B'], [0.61, '#FA944D'],
-    [0.68, '#E8B77A'], [0.76, '#8FB8DC'], [0.84, '#6FA0D4'],
-    [0.9, '#A8BCC4'], [0.96, '#7E9C58'], [1.00, '#4E6B30']
+    [0.00, '#000000'], [0.09, '#0A1A3D'], [0.18, '#1A0D33'],
+    [0.28, '#331F4D'], [0.38, '#573361'], [0.47, '#9A4A6E'],
+    [0.56, '#D9616B'], [0.66, '#FA944D'], [0.76, '#F2B06A'],
+    [0.85, '#E8C48E'], [0.93, '#9DB474'], [1.00, '#4E6B30']
   ];
-  var SKIES = [[0, 'Deep Space'], [0.2, 'Twilight'], [0.42, 'Sunset'], [0.64, 'Cumulus'], [0.82, 'Dawn']];
+  var SKIES = [[0, 'Deep Space'], [0.2, 'Twilight'], [0.45, 'Sunset'], [0.72, 'Cumulus'], [0.88, 'Dawn']];
 
   var root = document.documentElement;
   var range = (root.getAttribute('data-sky') || '0 1').split(' ').map(Number);
@@ -15,12 +14,32 @@
   function rgb(h) { return [parseInt(h.substr(1, 2), 16), parseInt(h.substr(3, 2), 16), parseInt(h.substr(5, 2), 16)]; }
   var PTS = STOPS.map(function (s) { return [s[0], rgb(s[1])]; });
 
+  function toLin(v) { v /= 255; return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }
+  function toSrgb(v) { v = v <= 0.0031308 ? v * 12.92 : 1.055 * Math.pow(v, 1 / 2.4) - 0.055; return Math.max(0, Math.min(255, v * 255)); }
+  function toLab(c) {
+    var r = toLin(c[0]), g = toLin(c[1]), b = toLin(c[2]);
+    var l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+    var m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+    var s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+    return [0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s, 1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s, 0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s];
+  }
+  function fromLab(o) {
+    var l = Math.pow(o[0] + 0.3963377774 * o[1] + 0.2158037573 * o[2], 3);
+    var m = Math.pow(o[0] - 0.1055613458 * o[1] - 0.0638541728 * o[2], 3);
+    var s = Math.pow(o[0] - 0.0894841775 * o[1] - 1.291485548 * o[2], 3);
+    return [toSrgb(4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s), toSrgb(-1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s), toSrgb(-0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s)];
+  }
+  function mix(a, b, f) {
+    var A = toLab(a), B = toLab(b);
+    return fromLab([A[0] + (B[0] - A[0]) * f, A[1] + (B[1] - A[1]) * f, A[2] + (B[2] - A[2]) * f]);
+  }
+
   function colorAt(t) {
     t = R0 + (R1 - R0) * Math.max(0, Math.min(1, t));
     for (var i = 1; i < PTS.length; i++) {
       if (t <= PTS[i][0]) {
         var a = PTS[i - 1], b = PTS[i], f = (t - a[0]) / (b[0] - a[0] || 1);
-        return [0, 1, 2].map(function (k) { return a[1][k] + (b[1][k] - a[1][k]) * f; });
+        return mix(a[1], b[1], f);
       }
     }
     return PTS[PTS.length - 1][1];
@@ -31,14 +50,14 @@
   }
 
   var grad = [];
-  for (var i = 0; i <= 40; i++) {
-    var c = colorAt(i / 40);
-    grad.push('rgb(' + c.map(Math.round).join(',') + ') ' + (i * 2.5) + '%');
+  for (var i = 0; i <= 80; i++) {
+    var c = colorAt(i / 80);
+    grad.push('rgb(' + c.map(Math.round).join(',') + ') ' + (i * 1.25) + '%');
   }
   root.style.background = 'linear-gradient(to bottom,' + grad.join(',') + ')';
 
   window.BP = window.BP || {};
-  window.BP.sky = { colorAt: colorAt, lum: lum };
+  window.BP.sky = { colorAt: colorAt, lum: lum, mix: mix };
 
   document.addEventListener('DOMContentLoaded', function () {
     var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
