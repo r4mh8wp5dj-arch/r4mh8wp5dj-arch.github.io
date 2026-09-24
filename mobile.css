@@ -18,8 +18,8 @@
   .pit-wrap { aspect-ratio: 5 / 5.8; }
   .machine { grid-template-columns: minmax(0, 1fr); }
   .pit-wrap, .hud { grid-area: 1 / 1; }
-  .pit-wrap { justify-self: start; width: calc(100% - 20px); max-width: none; max-height: 404px; }
-  .hud { justify-self: end; position: relative; z-index: 1; }
+  .pit-wrap { justify-self: start; width: calc(100% - 20px); max-width: none; max-height: 404px; margin-left: -10vw; }
+  .hud { justify-self: end; position: relative; z-index: 1; margin-right: 9vw; }
   .how { gap: 18px; padding-top: 6vh; padding-bottom: 6vh; }
   .how article { padding: 14px 18px 24px; }
   .scene { margin-bottom: 14px; max-width: 300px; }
@@ -106,7 +106,8 @@
   .bar nav { gap: 20px; }
   .machine { grid-template-columns: minmax(0, 1fr) auto; }
   .pit-wrap, .hud { grid-area: auto; }
-  .pit-wrap { justify-self: center; width: 100%; }
+  .pit-wrap { justify-self: center; width: 100%; margin-left: 0; }
+  .hud { margin-right: 0; }
 }
 
 @media (max-height: 500px) and (orientation: landscape) {
