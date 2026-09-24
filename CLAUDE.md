@@ -1,10 +1,11 @@
 # Block Pit site
 
-Static landing page for the Block Pit iOS game, served by GitHub Pages from `main`. No framework and no build step on the server: HTML, `styles.css` and plain scripts in `js/`.
+Static landing page for the Block Pit iOS game, served by GitHub Pages from `main`. No framework and no build step on the server: HTML, `styles.css`, `mobile.css` and plain scripts in `js/`.
 
 ## Standing rules
 
 - No comments in code: HTML, CSS or JS.
+- Phone-only styles live in `mobile.css`, which every page links with `media="(max-width: 700px)"`. Put phone changes there so they never reach desktop or tablet; `styles.css` keeps the shared and wider layouts.
 - Verify every change in WebKit (Safari) first, then Chromium: `npm run capture`.
 - No screen shake, and no motion that moves the page layout. Effects stay inside the canvas they belong to.
 - No layout shift: reserve space for anything that appears late (canvases, forms, messages).
@@ -18,7 +19,7 @@ Static landing page for the Block Pit iOS game, served by GitHub Pages from `mai
 - `npm install` once (dev tools only; nothing ships from `node_modules`).
 - `npm run config` applies `site.config.json` (base URL, emails, App Store and social links) to every page.
 - `npm run stamp` writes the current commit hash into asset URLs (`?v=`) so browsers never mix old and new files.
-- `npm run build` runs both. Run it before committing a change that touches `js/`, `styles.css` or the config.
+- `npm run build` runs both. Run it before committing a change that touches `js/`, `styles.css`, `mobile.css` or the config.
 - `npm run serve` starts a server on `0.0.0.0:8765` for testing from a phone on the same Wi-Fi.
 - `npm run capture` saves desktop, mobile and Safari screenshots to `tools/out/`.
 

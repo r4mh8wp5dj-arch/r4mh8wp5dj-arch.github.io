@@ -1,0 +1,83 @@
+.checkpoints { grid-template-columns: minmax(0, 1fr); flex-direction: column-reverse; display: flex; gap: 14px; }
+.checkpoints::before { display: none; }
+.checkpoints li { grid-template-columns: 120px minmax(0, 1fr); grid-template-rows: auto auto; justify-items: start; text-align: left; column-gap: 16px; align-items: center; }
+.checkpoints li::after { display: none; }
+.cp-art { grid-row: 1 / 3; height: 80px; border-radius: 14px; }
+.checkpoints b { align-self: end; }
+.checkpoints small { align-self: start; }
+
+@media (max-width: 600px) {
+  .bar nav .nav-x { display: none; }
+  .title { font-size: min(10.4vw, 2.6rem); }
+  #hud-gauges { width: 48px; height: 300px; }
+  #hud-score-cv { width: 80px; height: 44px; margin-left: -12px; }
+  .hud-score { width: 56px; }
+  .machine { gap: 4px; }
+  .pit-wrap { aspect-ratio: 5 / 5.8; }
+  .how { gap: 18px; padding-top: 6vh; padding-bottom: 6vh; }
+  .how article { padding: 14px 18px 24px; }
+  .scene { margin-bottom: 14px; max-width: 300px; }
+  .how .band { grid-template-columns: minmax(0, 1fr); justify-items: center; text-align: center; padding: 14px 18px 28px; box-shadow: inset 0 0 0 1px rgba(255, 77, 94, .28), inset 0 4px 0 #E61F1A; }
+  .band-stage { max-width: 360px; aspect-ratio: 1 / 1; margin-bottom: 4px; }
+  .band-gauge { width: 38px; height: 104px; }
+  .band p { margin-left: auto; margin-right: auto; }
+  .foot-mail a { display: inline-flex; align-items: center; min-height: 44px; }
+  .foot-mail { gap: 0; }
+  .hud { gap: 22px; width: 56px; }
+  .gnote { left: -6px; width: 68px; text-align: center; font-size: .8rem; }
+  .gnote b { font-size: .82rem; margin: 0; }
+  .gnote span { display: none; }
+  .gnote-press { top: -20px; }
+  .gnote-streak { top: 128px; }
+  .bar .mark, .bar nav a { min-height: 44px; display: inline-flex; align-items: center; }
+  .foot nav a, .toc a { min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; }
+  .toc a { display: grid; align-content: center; }
+  .mail { min-height: 44px; display: inline-flex; align-items: center; }
+  .hud-score b { font-size: 1.5rem; }
+}
+
+.bar { grid-template-columns: auto auto; padding-top: max(6px, env(safe-area-inset-top)); padding-bottom: 6px; }
+.announce { display: none; }
+.home .bar .appstore-sm { display: none; }
+.home .bar nav .nav-x { display: inline-flex; }
+.hero { padding: 20px var(--gut) 40px; gap: 20px; }
+.tag { margin-top: 14px; }
+.pitch { margin-top: 12px; font-size: 1.15rem; }
+.hero .cta-row { margin-top: 20px; }
+.hero .social, .end .social { display: none; }
+.how { gap: 14px; }
+.steps { display: flex; gap: 12px; margin: 0 calc(-1 * var(--gut)); padding: 0 var(--gut); overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: var(--gut); overscroll-behavior-x: contain; scrollbar-width: none; }
+.steps::-webkit-scrollbar { display: none; }
+.steps article { flex: 0 0 84%; scroll-snap-align: start; }
+.steps-dots { display: flex; justify-content: center; gap: 10px; height: 10px; align-items: center; }
+.steps-dots i { width: 8px; height: 8px; border-radius: 50%; background: rgba(255, 255, 255, .3); transition: background-color .25s, transform .25s var(--ease); }
+.steps-dots i.on { transform: scale(1.25); }
+.steps-dots i.on:nth-child(1) { background: #FF6B5E; }
+.steps-dots i.on:nth-child(2) { background: #F9C24E; }
+.steps-dots i.on:nth-child(3) { background: #3FD0DE; }
+.skies { padding: 6vh var(--gut) 8vh; }
+.end { min-height: 0; padding: 6vh var(--gut) calc(clamp(150px, 30vh, 320px) + 12px); }
+.dock {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px var(--gut);
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
+  background: #0B1631;
+  border-top: 1px solid rgba(244, 185, 66, .22);
+  box-shadow: 0 -6px 24px rgba(4, 8, 24, .28);
+  transform: translateY(110%);
+  visibility: hidden;
+  transition: transform .35s var(--ease), visibility 0s linear .35s;
+}
+.dock.show { transform: none; visibility: visible; transition: transform .35s var(--ease); }
+.dock-icon { width: 40px; height: 40px; border-radius: 10px; }
+.dock p { flex: 1; min-width: 0; display: grid; line-height: 1.25; }
+.dock b { font-weight: 700; font-size: .85rem; letter-spacing: .14em; text-transform: uppercase; }
+.dock small { font-size: .82rem; color: rgba(255, 255, 255, .78); }
+.dock .appstore img { height: 40px; }
