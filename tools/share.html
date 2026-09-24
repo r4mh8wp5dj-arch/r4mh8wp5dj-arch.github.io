@@ -6,10 +6,11 @@
   <link rel="stylesheet" href="../styles.css">
   <style>
     html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; background: #050A1E; }
-    .card { position: relative; width: 1200px; height: 630px; overflow: hidden; background: linear-gradient(180deg, #000000 0%, #0A1A3D 13%, #1A0D33 26%, #120F2E 38%, #331F4D 50%, #47296B 61%, #D9616B 69%, #FA944D 74%, #F2A24E 77%, #E8B77A 80%, #8FB8DC 85%, #6FA0D4 90%, #7E9C58 95%, #4E6B30 100%); }
+    .card { position: relative; width: 1200px; height: 630px; overflow: hidden; background: #000; }
     #city { position: absolute; left: 0; bottom: 26px; width: 1200px; height: 100px; }
     .ground { position: absolute; left: 0; right: 0; bottom: 0; height: 27px; background: linear-gradient(180deg, #96B46C 0, #96B46C 3px, #7E9C58 3px, #4E6B30 100%); }
-    #stars { position: absolute; inset: 0; width: 1200px; height: 630px; }
+    #sky, #stars { position: absolute; inset: 0; width: 1200px; height: 630px; }
+    .stars, .grain { display: none !important; }
     .copy { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: #fff; }
     .icon { width: 150px; height: 150px; border-radius: 34px; box-shadow: 0 0 0 2px rgba(255, 255, 255, .3), 0 20px 50px rgba(0, 0, 0, .5); }
     h1 { margin-top: 32px; font-size: 124px; line-height: .9; letter-spacing: .05em; }
@@ -22,6 +23,7 @@
 </head>
 <body>
   <div class="card">
+    <canvas id="sky"></canvas>
     <canvas id="stars"></canvas>
     <canvas id="city"></canvas>
     <div class="ground"></div>
@@ -32,8 +34,21 @@
       <img class="badge" src="../assets/img/badges/app-store-black.svg" alt="">
     </div>
   </div>
+  <script src="../js/sky.js"></script>
   <script>
     (function () {
+      var sk = document.getElementById('sky'), k = sk.getContext('2d');
+      sk.width = 1200; sk.height = 630;
+      var img = k.createImageData(1200, 630), D = img.data, path = window.BP.sky.pathColor, ns = 11;
+      function nz() { ns = (ns * 16807) % 2147483647; return (ns - 1) / 2147483646 - 0.5; }
+      for (var y = 0; y < 630; y++) {
+        var f = y / 629, c = path(1 - Math.pow(f, 1.7) * 0.9);
+        for (var x = 0; x < 1200; x++) {
+          var i = (y * 1200 + x) * 4, n = nz() * 3;
+          D[i] = c[0] + n; D[i + 1] = c[1] + n; D[i + 2] = c[2] + n; D[i + 3] = 255;
+        }
+      }
+      k.putImageData(img, 0, 0);
       var sc = document.getElementById('stars'), g = sc.getContext('2d');
       sc.width = 2400; sc.height = 1260; g.scale(2, 2);
       var seed = 7; function R() { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }
