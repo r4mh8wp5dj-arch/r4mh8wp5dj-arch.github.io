@@ -540,7 +540,7 @@
       inner.appendChild(fill);
       el.appendChild(inner);
       el.style.left = '50%';
-      el.style.top = look === 'full' ? '44%' : '14%';
+      el.style.top = look === 'full' ? '44%' : 'var(--banner-top, 14%)';
       el.style.fontSize = Math.round(size * Math.min(1, cw / 420)) + 'px';
       elPops.appendChild(el);
       currentBanner = el;
