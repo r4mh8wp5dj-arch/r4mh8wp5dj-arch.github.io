@@ -6,8 +6,9 @@
   <link rel="stylesheet" href="../styles.css">
   <style>
     html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; background: #050A1E; }
-    .card { position: relative; width: 1200px; height: 630px; overflow: hidden; background: radial-gradient(ellipse 60% 45% at 50% 108%, rgba(255, 179, 92, .55), transparent 70%), linear-gradient(180deg, #120F2E 0%, #331F4D 38%, #573361 58%, #8E3F7C 74%, #D9616B 90%, #FA944D 100%); }
-    #city { position: absolute; left: 0; bottom: 0; width: 1200px; height: 120px; }
+    .card { position: relative; width: 1200px; height: 630px; overflow: hidden; background: linear-gradient(180deg, #000000 0%, #0A1A3D 13%, #1A0D33 26%, #120F2E 38%, #331F4D 50%, #47296B 61%, #D9616B 69%, #FA944D 74%, #F2A24E 77%, #E8B77A 80%, #8FB8DC 85%, #6FA0D4 90%, #7E9C58 95%, #4E6B30 100%); }
+    #city { position: absolute; left: 0; bottom: 26px; width: 1200px; height: 100px; }
+    .ground { position: absolute; left: 0; right: 0; bottom: 0; height: 27px; background: linear-gradient(180deg, #96B46C 0, #96B46C 3px, #7E9C58 3px, #4E6B30 100%); }
     #stars { position: absolute; inset: 0; width: 1200px; height: 630px; }
     .copy { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: #fff; }
     .icon { width: 150px; height: 150px; border-radius: 34px; box-shadow: 0 0 0 2px rgba(255, 255, 255, .3), 0 20px 50px rgba(0, 0, 0, .5); }
@@ -16,13 +17,14 @@
     .tag b { font-weight: 700; }
     .badge { margin-top: 34px; height: 62px; width: auto; filter: drop-shadow(0 10px 22px rgba(18, 15, 46, .45)); }
     .copy { padding-bottom: 96px; }
-    h1, .tag { text-shadow: 0 4px 18px rgba(18, 15, 46, .45); }
+    h1, .tag { text-shadow: 0 4px 18px rgba(18, 15, 46, .55); }
   </style>
 </head>
 <body>
   <div class="card">
     <canvas id="stars"></canvas>
     <canvas id="city"></canvas>
+    <div class="ground"></div>
     <div class="copy">
       <img class="icon" src="../assets/img/logo-320.png" alt="">
       <h1>Block Pit</h1>
@@ -38,16 +40,16 @@
       for (var i = 0; i < 520; i++) {
         var x = R() * 1200, y = R() * 630, big = R() < 0.1, dx = (x - 600) / 420, dy = (y - 300) / 230;
         var calm = Math.min(1, Math.sqrt(dx * dx + dy * dy));
-        g.globalAlpha = (big ? 0.8 : 0.45) * Math.max(0, 1 - y / 380) * (0.25 + 0.75 * calm);
+        g.globalAlpha = (big ? 0.8 : 0.45) * Math.max(0, 1 - y / 330) * (0.25 + 0.75 * calm);
         g.fillStyle = '#fff';
         g.beginPath(); g.arc(x, y, big ? 1.4 : 0.7, 0, 6.2832); g.fill();
       }
       var cc = document.getElementById('city'), c = cc.getContext('2d');
-      cc.width = 2400; cc.height = 240; c.scale(2, 2);
-      [{ col: 'rgba(120,52,98,0.55)', min: 0.35, max: 0.75, bw: [40, 90], win: 0, s: 7 },
-       { col: 'rgba(70,32,80,0.85)', min: 0.25, max: 0.7, bw: [34, 80], win: 0.08, s: 19 },
-       { col: '#24123A', min: 0.18, max: 0.55, bw: [28, 70], win: 0.2, s: 41 }].forEach(function (L) {
-        seed = L.s; var x = -10, h = 120;
+      cc.width = 2400; cc.height = 200; c.scale(2, 2);
+      [{ col: 'rgba(120,150,150,0.45)', min: 0.3, max: 0.6, bw: [40, 90], win: 0, s: 7 },
+       { col: 'rgba(58,86,70,0.8)', min: 0.2, max: 0.75, bw: [34, 80], win: 0.08, s: 19 },
+       { col: '#1c2a22', min: 0.14, max: 0.6, bw: [28, 70], win: 0.22, s: 41 }].forEach(function (L) {
+        seed = L.s; var x = -10, h = 100;
         while (x < 1210) {
           var bw = L.bw[0] + R() * (L.bw[1] - L.bw[0]), bh = h * (L.min + R() * (L.max - L.min)), top = h - bh;
           c.fillStyle = L.col; c.fillRect(x, top, bw - 3, bh);
