@@ -16,7 +16,7 @@
     var grid, piece, phase, fallY, fallV, score, streak, pressure, pending, nextId, aim, frags, flashes, timers;
     var plan = null, planT = 0, shown = 0, wipeT = 0, clock = 0, bob = 0;
     var spin = { from: 0, to: 0, t: -10, next: 2.5, dur: 0.7 }, count = { from: 0, to: 0, t: -1 }, flashS = { v: 1, vel: 0, until: -1 };
-    var ghostSim = { key: '', over: false }, DANGER_RED = [230, 31, 26], GRAY = 140;
+    var ghostSim = { key: '', over: false }, DANGER_RED = [230, 31, 26], GRAY = 100, CHAN_GRAY = [117, 120, 125], lift = -1;
     var ghost = { key: '', t: -1, from: [0, 0, 0], pos: null }, pressFill = { row: -1, t: 0 }, pressBurst = -1, lastPressure = 0;
     var chan = { gain: 1, from: 1, peak: 1, t: -1, heat: 0, tier: 0, tierT: 0, flow: 0 };
     var streakView = { i: 0, v: 0, pulse: 0, pv: 0, pt: -1 };
@@ -177,7 +177,8 @@
       piece.cells.forEach(function (c) { base = Math.max(base, colH(aim.x + c[0], aim.z + c[2]) - c[1]); });
       return base;
     }
-    function hoverY() { return Math.min(opts.hoverCap || 9.8, Math.max(2.8, maxHeight() + 2.2)); }
+    function hoverY() { return Math.min(opts.hoverCap || 1e9, Math.max(2.8, maxHeight() + 2.6)); }
+    function camTop() { return opts.camTop || Math.max(cw < 500 ? 8.8 : 9.4, maxHeight() + 4.8); }
     function finalCells(cells, ax, az) {
       var cols = {};
       cells.forEach(function (c) { var k = (ax + c[0]) + ',' + (az + c[2]); (cols[k] = cols[k] || []).push(c); });
@@ -247,7 +248,9 @@
         if (y >= H) return;
         cols[y] = (cols[y] || 0) + 1;
         gray.at[b.id] = y * 0.12 + (cols[y] - 1) * 0.02;
+        gray.end = Math.max(gray.end || 0, gray.at[b.id] + 0.2);
       });
+      gray.end = Math.max(2, gray.end + 0.7);
       popNext = 0;
       while (elPops.firstChild) elPops.removeChild(elPops.firstChild);
       banner('Pit full', 'full', 34);
@@ -580,7 +583,7 @@
       botStep(dt);
       if (phase === 'doom') {
         doomT += dt;
-        if (doomT > 1.6) wipe();
+        if (doomT > gray.end) wipe();
       }
       if (phase === 'wipe') {
         wipeT += dt;
@@ -624,7 +627,9 @@
       }
       dying = dying.filter(function (d) { return clock - d.t < 0.13; });
       flashes = flashes.filter(function (f) { return clock - f.t < 0.13; });
-      if (!reduce) chan.flow += dt / 8 * (1 + (chan.tier && clock - chan.tierT < TIERS[chan.tier].dur ? TIERS[chan.tier].speed : 0)) * (streak >= 6 ? 2 : 1);
+      var over = gray ? easeInOut((clock - gray.t) / 0.6) : 0;
+      if (lift < 0 || (reduce && !gray)) lift = camTop(); else if (!gray) lift += (camTop() - lift) * Math.min(1, dt * 3);
+      if (!reduce) chan.flow += (1 - over) * dt / 8 * (1 + (chan.tier && clock - chan.tierT < TIERS[chan.tier].dur ? TIERS[chan.tier].speed : 0)) * (streak >= 6 ? 2 : 1);
       if (chan.t >= 0) {
         var e = clock - chan.t;
         chan.gain = e < 0.08 ? chan.from + (chan.peak - chan.from) * e / 0.08 : 1 + (chan.peak - 1) * Math.pow(1 - Math.min(1, (e - 0.08) / 0.6), 3);
@@ -662,7 +667,7 @@
         var r = wrap.getBoundingClientRect(), dh = Math.max(1, document.documentElement.scrollHeight);
         led = sky.led(sky.pageU((window.scrollY + r.top + r.height / 2) / dh));
       }
-      var fit = I.fitCam(VIEW, cw, ch, 4, -0.6, opts.camTop || (cw < 500 ? 9.6 : 10.5), cw < 500 ? 0.03 : 0.06, [2, 2, 2]);
+      var fit = I.fitCam(VIEW, cw, ch, 4, -0.6, lift < 0 ? camTop() : lift, cw < 500 ? 0.03 : 0.06, [2, 2, 2]);
       var yaw = YAW0 + spin.from + (spin.to - spin.from) * easeInOut((clock - spin.t) / spin.dur);
       cam.M = I.view(yaw, ELEV); cam.s = fit.s; cam.x = fit.x + cw * (opts.shiftX || 0); cam.y = fit.y; cam.pivot = fit.pivot;
       if (opts.gaugeBeside) {
@@ -672,7 +677,9 @@
         if (gauges.style.left !== gl) gauges.style.left = gl;
         if (gauges.style.top !== gt) gauges.style.top = gt;
       }
-      var chanOpts = { led: led, palette: channelPalette(led), gain: chan.gain, flow: chan.flow };
+      var dim = gray ? easeInOut((clock - gray.t) / 0.6) : 0, pal = channelPalette(led);
+      if (dim) pal = pal.map(function (c) { return c.map(function (v, i) { return v + (CHAN_GRAY[i] - v) * dim; }); });
+      var chanOpts = { led: led, palette: pal, gain: 1 + (chan.gain - 1) * (1 - dim), flow: chan.flow };
       I.plate(ctx, cam, chanOpts);
 
       var items = [], wk = phase === 'wipe' ? Math.max(0, (wipeT - 0.5) / 0.45) : 0;
