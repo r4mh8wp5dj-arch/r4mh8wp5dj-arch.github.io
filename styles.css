@@ -81,7 +81,7 @@ main, .foot { position: relative; z-index: 1; }
 }
 .bar.hide { transform: translateY(-110%); }
 .mark { justify-self: start; display: flex; align-items: center; gap: 10px; text-decoration: none; }
-.mark img { display: block; width: 24px; height: 24px; border-radius: 6px; }
+.mark img { display: block; width: 24px; height: 24px; border-radius: 6px; box-shadow: 0 0 0 1.5px rgba(255, 255, 255, .3), 0 4px 12px rgba(0, 0, 0, .35); }
 .mark span, .bar nav a { color: #fff; font-weight: 700; letter-spacing: .04em; font-size: .92rem; text-decoration: none; }
 .mark span { text-transform: uppercase; letter-spacing: .14em; font-size: .82rem; }
 .bar nav { justify-self: end; display: flex; gap: clamp(16px, 3vw, 32px); }
