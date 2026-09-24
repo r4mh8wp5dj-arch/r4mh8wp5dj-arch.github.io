@@ -41,13 +41,13 @@
   }
   </script>
   <link rel="preload" href="assets/fonts/Nippo-Variable.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="styles.css?v=5a4d06e">
-  <link rel="stylesheet" href="mobile.css?v=5a4d06e" media="(max-width: 700px), (max-height: 500px) and (orientation: landscape)">
-  <script src="js/sky.js?v=5a4d06e"></script>
-  <script src="js/iso.js?v=5a4d06e" defer></script>
-  <script src="js/site.js?v=5a4d06e" defer></script>
-  <script src="js/play.js?v=5a4d06e" defer></script>
-  <script src="js/dock.js?v=5a4d06e" defer></script>
+  <link rel="stylesheet" href="styles.css?v=bc13335">
+  <link rel="stylesheet" href="mobile.css?v=bc13335" media="(max-width: 700px), (max-height: 500px) and (orientation: landscape)">
+  <script src="js/sky.js?v=bc13335"></script>
+  <script src="js/iso.js?v=bc13335" defer></script>
+  <script src="js/site.js?v=bc13335" defer></script>
+  <script src="js/play.js?v=bc13335" defer></script>
+  <script src="js/dock.js?v=bc13335" defer></script>
 </head>
 <body class="home">
   <svg class="sprite" aria-hidden="true" focusable="false">
@@ -57,7 +57,6 @@
   </svg>
   <header class="bar">
     <a class="mark" href="./" aria-label="Block Pit home"><img src="assets/img/favicon-64.png" alt="" width="28" height="28"><span>Block Pit</span></a>
-    <p class="announce">Now on the App Store</p>
     <nav aria-label="Site">
       <a class="nav-x" href="#how">How to play</a>
       <a href="contact.html">Contact</a>
@@ -73,11 +72,6 @@
         <p class="pitch">Stack the colors, spark the chains, rise from the ground to deep space.</p>
         <div class="cta-row">
           <a class="appstore" data-appstore href="https://apps.apple.com/app/id[APP_ID]"><img src="assets/img/badges/app-store-black.svg" alt="Download Block Pit on the App Store" width="144" height="48"></a>
-          <ul class="social" aria-label="Block Pit on social media">
-            <li><a data-social="instagram" href="https://www.instagram.com/playblockpit" target="_blank" rel="me noopener" aria-label="Block Pit on Instagram"><svg aria-hidden="true" focusable="false"><use href="#i-instagram"></use></svg></a></li>
-            <li><a data-social="tiktok" href="[TIKTOK_URL]" target="_blank" rel="me noopener" aria-label="Block Pit on TikTok"><svg aria-hidden="true" focusable="false"><use href="#i-tiktok"></use></svg></a></li>
-            <li><a data-social="facebook" href="[FACEBOOK_URL]" target="_blank" rel="me noopener" aria-label="Block Pit on Facebook"><svg aria-hidden="true" focusable="false"><use href="#i-facebook"></use></svg></a></li>
-          </ul>
         </div>
       </div>
 
@@ -118,7 +112,7 @@
       <article data-ink>
         <canvas class="scene" data-scene="chain" role="img" aria-label="Two red blocks burst, the blue block above falls into the gap, touches another blue block and bursts for a chain of two."></canvas>
         <h2 class="k-c">Chain</h2>
-        <p>Blocks above fall into the gap and can match again, and every scoring drop in a row raises your multiplier.</p>
+        <p>Blocks above fall into the gap and match again, setting off a chain.</p>
       </article>
       </div>
       <div class="steps-dots" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
@@ -130,22 +124,22 @@
         </div>
         <div class="band-copy">
           <h2>The pit fights back.</h2>
-          <p>Every drop fills the pressure column. When it's full, a new row lifts the whole pit; columns already at the top hold there. The run ends only when a drop stacks past the rim.</p>
+          <p>Every drop fills the pressure column. When it's full, a new row lifts the pit. Stack past the rim and the run ends.</p>
         </div>
       </article>
     </section>
 
     <section class="skies" id="skies" aria-labelledby="skies-h">
       <div class="skies-head" data-ink>
-        <h2 id="skies-h">Skies</h2>
+        <h2 id="skies-h">How high can you go?</h2>
         <p>Every block you place lifts the pit higher, from the ground all the way to deep space.</p>
       </div>
       <ol class="checkpoints" data-ink aria-label="The five skies, from dawn to deep space">
         <li><canvas class="cp-art" data-theme="dawn" aria-hidden="true"></canvas><b>Dawn</b><small>Start</small></li>
-        <li><canvas class="cp-art" data-theme="cumulus" aria-hidden="true"></canvas><b>Cumulus</b><small>20 placements</small></li>
-        <li><canvas class="cp-art" data-theme="sunset" aria-hidden="true"></canvas><b>Sunset</b><small>50 placements</small></li>
-        <li><canvas class="cp-art" data-theme="twilight" aria-hidden="true"></canvas><b>Twilight</b><small>100 placements</small></li>
-        <li><canvas class="cp-art" data-theme="deepspace" aria-hidden="true"></canvas><b>Deep Space</b><small>170 placements</small></li>
+        <li><canvas class="cp-art" data-theme="cumulus" aria-hidden="true"></canvas><b>Cumulus</b><small>20 drops</small></li>
+        <li><canvas class="cp-art" data-theme="sunset" aria-hidden="true"></canvas><b>Sunset</b><small>50 drops</small></li>
+        <li><canvas class="cp-art" data-theme="twilight" aria-hidden="true"></canvas><b>Twilight</b><small>100 drops</small></li>
+        <li><canvas class="cp-art" data-theme="deepspace" aria-hidden="true"></canvas><b>Deep Space</b><small>170 drops</small></li>
       </ol>
     </section>
 
@@ -153,14 +147,9 @@
       <div class="end-in" data-ink>
         <img class="icon" src="assets/img/logo-320.png" alt="Block Pit app icon" width="112" height="112">
         <h2>The pit is open.</h2>
-        <p>On iPhone. Made by one developer, one pit.</p>
+        <p>On iPhone. Made by a solo developer.</p>
         <div class="cta-row">
           <a class="appstore" data-appstore href="https://apps.apple.com/app/id[APP_ID]"><img src="assets/img/badges/app-store-black.svg" alt="Download Block Pit on the App Store" width="144" height="48"></a>
-          <ul class="social" aria-label="Block Pit on social media">
-            <li><a data-social="instagram" href="https://www.instagram.com/playblockpit" target="_blank" rel="me noopener" aria-label="Block Pit on Instagram"><svg aria-hidden="true" focusable="false"><use href="#i-instagram"></use></svg></a></li>
-            <li><a data-social="tiktok" href="[TIKTOK_URL]" target="_blank" rel="me noopener" aria-label="Block Pit on TikTok"><svg aria-hidden="true" focusable="false"><use href="#i-tiktok"></use></svg></a></li>
-            <li><a data-social="facebook" href="[FACEBOOK_URL]" target="_blank" rel="me noopener" aria-label="Block Pit on Facebook"><svg aria-hidden="true" focusable="false"><use href="#i-facebook"></use></svg></a></li>
-          </ul>
         </div>
       </div>
       <canvas class="city" aria-hidden="true"></canvas>
