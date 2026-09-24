@@ -16,6 +16,10 @@
   .hud-score { width: 56px; }
   .machine { gap: 4px; }
   .pit-wrap { aspect-ratio: 5 / 5.8; }
+  .machine { grid-template-columns: minmax(0, 1fr); }
+  .pit-wrap, .hud { grid-area: 1 / 1; }
+  .pit-wrap { justify-self: start; width: calc(100% - 20px); max-width: none; max-height: 404px; }
+  .hud { justify-self: end; position: relative; z-index: 1; }
   .how { gap: 18px; padding-top: 6vh; padding-bottom: 6vh; }
   .how article { padding: 14px 18px 24px; }
   .scene { margin-bottom: 14px; max-width: 300px; }
@@ -44,6 +48,10 @@
   .announce { display: none; }
   .home .bar .appstore-sm { display: none; }
   .home .bar nav .nav-x { display: inline-flex; }
+  .mark img { width: 30px; height: 30px; border-radius: 8px; }
+  .mark span { font-size: .95rem; letter-spacing: .12em; }
+  .bar nav { gap: 18px; }
+  .bar nav a { font-size: .88rem; }
   .hero { padding: 20px var(--gut) 40px; gap: 20px; }
   .tag { margin-top: 14px; }
   .pitch { margin-top: 12px; font-size: 1.15rem; }
@@ -96,6 +104,9 @@
 @media (max-width: 359px) {
   .mark span { display: none; }
   .bar nav { gap: 20px; }
+  .machine { grid-template-columns: minmax(0, 1fr) auto; }
+  .pit-wrap, .hud { grid-area: auto; }
+  .pit-wrap { justify-self: center; width: 100%; }
 }
 
 @media (max-height: 500px) and (orientation: landscape) {
