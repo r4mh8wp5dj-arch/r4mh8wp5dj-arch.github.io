@@ -1052,7 +1052,7 @@
 
     window.addEventListener('resize', resize);
     resize();
-    if (script && reduce) { keyFrame(); render(0); return; }
+    if (script && reduce) { keyFrame(); render(0); window.addEventListener('resize', function () { render(0); }); return; }
     reset();
     render(0);
     I.visible(wrap, function (v) {
