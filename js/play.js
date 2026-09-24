@@ -95,7 +95,10 @@
         pressure = lastPressure = script.pressure;
       } else {
         var cells = [];
-        for (var y = 0; y < (opts.layers || 1); y++) for (var x = 0; x < W; x++) for (var z = 0; z < D; z++) cells.push([x, y, z]);
+        var hs = (opts.heights || [1]).slice(), top = 0;
+        for (var i = hs.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = hs[i]; hs[i] = hs[j]; hs[j] = t; }
+        hs.forEach(function (h) { top = Math.max(top, h); });
+        for (var y = 0; y < top; y++) for (var x = 0; x < W; x++) for (var z = 0; z < D; z++) if (y < (hs[x * D + z] || 1)) cells.push([x, y, z]);
         noClusterFill(cells);
       }
       shown = 0;
@@ -1079,7 +1082,7 @@
   ];
   createPit({
     canvas: document.getElementById('pit'),
-    layers: 5,
+    heights: [1, 1, 1, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 5, 5, 5],
     score: document.getElementById('hud-score'),
     scoreCv: document.getElementById('hud-score-cv'),
     gauges: document.getElementById('hud-gauges'),
