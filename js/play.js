@@ -10,13 +10,13 @@
     if (!canvas) return;
     var elScore = opts.score || null, scoreCv = opts.scoreCv || null, blobCv = document.createElement('canvas');
     var gauges = opts.gauges, elPops = opts.pops, wrap = canvas.parentNode, reduce = I.reduce;
-    var script = opts.script || null, stepIdx = 0, endT = 0, doomT = 0, drops = 0, marks = { key: '', t: 0 };
+    var script = opts.script || null, stepIdx = 0, endT = 0, doomT = 0, drops = 0, gray = null, marks = { key: '', t: 0 };
 
 
     var grid, piece, phase, fallY, fallV, score, streak, pressure, pending, nextId, aim, frags, flashes, timers;
     var plan = null, planT = 0, shown = 0, wipeT = 0, clock = 0, bob = 0;
     var spin = { from: 0, to: 0, t: -10, next: 2.5, dur: 0.7 }, count = { from: 0, to: 0, t: -1 }, flashS = { v: 1, vel: 0, until: -1 };
-    var ghostSim = { key: '', over: false }, DANGER_RED = [230, 31, 26];
+    var ghostSim = { key: '', over: false }, DANGER_RED = [230, 31, 26], GRAY = 140;
     var ghost = { key: '', t: -1, from: [0, 0, 0], pos: null }, pressFill = { row: -1, t: 0 }, pressBurst = -1, lastPressure = 0;
     var chan = { gain: 1, from: 1, peak: 1, t: -1, heat: 0, tier: 0, tierT: 0, flow: 0 };
     var streakView = { i: 0, v: 0, pulse: 0, pv: 0, pt: -1 };
@@ -86,6 +86,7 @@
       (timers || []).forEach(clearTimeout);
       timers = [];
       grid = empty();
+      gray = null;
       nextId = 1; score = 0; streak = 0; pressure = 0; pending = 0; lastPressure = 0;
       frags = []; flashes = [];
       aim = { x: 1, z: 1 };
@@ -115,7 +116,7 @@
           pressure = 0;
           pressBurst = clock;
           insertLayer();
-          if (overflow()) return wipe();
+          if (overflow()) return doom();
         }
       }
       if (script) {
@@ -176,7 +177,7 @@
       piece.cells.forEach(function (c) { base = Math.max(base, colH(aim.x + c[0], aim.z + c[2]) - c[1]); });
       return base;
     }
-    function hoverY() { return Math.min(opts.hoverCap || (cw < 500 ? 8.2 : 8.9), Math.max(2.8, maxHeight() + 2.2)); }
+    function hoverY() { return Math.min(opts.hoverCap || 9.8, Math.max(2.8, maxHeight() + 2.2)); }
     function finalCells(cells, ax, az) {
       var cols = {};
       cells.forEach(function (c) { var k = (ax + c[0]) + ',' + (az + c[2]); (cols[k] = cols[k] || []).push(c); });
@@ -232,16 +233,28 @@
 
     function next() {
       if (script) return spawn(false);
-      if (overflow()) return wipe();
-      if (maxHeight() >= 7) { phase = 'doom'; doomT = 0; piece = null; plan = null; return; }
+      if (overflow()) return doom();
       spawn(false);
+    }
+    function doom() {
+      phase = 'doom';
+      doomT = 0;
+      piece = null;
+      plan = null;
+      var cols = {};
+      gray = { t: clock, at: {} };
+      each(function (b, x, y) {
+        if (y >= H) return;
+        cols[y] = (cols[y] || 0) + 1;
+        gray.at[b.id] = y * 0.12 + (cols[y] - 1) * 0.02;
+      });
+      popNext = 0;
+      while (elPops.firstChild) elPops.removeChild(elPops.firstChild);
+      banner('Pit full', 'full', 34);
     }
     function wipe() {
       phase = 'wipe';
-      piece = null;
-      plan = null;
       wipeT = 0;
-      banner('Pit full', 'full', 34);
     }
 
     function endsInOverflow(cells, c, ax, az) {
@@ -283,7 +296,7 @@
       if (ok) groupsFor(temp, true).forEach(function (g) { hits += g.length; });
       placed.forEach(function (p) { grid[p[0]][p[1]][p[2]] = null; });
       if (!ok) return -1e9;
-      if (top > H && endsInOverflow(cells, piece.c, ax, az)) return -1e8 + hits;
+      if (top > H && endsInOverflow(cells, piece.c, ax, az)) return maxHeight() >= H ? 1e8 + Math.random() : -1e8 + hits;
       var sl = clamp((drops - 8) / 10, 0, 1);
       return (hits * 10 + (hits ? 6 : 0)) * (1 - sl) - top * 1.2 * (1 - sl) + top * 1.6 * sl - (hits ? 9 : 0) * sl + Math.random() * 4;
     }
@@ -489,6 +502,7 @@
       showScore(points, at);
     }
     function showScore(points, at) {
+      if (phase === 'doom' || phase === 'wipe') return;
       var tier = points >= 400 ? 3 : points >= 200 ? 2 : points >= 50 ? 1 : 0;
       var hang = [0, 0, 0.18, 0.4][tier], total = (1.3 + hang) * 1000;
       var p = I.project(cam, at[0] + 0.5, at[1] + 1, at[2] + 0.5);
@@ -523,12 +537,12 @@
       inner.appendChild(fill);
       el.appendChild(inner);
       el.style.left = '50%';
-      el.style.top = '14%';
+      el.style.top = look === 'full' ? '44%' : '14%';
       el.style.fontSize = Math.round(size * Math.min(1, cw / 420)) + 'px';
       elPops.appendChild(el);
       currentBanner = el;
       if (el.animate && !reduce) {
-        el.animate([{ transform: 'translate(-50%,-50%) scale(.5)', opacity: 0 }, { transform: 'translate(-50%,-50%) scale(1)', opacity: 1, offset: 0.12 }, { transform: 'translate(-50%,-50%) scale(1)', opacity: 1, offset: 0.8 }, { transform: 'translate(-50%,-50%) scale(1)', opacity: 0 }], { duration: look === 'full' ? 900 : 1500, fill: 'forwards', easing: 'ease-out' });
+        el.animate([{ transform: 'translate(-50%,-50%) scale(.5)', opacity: 0 }, { transform: 'translate(-50%,-50%) scale(1)', opacity: 1, offset: 0.12 }, { transform: 'translate(-50%,-50%) scale(1)', opacity: 1, offset: 0.8 }, { transform: 'translate(-50%,-50%) scale(1)', opacity: 0 }], { duration: look === 'full' ? 2000 : 1500, fill: 'forwards', easing: 'ease-out' });
         if (look === 'c1') {
           fill.animate([{ filter: 'brightness(1)' }, { filter: 'brightness(1.6)', offset: 0.3 }, { filter: 'brightness(1)' }], { duration: 400, delay: 80 });
         } else {
@@ -536,7 +550,7 @@
           inner.animate([{ transform: 'scale(.72)' }, { transform: 'scale(' + o + ')', offset: 0.29 }, { transform: 'scale(' + (1 - sw * 0.35 * w) + ')', offset: 0.49 }, { transform: 'scale(' + (1 + sw * 0.15 * w) + ')', offset: 0.84 }, { transform: 'scale(1)' }], { duration: 410, easing: 'ease-out' });
         }
       }
-      setTimeout(function () { el.remove(); if (currentBanner === el) currentBanner = null; }, look === 'full' ? 950 : 1550);
+      setTimeout(function () { el.remove(); if (currentBanner === el) currentBanner = null; }, look === 'full' ? 2050 : 1550);
     }
 
     function resize() {
@@ -566,7 +580,7 @@
       botStep(dt);
       if (phase === 'doom') {
         doomT += dt;
-        if (doomT > 0.8) wipe();
+        if (doomT > 1.6) wipe();
       }
       if (phase === 'wipe') {
         wipeT += dt;
@@ -648,7 +662,7 @@
         var r = wrap.getBoundingClientRect(), dh = Math.max(1, document.documentElement.scrollHeight);
         led = sky.led(sky.pageU((window.scrollY + r.top + r.height / 2) / dh));
       }
-      var fit = I.fitCam(VIEW, cw, ch, 4, -0.6, opts.camTop || (cw < 500 ? 8.8 : 9.4), cw < 500 ? 0.03 : 0.06, [2, 2, 2]);
+      var fit = I.fitCam(VIEW, cw, ch, 4, -0.6, opts.camTop || (cw < 500 ? 9.6 : 10.5), cw < 500 ? 0.03 : 0.06, [2, 2, 2]);
       var yaw = YAW0 + spin.from + (spin.to - spin.from) * easeInOut((clock - spin.t) / spin.dur);
       cam.M = I.view(yaw, ELEV); cam.s = fit.s; cam.x = fit.x + cw * (opts.shiftX || 0); cam.y = fit.y; cam.pivot = fit.pivot;
       if (opts.gaugeBeside) {
@@ -669,6 +683,10 @@
         if (wk) k *= clamp(1 - (wk * 1.6 - (TOP - y) / TOP * 0.6), 0, 1);
         if (k <= 0.02) return;
         item = { x: x, y: b.vy, z: z, c: b.c, k: k * BLK };
+        if (gray && b.id in gray.at) {
+          var ge2 = reduce ? 1 : Math.round(clamp((clock - gray.t - gray.at[b.id]) / 0.2, 0, 1) * 20) / 20;
+          if (ge2 > 0) item.rgb = I.RGB[b.c].map(function (v) { return Math.round(v + (GRAY - v) * ge2); });
+        }
         if (s) item.sq = 1 - s.h;
         if (b.rise && b.vy < 0) item.k = k * BLK * Math.max(0.02, 1 + b.vy);
         items.push(item);
@@ -743,23 +761,6 @@
         ctx.restore();
       });
 
-      if (phase === 'wipe' && wipeT < 0.62) {
-        var tallest = maxHeight(), pulse = 1 + 0.1 * Math.sin(wipeT * 30);
-        for (var tx = 0; tx < W; tx++) for (var tz = 0; tz < D; tz++) {
-          if (colH(tx, tz) !== tallest) continue;
-          var tp = I.project(cam, tx + 0.5, tallest + 0.6, tz + 0.5);
-          ctx.save();
-          ctx.font = '700 ' + Math.round(cam.s * 0.9 * pulse) + 'px Nippo';
-          ctx.textAlign = 'center';
-          ctx.lineJoin = 'round';
-          ctx.lineWidth = Math.max(2, cam.s * 0.12);
-          ctx.strokeStyle = '#000';
-          ctx.strokeText('!!!', tp[0], tp[1]);
-          ctx.fillStyle = '#E61F1A';
-          ctx.fillText('!!!', tp[0], tp[1]);
-          ctx.restore();
-        }
-      }
       drawMarks();
       drawGauges(now);
       if (scoreCv) drawScore(now);
@@ -767,7 +768,7 @@
 
     var MARKS = { 6: ['!', '#F2CC26'], 7: ['!!', '#F28C1A'], 8: ['!!!', '#E61F1A'] };
     function drawMarks() {
-      if (phase === 'wipe') return;
+      if (phase === 'doom' || phase === 'wipe') return;
       var tallest = maxHeight(), cols = [];
       if (tallest < 6) { marks.key = ''; return; }
       for (var mx = 0; mx < W; mx++) for (var mz = 0; mz < D; mz++) {
