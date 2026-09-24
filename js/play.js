@@ -227,8 +227,10 @@
         later(90, next);
       } else {
         phase = 'resolve';
-        anticipate(groups);
-        later(120, function () { resolve(ids, true, 1); });
+        settle(function () {
+          anticipate(groupsFor(ids, true));
+          later(120, function () { resolve(ids, true, 1); });
+        });
       }
     }
 
