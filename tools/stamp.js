@@ -10,7 +10,7 @@ let changed = 0;
 pages.forEach(file => {
   const full = path.join(ROOT, file);
   const before = fs.readFileSync(full, 'utf8');
-  const after = before.replace(/((?:href|src)="\/?(?:styles\.css|mobile\.css|js\/[\w.-]+\.js|assets\/img\/(?:favicon-\d+|apple-touch-icon|logo-\d+|icon-\d+)\.png))(?:\?v=[\w.-]*)?"/g, `$1?v=${hash}"`);
+  const after = before.replace(/((?:href|src)="\/?(?:styles\.css|mobile\.css|js\/[\w.-]+\.js|assets\/img\/(?:favicon-\d+|apple-touch-icon|logo-\d+|icon-\d+)\.png))(?:\?v=[\w.-]*)?"/g, `$1?v=${hash}"`).replace(/(assets\/img\/share\.png)(?:\?v=[\w.-]*)?"/g, `$1?v=${hash}"`);
   if (after !== before) { fs.writeFileSync(full, after); changed++; }
 });
 

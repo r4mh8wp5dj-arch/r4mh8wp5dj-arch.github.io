@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Block Pit share card</title>
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; background: #050A1E; }
+    .card { position: relative; width: 1200px; height: 630px; overflow: hidden; background: linear-gradient(180deg, #03061A 0%, #0A1A3D 38%, #331F4D 72%, #6B3563 90%, #D9616B 118%); }
+    .card canvas { position: absolute; }
+    #stars { inset: 0; width: 1200px; height: 630px; }
+    #pit { left: 610px; top: 40px; width: 560px; height: 560px; }
+    .copy { position: absolute; left: 76px; top: 0; bottom: 0; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; color: #fff; }
+    .icon { width: 96px; height: 96px; border-radius: 22px; box-shadow: 0 0 0 2px rgba(255, 255, 255, .28), 0 14px 34px rgba(0, 0, 0, .45); }
+    h1 { margin-top: 30px; font-size: 104px; line-height: .9; letter-spacing: .04em; }
+    .tag { margin-top: 26px; font-size: 38px; letter-spacing: .08em; }
+    .tag b { font-weight: 700; }
+    .badge { margin-top: 44px; height: 64px; width: auto; }
+    .banner { position: absolute; left: 890px; top: 112px; font-size: 50px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <canvas id="stars"></canvas>
+    <canvas id="pit"></canvas>
+    <span class="pop pop-banner pop-c2 banner"><i data-t="Chain x3!"><b>Chain x3!</b></i></span>
+    <div class="copy">
+      <img class="icon" src="../assets/img/logo-320.png" alt="">
+      <h1>Block Pit</h1>
+      <p class="tag"><b class="k-r">Drop.</b> <b class="k-y">Match.</b> <b class="k-c">Chain.</b></p>
+      <img class="badge" src="../assets/img/badges/app-store-black.svg" alt="">
+    </div>
+  </div>
+  <script src="../js/iso.js"></script>
+  <script>
+    (function () {
+      var I = window.BP.iso;
+      var sc = document.getElementById('stars'), g = sc.getContext('2d');
+      sc.width = 2400; sc.height = 1260; g.scale(2, 2);
+      var seed = 7; function R() { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }
+      for (var i = 0; i < 520; i++) {
+        var y = R() * 630, big = R() < 0.1;
+        g.globalAlpha = (big ? 0.8 : 0.45) * (1 - y / 630 * 0.7);
+        g.fillStyle = '#fff';
+        g.beginPath(); g.arc(R() * 1200, y, big ? 1.4 : 0.7, 0, 6.2832); g.fill();
+      }
+      var cv = document.getElementById('pit'), F = I.fit(cv), ctx = F.ctx;
+      var cam = I.fitCam(I.view(Math.PI / 4 - 0.22, 0.6), F.w, F.h, 4, -0.6, 5.4, 0.06, [2, 2, 2]);
+      I.plate(ctx, cam, { led: [255, 150, 90], gain: 1.9, palette: [[255, 42, 26], [255, 110, 40], [255, 175, 60], [255, 224, 77]], flow: 0.05 });
+      var H = [[0, 0, [1, 0, 2]], [1, 0, [3, 1, 0]], [2, 0, [0, 2]], [3, 0, [1, 0]],
+               [0, 1, [2, 3]], [1, 1, [0, 2]], [2, 1, [1]], [3, 1, [2]],
+               [0, 2, [0, 1]], [1, 2, [1]], [2, 2, [0]], [3, 2, [1]],
+               [0, 3, [3]], [1, 3, [2]], [2, 3, [0]], [3, 3, [2]]];
+      var items = [];
+      H.forEach(function (c) { c[2].forEach(function (col, y) { items.push({ x: c[0], y: y, z: c[1], c: col }); }); });
+      [[2, 3], [3, 3]].forEach(function (p) { items.push({ x: p[0], y: 1, z: p[1], c: 3, f: 0.75, k: 1.08 }); });
+      var S = 3;
+      function r() { S = (S * 16807) % 2147483647; return (S - 1) / 2147483646; }
+      [[2.5, 3.5], [3.5, 3.5]].forEach(function (o) {
+        for (var k = 0; k < 9; k++) {
+          var a = r() * 6.2832, d = 0.55 + r() * 0.8;
+          items.push({ x: o[0] + Math.cos(a) * d - 0.15, y: 1.6 + r() * 1.2, z: o[1] + Math.sin(a) * d - 0.15, c: 3, k: 0.17 + r() * 0.13, lo: true });
+        }
+      });
+      items.push({ x: 1, y: 4.2, z: 1, c: 1 }, { x: 2, y: 4.2, z: 1, c: 1 }, { x: 1, y: 4.2, z: 2, c: 1 });
+      I.cubes(ctx, items, cam);
+      document.body.setAttribute('data-ready', '1');
+    })();
+  </script>
+</body>
+</html>
