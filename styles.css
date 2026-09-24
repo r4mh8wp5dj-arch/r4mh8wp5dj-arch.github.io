@@ -411,7 +411,7 @@ main, .foot { position: relative; z-index: 1; }
   .gnote span { display: none; }
   .gnote-press { top: -28px; }
   .gnote-streak { top: 150px; }
-  .pit-wrap { transform: translateY(-17%); }
+  .pit-wrap { transform: translateY(-8%); }
   .hud { position: relative; z-index: 1; }
 }
 
