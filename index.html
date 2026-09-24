@@ -41,13 +41,13 @@
   }
   </script>
   <link rel="preload" href="assets/fonts/Nippo-Variable.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="styles.css?v=69091a7">
-  <link rel="stylesheet" href="mobile.css?v=69091a7" media="(max-width: 700px), (max-height: 500px) and (orientation: landscape)">
-  <script src="js/sky.js?v=69091a7"></script>
-  <script src="js/iso.js?v=69091a7" defer></script>
-  <script src="js/site.js?v=69091a7" defer></script>
-  <script src="js/play.js?v=69091a7" defer></script>
-  <script src="js/dock.js?v=69091a7" defer></script>
+  <link rel="stylesheet" href="styles.css?v=591a072">
+  <link rel="stylesheet" href="mobile.css?v=591a072" media="(max-width: 700px), (max-height: 500px) and (orientation: landscape)">
+  <script src="js/sky.js?v=591a072"></script>
+  <script src="js/iso.js?v=591a072" defer></script>
+  <script src="js/site.js?v=591a072" defer></script>
+  <script src="js/play.js?v=591a072" defer></script>
+  <script src="js/dock.js?v=591a072" defer></script>
 </head>
 <body class="home">
   <svg class="sprite" aria-hidden="true" focusable="false">
@@ -125,6 +125,17 @@
         <div class="band-copy">
           <h2>The pit fights back.</h2>
           <p>Every drop fills the pressure column. When it's full, a new row lifts the pit. Stack past the rim and the run ends.</p>
+        </div>
+      </article>
+      <article class="band band-streak" data-ink>
+        <div class="band-stage">
+          <canvas class="band-cv streak-cv" role="img" aria-label="Blocks drop one after another onto blocks of their own color and burst. Each scoring drop fills the streak meter and raises the multiplier, until a drop that scores nothing resets it."></canvas>
+          <canvas class="band-gauge streak-gauge" aria-hidden="true"></canvas>
+          <div class="pit-pops" aria-hidden="true"></div>
+        </div>
+        <div class="band-copy">
+          <h2>Keep the streak alive.</h2>
+          <p>Every drop that scores raises your multiplier, up to ×2.4. A drop that scores nothing resets it.</p>
         </div>
       </article>
     </section>

@@ -798,6 +798,14 @@
 
     function keyFrame() {
       reset();
+      if (script.keyStreak) {
+        streak = script.keyStreak;
+        streakView.i = Math.min(1, streak / 6);
+        piece = null;
+        phase = 'end';
+        endT = -1e9;
+        return;
+      }
       script.steps.slice(0, 3).forEach(function (st) {
         var y = colH(st.x, st.z);
         grid[st.x][y][st.z] = block(st.c, y);
@@ -896,72 +904,74 @@
     function drawGauges(now) {
       var g = gauges.getContext('2d'), gw = gauges.width / Math.min(window.devicePixelRatio || 1, 2), gh = gauges.height / Math.min(window.devicePixelRatio || 1, 2);
       g.clearRect(0, 0, gw, gh);
-      var S = Math.min(gw / 40, (gh - 8) / (opts.streak === false ? 104 : 262)), t = now / 1000;
+      var S = Math.min(gw / 40, (gh - 8) / (opts.pressure === false ? 128 : opts.streak === false ? 104 : 262)), t = now / 1000;
       var edge = 10, dy = edge / 2, dx = edge * Math.cos(Math.PI / 6), inset = 2, cr = edge * 0.12;
       var base = [34, 211, 238], mid = base.map(function (v) { return v * 0.72; });
       var prog = pressure / PRESSURE_MAX, critical = prog >= 0.75;
       var pulseB = critical ? 1.175 + 0.175 * Math.sin(t * 6) : 1;
       var dark = 1;
-      g.save();
-      g.translate((gw - (2 * dx + 2 * inset) * S) / 2, 4);
-      g.scale(S, S);
-      g.shadowColor = 'rgba(0,0,0,0.55)';
-      g.shadowBlur = 2;
-      g.shadowOffsetY = 1;
-      function faceFill(pts, top, factor, filled, alpha, fade) {
-        roundPoly(g, pts.map(function (p) { return [p[0] + inset, p[1]]; }), cr);
-        g.fillStyle = rgb(base.map(function (v) { return v * dark; }), alpha);
-        g.fill();
-        if (filled) {
-          var gr = g.createLinearGradient(0, top + edge, 0, top - dy);
-          gr.addColorStop(0, rgb(base.map(function (v) { return v * factor * pulseB; })));
-          gr.addColorStop(1, rgb(mid.map(function (v) { return v * factor * pulseB; })));
-          g.globalAlpha = fade;
-          g.fillStyle = gr;
-          g.fill();
-          g.globalAlpha = 1;
-        }
-      }
-      for (var row = PRESSURE_MAX - 1; row >= 0; row--) {
-        var top = inset + 2 * dy + row * edge, filled = prog * 8 >= (7 - row) + 1;
-        var fade = 1;
-        if (filled && pressFill.row === row) fade = easeOutQ(Math.min(1, (clock - pressFill.t) / 0.15));
-        faceFill([[dx, top], [0, top - dy], [0, top - dy + edge], [dx, top + edge]], top, 0.8, filled, 0.36, fade);
-        faceFill([[dx, top], [dx, top + edge], [2 * dx, top - dy + edge], [2 * dx, top - dy]], top, 1, filled, 0.26, fade);
-        if (row === 0) {
-          roundPoly(g, [[dx + inset, 2 * dy + inset], [2 * dx + inset, dy + inset], [dx + inset, inset], [inset, dy + inset]], cr);
-          g.fillStyle = filled ? rgb(mid.map(function (v) { return v * 1.15 * pulseB; }), fade) : rgb(base, 0.18);
-          g.fill();
-        }
-      }
-      g.shadowColor = 'transparent';
       var bottom = inset + 2 * dy + 7 * edge + edge;
-      g.strokeStyle = 'rgba(0,0,0,0.3)';
-      g.lineWidth = 0.75;
-      g.beginPath();
-      g.moveTo(inset + dx, inset); g.lineTo(inset + 2 * dx, inset + dy); g.lineTo(inset + 2 * dx, bottom - dy); g.lineTo(inset + dx, bottom); g.lineTo(inset, bottom - dy); g.lineTo(inset, inset + dy); g.closePath();
-      for (var r2 = 0; r2 < PRESSURE_MAX; r2++) {
-        var tp = inset + 2 * dy + r2 * edge - dy;
-        g.moveTo(inset, tp); g.lineTo(inset + dx, tp + dy); g.lineTo(inset + 2 * dx, tp);
-      }
-      g.moveTo(inset + dx, inset + 2 * dy); g.lineTo(inset + dx, bottom);
-      g.stroke();
-      if (pressBurst >= 0) {
-        var be = clock - pressBurst, bo = be < 0.05 ? 1 : Math.max(0, 1 - easeOutQ((be - 0.05) / 0.25));
-        if (bo > 0) {
-          g.globalCompositeOperation = 'lighter';
-          g.fillStyle = 'rgba(255,255,255,' + (bo * 0.35) + ')';
-          g.beginPath();
-          g.moveTo(inset + dx, inset); g.lineTo(inset + 2 * dx, inset + dy); g.lineTo(inset + 2 * dx, bottom - dy); g.lineTo(inset + dx, bottom); g.lineTo(inset, bottom - dy); g.lineTo(inset, inset + dy); g.closePath();
+      if (opts.pressure !== false) {
+        g.save();
+        g.translate((gw - (2 * dx + 2 * inset) * S) / 2, 4);
+        g.scale(S, S);
+        g.shadowColor = 'rgba(0,0,0,0.55)';
+        g.shadowBlur = 2;
+        g.shadowOffsetY = 1;
+        function faceFill(pts, top, factor, filled, alpha, fade) {
+          roundPoly(g, pts.map(function (p) { return [p[0] + inset, p[1]]; }), cr);
+          g.fillStyle = rgb(base.map(function (v) { return v * dark; }), alpha);
           g.fill();
-          g.globalCompositeOperation = 'source-over';
+          if (filled) {
+            var gr = g.createLinearGradient(0, top + edge, 0, top - dy);
+            gr.addColorStop(0, rgb(base.map(function (v) { return v * factor * pulseB; })));
+            gr.addColorStop(1, rgb(mid.map(function (v) { return v * factor * pulseB; })));
+            g.globalAlpha = fade;
+            g.fillStyle = gr;
+            g.fill();
+            g.globalAlpha = 1;
+          }
         }
+        for (var row = PRESSURE_MAX - 1; row >= 0; row--) {
+          var top = inset + 2 * dy + row * edge, filled = prog * 8 >= (7 - row) + 1;
+          var fade = 1;
+          if (filled && pressFill.row === row) fade = easeOutQ(Math.min(1, (clock - pressFill.t) / 0.15));
+          faceFill([[dx, top], [0, top - dy], [0, top - dy + edge], [dx, top + edge]], top, 0.8, filled, 0.36, fade);
+          faceFill([[dx, top], [dx, top + edge], [2 * dx, top - dy + edge], [2 * dx, top - dy]], top, 1, filled, 0.26, fade);
+          if (row === 0) {
+            roundPoly(g, [[dx + inset, 2 * dy + inset], [2 * dx + inset, dy + inset], [dx + inset, inset], [inset, dy + inset]], cr);
+            g.fillStyle = filled ? rgb(mid.map(function (v) { return v * 1.15 * pulseB; }), fade) : rgb(base, 0.18);
+            g.fill();
+          }
+        }
+        g.shadowColor = 'transparent';
+        g.strokeStyle = 'rgba(0,0,0,0.3)';
+        g.lineWidth = 0.75;
+        g.beginPath();
+        g.moveTo(inset + dx, inset); g.lineTo(inset + 2 * dx, inset + dy); g.lineTo(inset + 2 * dx, bottom - dy); g.lineTo(inset + dx, bottom); g.lineTo(inset, bottom - dy); g.lineTo(inset, inset + dy); g.closePath();
+        for (var r2 = 0; r2 < PRESSURE_MAX; r2++) {
+          var tp = inset + 2 * dy + r2 * edge - dy;
+          g.moveTo(inset, tp); g.lineTo(inset + dx, tp + dy); g.lineTo(inset + 2 * dx, tp);
+        }
+        g.moveTo(inset + dx, inset + 2 * dy); g.lineTo(inset + dx, bottom);
+        g.stroke();
+        if (pressBurst >= 0) {
+          var be = clock - pressBurst, bo = be < 0.05 ? 1 : Math.max(0, 1 - easeOutQ((be - 0.05) / 0.25));
+          if (bo > 0) {
+            g.globalCompositeOperation = 'lighter';
+            g.fillStyle = 'rgba(255,255,255,' + (bo * 0.35) + ')';
+            g.beginPath();
+            g.moveTo(inset + dx, inset); g.lineTo(inset + 2 * dx, inset + dy); g.lineTo(inset + 2 * dx, bottom - dy); g.lineTo(inset + dx, bottom); g.lineTo(inset, bottom - dy); g.lineTo(inset, inset + dy); g.closePath();
+            g.fill();
+            g.globalCompositeOperation = 'source-over';
+          }
+        }
+        g.restore();
       }
-      g.restore();
 
       if (opts.streak === false) return;
       var i = clamp(streakView.i, 0, 1), pulse = clamp(streakView.pulse, -0.3, 1.4), T = FIRE;
-      var colW = 12, barH = 70, top0 = 4 + (bottom + 4) * S + 40 * S;
+      var colW = 12, barH = 70, top0 = opts.pressure === false ? 4 : 4 + (bottom + 4) * S + 40 * S;
       g.save();
       g.translate(gw / 2, top0);
       g.scale(S, S);
@@ -1095,6 +1105,36 @@
         { cells: [[0, 0, 0]], c: 0, x: 2, z: 1 }
       ],
       hold: 2.2
+    }
+  });
+  var streakCv = document.querySelector('.streak-cv');
+  if (streakCv) createPit({
+    canvas: streakCv,
+    gauges: document.querySelector('.streak-gauge'),
+    pops: streakCv.parentNode.querySelector('.pit-pops'),
+    pressure: false,
+    camTop: 6.4,
+    shiftX: -0.06,
+    gaugeBeside: 14,
+    script: {
+      grid: [
+        [0, 0, [1, 0]], [0, 1, [3, 2]], [0, 2, [1, 0]], [0, 3, [3, 2]],
+        [1, 0, [2, 1]], [1, 1, [0, 3]], [1, 2, [2, 1]], [1, 3, [0, 3]],
+        [2, 0, [3, 2]], [2, 1, [1, 0]], [2, 2, [3, 2]], [2, 3, [1, 0]],
+        [3, 0, [0, 3]], [3, 1, [2, 1]], [3, 2, [0, 3]], [3, 3, [2, 1]]
+      ],
+      pressure: 0,
+      keyStreak: 5,
+      steps: [
+        { cells: [[0, 0, 0]], c: 3, x: 1, z: 1 },
+        { cells: [[0, 0, 0]], c: 2, x: 2, z: 2 },
+        { cells: [[0, 0, 0]], c: 0, x: 0, z: 2 },
+        { cells: [[0, 0, 0]], c: 1, x: 3, z: 1 },
+        { cells: [[0, 0, 0]], c: 3, x: 1, z: 3 },
+        { cells: [[0, 0, 0]], c: 2, x: 2, z: 0 },
+        { cells: [[0, 0, 0]], c: 3, x: 3, z: 3 }
+      ],
+      hold: 2.4
     }
   });
 })();
