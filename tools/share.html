@@ -6,24 +6,28 @@
   <link rel="stylesheet" href="../styles.css">
   <style>
     html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; background: #050A1E; }
-    .card { position: relative; width: 1200px; height: 630px; overflow: hidden; background: radial-gradient(ellipse 70% 60% at 50% 46%, rgba(61, 112, 217, .22), transparent 70%), linear-gradient(180deg, #03061A 0%, #0A1A3D 42%, #331F4D 78%, #6B3563 100%); }
+    .card { position: relative; width: 1200px; height: 630px; overflow: hidden; background: radial-gradient(ellipse 60% 45% at 50% 108%, rgba(255, 179, 92, .55), transparent 70%), linear-gradient(180deg, #120F2E 0%, #331F4D 38%, #573361 58%, #8E3F7C 74%, #D9616B 90%, #FA944D 100%); }
+    #city { position: absolute; left: 0; bottom: 0; width: 1200px; height: 120px; }
     #stars { position: absolute; inset: 0; width: 1200px; height: 630px; }
     .copy { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: #fff; }
     .icon { width: 150px; height: 150px; border-radius: 34px; box-shadow: 0 0 0 2px rgba(255, 255, 255, .3), 0 20px 50px rgba(0, 0, 0, .5); }
-    h1 { margin-top: 38px; font-size: 128px; line-height: .9; letter-spacing: .05em; }
+    h1 { margin-top: 32px; font-size: 124px; line-height: .9; letter-spacing: .05em; }
     .tag { margin-top: 26px; font-size: 42px; letter-spacing: .1em; }
     .tag b { font-weight: 700; }
-    .out { margin-top: 40px; color: var(--gold); font-weight: 700; font-size: 20px; letter-spacing: .32em; text-transform: uppercase; }
+    .badge { margin-top: 34px; height: 62px; width: auto; filter: drop-shadow(0 10px 22px rgba(18, 15, 46, .45)); }
+    .copy { padding-bottom: 96px; }
+    h1, .tag { text-shadow: 0 4px 18px rgba(18, 15, 46, .45); }
   </style>
 </head>
 <body>
   <div class="card">
     <canvas id="stars"></canvas>
+    <canvas id="city"></canvas>
     <div class="copy">
       <img class="icon" src="../assets/img/logo-320.png" alt="">
       <h1>Block Pit</h1>
       <p class="tag"><b class="k-r">Drop.</b> <b class="k-y">Match.</b> <b class="k-c">Chain.</b></p>
-      <p class="out">Out now on the App Store</p>
+      <img class="badge" src="../assets/img/badges/app-store-black.svg" alt="">
     </div>
   </div>
   <script>
@@ -34,10 +38,24 @@
       for (var i = 0; i < 520; i++) {
         var x = R() * 1200, y = R() * 630, big = R() < 0.1, dx = (x - 600) / 420, dy = (y - 300) / 230;
         var calm = Math.min(1, Math.sqrt(dx * dx + dy * dy));
-        g.globalAlpha = (big ? 0.8 : 0.45) * (1 - y / 630 * 0.6) * (0.25 + 0.75 * calm);
+        g.globalAlpha = (big ? 0.8 : 0.45) * Math.max(0, 1 - y / 380) * (0.25 + 0.75 * calm);
         g.fillStyle = '#fff';
         g.beginPath(); g.arc(x, y, big ? 1.4 : 0.7, 0, 6.2832); g.fill();
       }
+      var cc = document.getElementById('city'), c = cc.getContext('2d');
+      cc.width = 2400; cc.height = 240; c.scale(2, 2);
+      [{ col: 'rgba(120,52,98,0.55)', min: 0.35, max: 0.75, bw: [40, 90], win: 0, s: 7 },
+       { col: 'rgba(70,32,80,0.85)', min: 0.25, max: 0.7, bw: [34, 80], win: 0.08, s: 19 },
+       { col: '#24123A', min: 0.18, max: 0.55, bw: [28, 70], win: 0.2, s: 41 }].forEach(function (L) {
+        seed = L.s; var x = -10, h = 120;
+        while (x < 1210) {
+          var bw = L.bw[0] + R() * (L.bw[1] - L.bw[0]), bh = h * (L.min + R() * (L.max - L.min)), top = h - bh;
+          c.fillStyle = L.col; c.fillRect(x, top, bw - 3, bh);
+          if (R() < 0.35) { var sw = (bw - 3) * 0.55; c.fillRect(x + (bw - 3 - sw) / 2, top - sw * 0.45, sw, sw * 0.45 + 1); }
+          if (L.win) for (var wy = top + 10; wy < h - 8; wy += 13) for (var wx = x + 7; wx < x + bw - 12; wx += 12) if (R() < L.win) { c.fillStyle = R() < 0.5 ? 'rgba(255,210,122,0.85)' : 'rgba(255,176,32,0.6)'; c.fillRect(wx, wy, 6, 7); c.fillStyle = L.col; }
+          x += bw + R() * 8;
+        }
+      });
       document.body.setAttribute('data-ready', '1');
     })();
   </script>
