@@ -129,7 +129,7 @@
       var rgb = it2.rgb || RGB[it2.c];
       var key = it2.rgb ? it2.rgb.join(',') : it2.c;
       ctx.globalAlpha = it2.a == null ? 1 : it2.a;
-      var small = s * e.k < 14, glow = (it2.f || 0) * 0.9;
+      var small = it2.lo || s * e.k < 14, glow = (it2.f || 0) * 0.9;
       if (it2.flat || small) {
         for (var f0 = 0; f0 < 6; f0++) {
           if (!fl[f0].vis || (it2.hide && it2.hide[f0])) continue;

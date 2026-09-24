@@ -14,7 +14,7 @@
 
 
     var grid, piece, phase, fallY, fallV, score, streak, pressure, pending, nextId, aim, frags, flashes, timers;
-    var plan = null, planT = 0, shown = 0, wipeT = 0, clock = 0, freeze = 0, bob = 0;
+    var plan = null, planT = 0, shown = 0, wipeT = 0, clock = 0, bob = 0;
     var spin = { from: 0, to: 0, t: -10, next: 2.5, dur: 0.7 }, count = { from: 0, to: 0, t: -1 }, flashS = { v: 1, vel: 0, until: -1 };
     var ghostSim = { key: '', over: false }, DANGER_RED = [230, 31, 26];
     var ghost = { key: '', t: -1, from: [0, 0, 0], pos: null }, pressFill = { row: -1, t: 0 }, pressBurst = -1, lastPressure = 0;
@@ -425,7 +425,6 @@
       squashNeighbors(gone);
       if (chain >= 2) banner('Chain x' + chain + '!', chain >= 6 ? 'c3' : chain >= 4 ? 'c2' : 'c1', 28 * (1 + (Math.min(chain, 6) - 2) * 0.15));
       pulseChannel(chain >= 4 ? 3 : chain >= 2 ? 2 : 1);
-      if (!reduce) freeze = [0.04, 0.045, 0.05, 0.055, 0.06][Math.min(chain, 5) - 1];
       later(200, function () {
         var before = pairs();
         compact();
@@ -562,7 +561,6 @@
     }
 
     function step(dt) {
-      if (freeze > 0) { freeze -= dt; return; }
       clock += dt;
       bob += dt;
       botStep(dt);
@@ -724,7 +722,7 @@
         var k = f.k * (t < f.life * 0.6 ? 1 : Math.max(0.001, 1 - (t - f.life * 0.6) / (f.life * 0.4)));
         var p = I.project(cam, px, py2, pz);
         var M = I.mul(cam.M, I.mul(I.rotX(f.rx * t / f.life), I.rotY(f.ry * t / f.life)));
-        I.cubes(ctx, [{ x: -0.5, y: -0.5, z: -0.5, c: f.c, k: k }], { M: M, s: cam.s, x: p[0], y: p[1], pivot: [0, 0, 0] });
+        I.cubes(ctx, [{ x: -0.5, y: -0.5, z: -0.5, c: f.c, k: k, lo: true }], { M: M, s: cam.s, x: p[0], y: p[1], pivot: [0, 0, 0] });
       });
 
       flashes.forEach(function (f) {

@@ -24,7 +24,7 @@
     origins.forEach(function (o) {
       for (var i = 0; i < 7; i++) {
         var vx = (R() - 0.5) * 5, vz = (R() - 0.5) * 5, vy = 2.5 + R() * 3.5;
-        out.push({ x: o[0] + vx * tau, y: o[1] + vy * tau - 7 * tau * tau, z: o[2] + vz * tau, c: o[3], k: Math.max(0.02, 0.3 * (1 - tau / 0.85)) });
+        out.push({ x: o[0] + vx * tau, y: o[1] + vy * tau - 7 * tau * tau, z: o[2] + vz * tau, c: o[3], k: Math.max(0.02, 0.3 * (1 - tau / 0.85)), lo: true });
       }
     });
     return out;
