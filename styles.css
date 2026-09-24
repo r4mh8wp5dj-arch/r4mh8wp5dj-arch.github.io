@@ -95,6 +95,7 @@ main, .foot { position: relative; z-index: 1; }
   .bar nav { gap: 28px; }
   .bar nav a { font-size: 1.02rem; }
   .bar .appstore-sm img { height: 44px; }
+  .bar nav .bar-get { height: 44px; padding: 0 20px; font-size: .95rem; color: #0B2414; border-bottom: 0; }
 }
 
 .hero, .how, .skies, .end { position: relative; z-index: 1; }
@@ -135,9 +136,7 @@ main, .foot { position: relative; z-index: 1; }
 
 .cta-row { margin-top: 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 16px 20px; }
 .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
-.appstore { display: inline-flex; border-radius: 9px; transition: transform .25s var(--ease), box-shadow .25s var(--ease); }
-.appstore:hover, .appstore:focus-visible { transform: translateY(-3px) scale(1.04); box-shadow: 0 10px 24px rgba(4, 8, 24, .35); }
-.appstore:active { transform: translateY(0) scale(.98); }
+.appstore { display: inline-flex; border-radius: 9px; }
 .appstore img { display: block; height: var(--btn-h); width: auto; }
 .appstore-sm img { height: 40px; }
 .social { display: flex; gap: 4px; margin: 0; padding: 0; list-style: none; }
@@ -441,5 +440,4 @@ body:not(.home) .foot { background: #1a1233; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .001s !important; animation-iteration-count: 1 !important; transition-duration: .001s !important; scroll-behavior: auto !important; }
-  .appstore:hover, .appstore:focus-visible, .appstore:active { transform: none; }
 }
