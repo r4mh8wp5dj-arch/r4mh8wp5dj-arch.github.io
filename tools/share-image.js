@@ -9,7 +9,7 @@ const CHROME = process.env.CHROME_PATH || '/Applications/Google Chrome.app/Conte
   await p.evaluate(() => document.fonts.ready);
   await p.waitForSelector('body[data-ready]');
   await new Promise(r => setTimeout(r, 300));
-  await p.screenshot({ path: path.resolve(__dirname, '../assets/img/share.png'), clip: { x: 0, y: 0, width: 1200, height: 630 } });
+  await p.screenshot({ path: path.resolve(__dirname, '../assets/img/share.jpg'), type: 'jpeg', quality: 86, clip: { x: 0, y: 0, width: 1200, height: 630 } });
   await b.close();
-  console.log('Wrote assets/img/share.png');
+  console.log('Wrote assets/img/share.jpg');
 })();
