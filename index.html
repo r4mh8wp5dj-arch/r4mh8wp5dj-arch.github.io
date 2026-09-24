@@ -41,11 +41,12 @@
   }
   </script>
   <link rel="preload" href="assets/fonts/Nippo-Variable.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="styles.css?v=ddd5a31">
-  <script src="js/sky.js?v=ddd5a31"></script>
-  <script src="js/iso.js?v=ddd5a31" defer></script>
-  <script src="js/site.js?v=ddd5a31" defer></script>
-  <script src="js/play.js?v=ddd5a31" defer></script>
+  <link rel="stylesheet" href="styles.css?v=361c158">
+  <script src="js/sky.js?v=361c158"></script>
+  <script src="js/iso.js?v=361c158" defer></script>
+  <script src="js/site.js?v=361c158" defer></script>
+  <script src="js/play.js?v=361c158" defer></script>
+  <script src="js/dock.js?v=361c158" defer></script>
 </head>
 <body class="home">
   <svg class="sprite" aria-hidden="true" focusable="false">
@@ -102,6 +103,7 @@
     </section>
 
     <section class="how" id="how" aria-label="How to play">
+      <div class="steps">
       <article data-ink>
         <canvas class="scene" data-scene="drop" role="img" aria-label="A piece hovers over the pit, slides one cell, turns and drops into place."></canvas>
         <h2 class="k-r">Drop</h2>
@@ -117,7 +119,9 @@
         <h2 class="k-c">Chain</h2>
         <p>Blocks above fall into the gap and can match again, and every scoring drop in a row raises your multiplier.</p>
       </article>
-          <article class="band" data-ink>
+      </div>
+      <div class="steps-dots" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
+      <article class="band" data-ink>
         <div class="band-stage">
           <canvas class="band-cv" role="img" aria-label="The pressure column fills, a new row lifts the pit, the tallest column shows one, two, then three warning marks, and a chain burst brings it back down."></canvas>
           <canvas class="band-gauge" aria-hidden="true"></canvas>
@@ -182,5 +186,11 @@
       <small>© 2026 Block Pit</small>
     </div>
   </footer>
+
+  <aside class="dock" aria-label="Get Block Pit">
+    <img class="dock-icon" src="assets/img/logo-320.png" alt="" width="40" height="40">
+    <p><b>Block Pit</b><small>Out now on iPhone</small></p>
+    <a class="appstore" data-appstore href="https://apps.apple.com/app/id[APP_ID]"><img src="assets/img/badges/app-store-black.svg" alt="Download Block Pit on the App Store" width="120" height="40"></a>
+  </aside>
 </body>
 </html>
