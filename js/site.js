@@ -70,20 +70,33 @@
       }
     },
     chain: {
-      dur: 4.2, key: 2.05,
-      base: [[0, 0, 0, 3], [3, 0, 0, 2], [0, 0, 1, 5], [1, 0, 1, 0], [2, 0, 1, 1], [3, 0, 1, 5], [0, 0, 3, 2], [2, 0, 3, 5], [3, 0, 3, 3]],
+      dur: 5.8, key: 3.75, own: true,
+      bursts: [1.3, 2.2, 3.1, 4.0],
+      base: [[0, 0, 0, 5], [2, 0, 0, 1], [3, 0, 0, 2], [1, 0, 1, 5], [3, 0, 1, 3], [0, 0, 2, 2]],
+      piece: [1, 3],
+      cells: [[1, 2, 0, 1], [2, 2, 1, 2], [2, 3, 2, 3], [3, 3, 3, null]],
       draw: function (d, t) {
-        var b1 = 1.3, b2 = 2.2, fall = seg(t, 0.45, 0.8), f1 = flash(t, 1.0, b1), f2 = flash(t, 1.9, b2);
-        var bf = seg(t, 1.45, 1.75), items = [];
-        this.base.forEach(function (b) {
-          var red = b[0] === 1 && b[2] === 1, blue = b[0] === 2 && b[2] === 1;
-          if ((red && t >= b1) || (blue && t >= b2)) return;
-          items.push({ x: b[0], y: b[1], z: b[2], c: b[3], f: red ? f1 : blue ? f2 : 0 });
+        var B = this.bursts, cells = this.cells, piece = this.piece, items = [], parts = [];
+        function glow(k) { return flash(t, B[k] - 0.3, B[k]); }
+        this.base.forEach(function (b) { items.push({ x: b[0], y: 0, z: b[2], c: b[3] }); });
+        cells.forEach(function (c, k) {
+          if (t < B[k]) items.push({ x: c[0], y: 0, z: c[1], c: c[2], f: glow(k) });
+          if (c[3] != null && t < B[k + 1]) {
+            var p = seg(t, B[k] + 0.15, B[k] + 0.45), y = 1 - p * p;
+            items.push({ x: c[0], y: y, z: c[1], c: c[3], f: y < 0.02 ? glow(k + 1) : 0, sq: squash(t, B[k] + 0.45, B[k] + 0.6, 0.16) });
+          }
+          var from = k === 0 ? piece : cells[k - 1];
+          parts = parts.concat(frags([[from[0], 0, from[1], c[2]], [c[0], 0, c[1], c[2]]], B[k], t, 3 + k * 4));
         });
-        if (t < b1) items.push({ x: 1, y: 2.6 - 2.6 * fall * fall + hover(t, 0.45), z: 0, c: 0, f: f1, sq: squash(t, 0.8, 1.0, 0.22) });
-        if (t < b2) items.push({ x: 1, y: t < 1.45 ? 1 : 1 - bf * bf, z: 1, c: 1, f: f2, sq: squash(t, 1.75, 1.9, 0.16) });
-        d.cubes(items.concat(frags([[1, 0, 0, 0], [1, 0, 1, 0]], b1, t, 3), frags([[1, 0, 1, 1], [2, 0, 1, 1]], b2, t, 11)));
-        if (t >= b2) d.popup('×2', [1.6, 1.3 + seg(t, b2, b2 + 1.2) * 1.2, 1.2], 1 - seg(t, b2 + 0.9, b2 + 1.5));
+        var fall = seg(t, 0.45, 0.8);
+        if (t < B[0]) items.push({ x: piece[0], y: 2.6 - 2.6 * fall * fall + hover(t, 0.45), z: piece[1], c: 0, f: glow(0), sq: squash(t, 0.8, 1.0, 0.22) });
+        d.cubes(items.concat(parts));
+        for (var k = 1; k < B.length; k++) {
+          if (t < B[k]) continue;
+          var a = cells[k - 1], b = cells[k], last = k === B.length - 1;
+          var fade = last ? 1 - seg(t, B[k] + 0.9, B[k] + 1.5) : 1 - seg(t, B[k] + 0.55, B[k] + 0.85);
+          if (fade > 0) d.popup('×' + (k + 1), [(a[0] + b[0]) / 2 + 0.5, 1.3 + seg(t, B[k], B[k] + 1.2) * 1.2, (a[1] + b[1]) / 2 + 0.5], fade, null, 0.85 + (k - 1) * 0.15);
+        }
       }
     }
   };
