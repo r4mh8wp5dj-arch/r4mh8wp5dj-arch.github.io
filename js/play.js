@@ -15,7 +15,7 @@
 
     var grid, piece, phase, fallY, fallV, score, streak, pressure, pending, nextId, aim, frags, flashes, timers;
     var plan = null, planT = 0, shown = 0, wipeT = 0, clock = 0, freeze = 0, bob = 0;
-    var spin = { from: 0, to: 0, t: -10, next: 2.5, dur: 0.7, n: 0 }, count = { from: 0, to: 0, t: -1 }, flashS = { v: 1, vel: 0, until: -1 };
+    var spin = { from: 0, to: 0, t: -10, next: 2.5, dur: 0.7 }, count = { from: 0, to: 0, t: -1 }, flashS = { v: 1, vel: 0, until: -1 };
     var ghostSim = { key: '', over: false }, DANGER_RED = [230, 31, 26];
     var ghost = { key: '', t: -1, from: [0, 0, 0], pos: null }, pressFill = { row: -1, t: 0 }, pressBurst = -1, lastPressure = 0;
     var chan = { gain: 1, from: 1, peak: 1, t: -1, heat: 0, tier: 0, tierT: 0, flow: 0 };
@@ -67,7 +67,7 @@
     function noClusterFill(cells) {
       cells.forEach(function (p) {
         var bad = {};
-        [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, 0, 1], [0, 0, -1]].forEach(function (d) {
+        [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]].forEach(function (d) {
           var x = p[0] + d[0], y = p[1] + d[1], z = p[2] + d[2];
           if (x < 0 || x >= W || z < 0 || z >= D || y < 0 || y >= TOP) return;
           var n = grid[x][y][z];
@@ -95,7 +95,7 @@
         pressure = lastPressure = script.pressure;
       } else {
         var cells = [];
-        for (var x = 0; x < W; x++) for (var z = 0; z < D; z++) cells.push([x, 0, z]);
+        for (var y = 0; y < (opts.layers || 1); y++) for (var x = 0; x < W; x++) for (var z = 0; z < D; z++) cells.push([x, y, z]);
         noClusterFill(cells);
       }
       shown = 0;
@@ -587,7 +587,7 @@
       var fw = 2 * Math.PI / 0.22, ftarget = clock < flashS.until ? 1.22 : 1;
       flashS.vel += ((ftarget - flashS.v) * fw * fw - 2 * 0.45 * fw * flashS.vel) * dt;
       flashS.v += flashS.vel * dt;
-      if (!reduce && !script && clock >= spin.next && clock - spin.t > spin.dur) { var slow = spin.n >= 2; spin = { from: spin.to, to: spin.to + Math.PI / 2, t: clock, dur: slow ? 1.3 : 0.7, next: clock + (slow ? 6 : 2.5), n: spin.n + 1 }; }
+      if (!reduce && !script && clock >= spin.next && clock - spin.t > spin.dur) spin = { from: spin.to, to: spin.to + Math.PI / 2, t: clock, dur: 0.7, next: clock + 2.5 };
       if (phase === 'fall') {
         fallV += (reduce ? 26 : 70) * dt;
         fallY -= fallV * dt;
@@ -1079,6 +1079,7 @@
   ];
   createPit({
     canvas: document.getElementById('pit'),
+    layers: 5,
     score: document.getElementById('hud-score'),
     scoreCv: document.getElementById('hud-score-cv'),
     gauges: document.getElementById('hud-gauges'),

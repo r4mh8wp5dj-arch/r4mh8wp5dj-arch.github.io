@@ -412,7 +412,11 @@ main, .foot { position: relative; z-index: 1; }
   .gnote-press { top: -28px; }
   .gnote-streak { top: 150px; }
   .pit-wrap { transform: translateY(-17%); }
-  .hud { position: relative; z-index: 1; margin-left: -24px; }
+  .hud { position: relative; z-index: 1; }
+}
+
+@media (min-width: 1000px) {
+  .hud { margin-left: -24px; }
 }
 
 @media (min-width: 1200px) {
