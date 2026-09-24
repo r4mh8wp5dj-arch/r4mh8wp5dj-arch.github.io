@@ -140,8 +140,8 @@ main, .foot { position: relative; z-index: 1; }
 .appstore img { display: block; height: var(--btn-h); width: auto; }
 .appstore-sm img { height: 40px; }
 .social { display: flex; gap: 4px; margin: 0; padding: 0; list-style: none; }
-.social a { display: grid; place-items: center; width: var(--btn-h); height: var(--btn-h); border-radius: 50%; color: var(--ink); transition: background-color .2s, transform .2s var(--ease); }
-.social a:hover { background: rgba(255, 255, 255, .12); transform: translateY(-2px); }
+.social a { display: grid; place-items: center; width: var(--btn-h); height: var(--btn-h); border-radius: 50%; color: var(--ink); transition: background-color .2s; }
+.social a:hover { background: rgba(255, 255, 255, .12); }
 .on-light .social a:hover { background: rgba(10, 26, 61, .08); }
 .social svg { width: 24px; height: 24px; fill: currentColor; }
 .btn {
