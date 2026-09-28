@@ -13,7 +13,7 @@ function apply(html, file) {
   html = html.replace(/(<meta (?:property|name)="(?:og|twitter):image" content=")[^"]*?(assets\/[^"]+")/g, `$1${base}$2`);
   html = html.replace(/("url": ")[^"]*(")/g, `$1${url}$2`);
   html = html.replace(/("image": ")[^"]*?(assets\/[^"]+")/g, `$1${base}$2`);
-  html = html.replace(/("sameAs": \[")[^"]*(")/, `$1${cfg.social.instagram}$2`);
+  html = html.replace(/("sameAs": )\[[^\]]*\]/, (m, a) => a + JSON.stringify(Object.values(cfg.social).filter((u) => /^https:/.test(u))).replace(/,/g, ', '));
   html = html.replace(/(<a\b[^>]*\bdata-email="(\w+)"[^>]*>)([^<]*)(<\/a>)/g, (m, open, key, text, close) => {
     const addr = cfg.email[key];
     if (!addr) throw new Error(`Unknown email key "${key}" in ${file}`);
