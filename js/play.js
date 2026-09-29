@@ -9,7 +9,7 @@
     var canvas = opts.canvas;
     if (!canvas) return;
     var elScore = opts.score || null, scoreCv = opts.scoreCv || null, blobCv = document.createElement('canvas');
-    var gauges = opts.gauges, elPops = opts.pops, wrap = canvas.parentNode, reduce = I.reduce;
+    var gauges = opts.gauges, elPops = opts.pops, wrap = canvas.parentNode, fader = opts.fade || wrap, reduce = I.reduce;
     var script = opts.script || null, stepIdx = 0, endT = 0, doomT = 0, drops = 0, gray = null, marks = { key: '', t: 0 };
 
 
@@ -189,7 +189,7 @@
       return base;
     }
     function hoverY() { return Math.min(opts.hoverCap || (opts.cap ? camTop() - 2.2 : 1e9), Math.max(2.8, maxHeight() + 2.6)); }
-    function camTop() { return opts.camTop || (opts.cap ? (cw < 500 ? 9.2 : 9) : Math.max(cw < 500 ? 8.8 : 9.4, maxHeight() + 4.8)); }
+    function camTop() { return opts.camTop || (opts.cap ? 8.6 : Math.max(cw < 500 ? 8.8 : 9.4, maxHeight() + 4.8)); }
     function capped() { return opts.cap && maxHeight() > opts.cap; }
     function rest() { piece = null; plan = null; phase = 'end'; endT = 0; }
     function finalCells(cells, ax, az) {
@@ -610,6 +610,7 @@
         var sr = scoreCv.getBoundingClientRect();
         scoreCv.width = Math.round(sr.width * dpr); scoreCv.height = Math.round(sr.height * dpr);
       }
+      if (!gauges) return;
       var gr = gauges.getBoundingClientRect();
       gauges.width = Math.round(gr.width * dpr); gauges.height = Math.round(gr.height * dpr);
       gauges.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -639,9 +640,9 @@
         var hold = script ? script.hold : 0.9;
         if (phase === 'end') {
           endT += dt;
-          if (endT > hold) { reset(); wrap.style.opacity = 0; }
-          else wrap.style.opacity = (1 - clamp((endT - hold + 0.35) / 0.35, 0, 1)).toFixed(3);
-        } else if (wrap.style.opacity !== '' && +wrap.style.opacity < 1) wrap.style.opacity = Math.min(1, +wrap.style.opacity + dt / 0.35).toFixed(3);
+          if (endT > hold) { reset(); fader.style.opacity = 0; }
+          else fader.style.opacity = (1 - clamp((endT - hold + 0.35) / 0.35, 0, 1)).toFixed(3);
+        } else if (fader.style.opacity !== '' && +fader.style.opacity < 1) fader.style.opacity = Math.min(1, +fader.style.opacity + dt / 0.35).toFixed(3);
       }
       if (score !== count.to) {
         count = { from: shown, to: score, t: clock };
@@ -718,8 +719,12 @@
       var yaw = YAW0 + spin.from + (spin.to - spin.from) * easeInOut((clock - spin.t) / spin.dur);
       cam.M = I.view(yaw, ELEV); cam.s = fit.s; cam.x = fit.x + cw * (opts.shiftX || 0); cam.y = fit.y; cam.pivot = fit.pivot;
       if (opts.gaugeBeside) {
-        var gx = -1e9, gy = 0;
-        [[-0.35, -0.35], [4.35, -0.35], [4.35, 4.35], [-0.35, 4.35]].forEach(function (q) { var pp = I.project(cam, q[0], 0, q[1]); if (pp[0] > gx) { gx = pp[0]; gy = pp[1]; } });
+        var gx = -1e9, gy = 0, lx = 1e9;
+        [[-0.35, -0.35], [4.35, -0.35], [4.35, 4.35], [-0.35, 4.35]].forEach(function (q) { var pp = I.project(cam, q[0], 0, q[1]); lx = Math.min(lx, pp[0]); if (pp[0] > gx) { gx = pp[0]; gy = pp[1]; } });
+        if (opts.center) {
+          var dx = (cw - (lx + gx + opts.gaugeBeside + gauges.offsetWidth)) / 2;
+          cam.x += dx; gx += dx;
+        }
         var gl = Math.round(gx + opts.gaugeBeside) + 'px', gt = Math.round(gy - gauges.offsetHeight) + 'px';
         if (gauges.style.left !== gl) gauges.style.left = gl;
         if (gauges.style.top !== gt) gauges.style.top = gt;
@@ -816,7 +821,7 @@
       });
 
       drawMarks();
-      drawGauges(now);
+      if (gauges) drawGauges(now);
       if (scoreCv) drawScore(now);
     }
 
@@ -903,7 +908,7 @@
 
     function drawScore(now) {
       var dpr = Math.min(window.devicePixelRatio || 1, 2), w = scoreCv.width / dpr, h = scoreCv.height / dpr;
-      var g = scoreCv.getContext('2d'), t = reduce ? 3 : now / 1000, text = String(Math.round(shown)), size = Math.min(34, h * 0.62);
+      var g = scoreCv.getContext('2d'), t = reduce ? 3 : now / 1000, text = String(Math.round(shown)), size = Math.min(46, h * 0.62);
       if (blobCv.width !== scoreCv.width || blobCv.height !== scoreCv.height) { blobCv.width = scoreCv.width; blobCv.height = scoreCv.height; }
       var b = blobCv.getContext('2d');
       b.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -1136,12 +1141,12 @@
   createPit({
     canvas: document.getElementById('pit'),
     heights: [1, 1, 1, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 5, 5, 5],
-    cap: 6,
+    cap: 5,
     chains: 2,
     score: document.getElementById('hud-score'),
     scoreCv: document.getElementById('hud-score-cv'),
-    gauges: document.getElementById('hud-gauges'),
-    pops: document.querySelector('.pit-wrap .pit-pops')
+    pops: document.querySelector('.pit-wrap .pit-pops'),
+    fade: document.getElementById('pit')
   });
   var band = document.querySelector('.band-cv');
   if (band) createPit({
@@ -1152,7 +1157,7 @@
     camTop: 10.2,
     hoverCap: 10.4,
     noPoints: true,
-    shiftX: -0.06,
+    center: true,
     gaugeBeside: 10,
     script: {
       grid: HOLD,
@@ -1173,7 +1178,7 @@
     pops: streakCv.parentNode.querySelector('.pit-pops'),
     pressure: false,
     camTop: 6.4,
-    shiftX: -0.06,
+    center: true,
     gaugeBeside: 14,
     script: {
       grid: [

@@ -1,11 +1,11 @@
 @media (max-width: 700px) {
-  .checkpoints { grid-template-columns: minmax(0, 1fr); flex-direction: column-reverse; display: flex; gap: 14px; }
+  .checkpoints { display: flex; flex-direction: column-reverse; align-items: center; gap: 0; }
   .checkpoints::before { display: none; }
-  .checkpoints li { grid-template-columns: 120px minmax(0, 1fr); grid-template-rows: auto auto; justify-items: start; text-align: left; column-gap: 16px; align-items: center; }
-  .checkpoints li::after { display: none; }
-  .cp-art { grid-row: 1 / 3; height: 80px; border-radius: 14px; }
-  .checkpoints b { align-self: end; }
-  .checkpoints small { align-self: start; }
+  .checkpoints li { width: 100%; }
+  .cp-art { width: min(72vw, 280px); height: 112px; border-radius: 14px; }
+  .checkpoints b { margin-top: 12px; font-size: 1.1rem; }
+  .checkpoints li::after { order: 4; width: 8px; height: 47px; margin: 12px 0 14px; border-radius: 0; background: linear-gradient(to bottom, #3D70D9 0 8px, transparent 8px 13px, #4DB06E 13px 21px, transparent 21px 26px, #F2B03B 26px 34px, transparent 34px 39px, #E84D3D 39px 47px); box-shadow: none; filter: drop-shadow(0 1px 1px rgba(10, 16, 40, .35)); }
+  .checkpoints li:first-child::after { display: none; }
 }
 
 @media (max-width: 600px) {
@@ -13,35 +13,23 @@
   .title { font-size: min(13vw, 3.3rem); }
   .tag { font-size: 1.35rem; }
   .hero .appstore img { height: 52px; }
-  #hud-gauges { width: 48px; height: 300px; }
-  #hud-score-cv { width: 80px; height: 44px; margin-left: -12px; }
-  .hud-score { width: 56px; }
-  .machine { gap: 4px; }
-  .pit-wrap { aspect-ratio: 5 / 5.8; }
-  .machine { grid-template-columns: minmax(0, 1fr); }
-  .pit-wrap, .hud { grid-area: 1 / 1; }
-  .pit-wrap { justify-self: start; width: 380px; max-width: none; height: 430px; max-height: none; aspect-ratio: auto; margin-left: calc(50vw - 259px); }
-  .hud { justify-self: end; position: relative; z-index: 1; margin-right: calc(50vw - 174px); }
+  #hud-score-cv { width: 150px; height: 54px; margin: 0 auto; }
+  .hud-score { width: auto; }
+  .pit-wrap { width: 100%; max-width: 440px; height: 440px; max-height: none; aspect-ratio: auto; --banner-top: 30%; }
+  .hud { top: 2%; left: 0; right: 0; }
   .how { gap: 18px; padding-top: 6vh; padding-bottom: 6vh; }
   .how article { padding: 14px 18px 24px; }
   .scene { margin-bottom: 14px; max-width: 300px; }
   .how .band { grid-template-columns: minmax(0, 1fr); justify-items: center; text-align: center; padding: 14px 18px 28px; box-shadow: inset 0 0 0 1px rgba(255, 77, 94, .28), inset 0 4px 0 #E61F1A; }
   .band-stage { max-width: 360px; aspect-ratio: 1 / 1; margin-bottom: 4px; }
-  .band-gauge { width: 38px; height: 104px; }
+  .band-gauge { width: 46px; height: 126px; }
   .how .band-streak { box-shadow: inset 0 0 0 1px rgba(255, 140, 40, .3), inset 0 4px 0 #FF6B0F; }
   .band-streak .band-stage { order: 0; }
-  .streak-gauge { width: 40px; height: 128px; }
+  .streak-gauge { width: 50px; height: 160px; }
   .band p { margin-left: auto; margin-right: auto; }
   .foot-mail a { display: inline-flex; align-items: center; min-height: 44px; }
   .foot-mail { gap: 0; }
-  .hud { gap: 22px; width: 56px; }
-  .gnote { left: -6px; width: 68px; text-align: center; font-size: .8rem; }
-  .gnote b { font-size: .85rem; margin: 0; }
   .hud-score small { font-size: .85rem; }
-  .gnote span { display: none; }
-  .gnote-press { top: -20px; }
-  .gnote-streak { top: 131px; }
-  .gauges { margin-top: 14px; }
   .bar .mark, .bar nav a { min-height: 44px; display: inline-flex; align-items: center; }
   .foot nav a, .toc a { min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; }
   .toc a { display: grid; align-content: center; }
@@ -108,10 +96,7 @@
 @media (max-width: 359px) {
   .mark span { display: none; }
   .bar nav { gap: 20px; }
-  .machine { grid-template-columns: minmax(0, 1fr) auto; }
-  .pit-wrap, .hud { grid-area: auto; }
-  .pit-wrap { justify-self: center; width: 100%; margin-left: 0; height: auto; aspect-ratio: 5 / 5.8; }
-  .hud { margin-right: 0; }
+  .pit-wrap { height: auto; aspect-ratio: 1 / 1.1; }
 }
 
 @media (max-height: 500px) and (orientation: landscape) {

@@ -1,4 +1,5 @@
 (function () {
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   var PATH = [
     [0.00, '#4E6B30'], [0.06, '#7E9C58'], [0.15, '#6FA0D4'],
     [0.28, '#8FB8DC'], [0.37, '#E8B77A'],
