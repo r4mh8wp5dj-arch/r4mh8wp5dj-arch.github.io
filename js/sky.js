@@ -105,7 +105,7 @@
     var W = 0, H = 0, SH = 0, seededW = -1, docH = 1, stars = [], last = 0, sy = 0, dirty = true;
 
     function seed() {
-      var n = Math.round(Math.max(300, Math.min(2400, Math.round(W * SH / 700))) * parseFloat(root.getAttribute('data-stars') || '1'));
+      var n = Math.round(Math.max(300, Math.min(2400, Math.round(W * SH / (W < 700 ? 500 : 700)))) * parseFloat(root.getAttribute('data-stars') || '1'));
       stars = [];
       for (var i = 0; i < n; i++) {
         var big = Math.random() < 0.12;

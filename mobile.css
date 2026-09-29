@@ -36,7 +36,8 @@
   .foot-mail { gap: 0; }
   .hud { gap: 22px; width: 56px; }
   .gnote { left: -6px; width: 68px; text-align: center; font-size: .8rem; }
-  .gnote b { font-size: .82rem; margin: 0; }
+  .gnote b { font-size: .85rem; margin: 0; }
+  .hud-score small { font-size: .85rem; }
   .gnote span { display: none; }
   .gnote-press { top: -20px; }
   .gnote-streak { top: 131px; }
@@ -57,9 +58,9 @@
   .bar nav { gap: 18px; }
   .bar nav a { font-size: .88rem; }
   .hero { padding: 40px var(--gut) 14px; gap: 32px; }
-  .tag { margin-top: 14px; }
+  .tag { margin-top: 6px; }
   .pitch { margin-top: 18px; font-size: 1.2rem; }
-  .hero .cta-row { margin-top: 28px; }
+  .hero .cta-row { margin-top: 32px; }
   .how { gap: 14px; }
   .steps { display: flex; gap: 12px; margin: 0 calc(-1 * var(--gut)); padding: 0 8vw; overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none; }
   .steps::-webkit-scrollbar { display: none; }

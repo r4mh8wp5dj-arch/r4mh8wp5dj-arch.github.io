@@ -189,7 +189,7 @@
       return base;
     }
     function hoverY() { return Math.min(opts.hoverCap || (opts.cap ? camTop() - 2.2 : 1e9), Math.max(2.8, maxHeight() + 2.6)); }
-    function camTop() { return opts.camTop || (opts.cap ? (cw < 500 ? 9.8 : 10.2) : Math.max(cw < 500 ? 8.8 : 9.4, maxHeight() + 4.8)); }
+    function camTop() { return opts.camTop || (opts.cap ? (cw < 500 ? 9.2 : 9) : Math.max(cw < 500 ? 8.8 : 9.4, maxHeight() + 4.8)); }
     function capped() { return opts.cap && maxHeight() > opts.cap; }
     function rest() { piece = null; plan = null; phase = 'end'; endT = 0; }
     function finalCells(cells, ax, az) {
