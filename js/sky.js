@@ -190,7 +190,8 @@
         var br = bar.getBoundingClientRect();
         bar.classList.toggle('on-light', lum(colorAt((sy + br.top + br.height / 2) / docH)) > 0.18);
       }
-      if (reduce) draw(performance.now());
+      var t = performance.now();
+      if (reduce || t - last > 16) draw(t);
     }
 
     function loop(now) {

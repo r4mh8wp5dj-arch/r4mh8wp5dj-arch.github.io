@@ -26,7 +26,7 @@
       });
       return out;
     }
-    return { outer: ring(0.1, 0.16, 4), inner: ring(0.13, 0.13, 4), face: ring(0.055, 0.14, 4) };
+    return { outer: ring(0.1, 0.16, 4), inner: ring(0.13, 0.13, 4), face: ring(0.055, 0.14, 4), ghost: ring(0.012, 0.15, 4) };
   })();
   function mixRgb(a, b, f) { return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f]; }
   function pathUV(ctx, map, ring) {
@@ -130,6 +130,19 @@
       var key = it2.rgb ? it2.rgb.join(',') : it2.c;
       ctx.globalAlpha = it2.a == null ? 1 : it2.a;
       var small = it2.lo || s * e.k < 14, glow = (it2.f || 0) * 0.9;
+      if (it2.flat && !small) {
+        for (var g0 = 0; g0 < 6; g0++) {
+          if (!fl[g0].vis || (it2.hide && it2.hide[g0])) continue;
+          var GU = FACES[g0].uv, G00 = pts[GU[0]], G10 = pts[GU[1]], G01 = pts[GU[2]], G11 = pts[GU[3]];
+          pathUV(ctx, function (u, v) {
+            return [G00[0] + (G10[0] - G00[0]) * u + (G01[0] - G00[0]) * v + (G11[0] - G10[0] - G01[0] + G00[0]) * u * v,
+                    G00[1] + (G10[1] - G00[1]) * u + (G01[1] - G00[1]) * v + (G11[1] - G10[1] - G01[1] + G00[1]) * u * v];
+          }, RR.ghost);
+          ctx.fillStyle = css(shadeRgb(rgb, fl[g0].top ? 1.08 : 0.8 + 0.2 * Math.max(0, Math.min(1, (fl[g0].b - 0.6) / 0.58))));
+          ctx.fill();
+        }
+        continue;
+      }
       if (it2.flat || small) {
         for (var f0 = 0; f0 < 6; f0++) {
           if (!fl[f0].vis || (it2.hide && it2.hide[f0])) continue;

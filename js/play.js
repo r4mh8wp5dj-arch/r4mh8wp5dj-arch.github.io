@@ -16,7 +16,7 @@
     var grid, piece, phase, fallY, fallV, score, streak, pressure, pending, nextId, aim, frags, flashes, timers;
     var plan = null, planT = 0, shown = 0, wipeT = 0, clock = 0, bob = 0;
     var spin = { from: 0, to: 0, t: -10, next: 2.5, dur: 0.7 }, count = { from: 0, to: 0, t: -1 }, flashS = { v: 1, vel: 0, until: -1 };
-    var ghostSim = { key: '', over: false }, DANGER_RED = [230, 31, 26], GRAY = 100, CHAN_GRAY = [117, 120, 125], lift = -1, queued = null, fills = 0;
+    var ghostSim = { key: '', over: false }, DANGER_RED = [230, 31, 26], GRAY = 100, CHAN_GRAY = [117, 120, 125], lift = -1, queued = null, fills = 0, vis = { x: 1, z: 1 }, enterT = -10;
     var ghost = { key: '', t: -1, from: [0, 0, 0], pos: null }, pressFill = { row: -1, t: 0 }, pressBurst = -1, lastPressure = 0;
     var chan = { gain: 1, from: 1, peak: 1, t: -1, heat: 0, tier: 0, tierT: 0, flow: 0 };
     var streakView = { i: 0, v: 0, pulse: 0, pv: 0, pt: -1 };
@@ -133,21 +133,24 @@
         var st = script.steps[stepIdx++];
         if (!st) return rest();
         piece = { cells: st.cells.map(function (c) { return c.slice(); }), c: st.c };
-        aim = { x: st.x, z: st.z };
+        aim = { x: st.fx == null ? st.x : st.fx, z: st.fz == null ? st.z : st.fz };
         clampAim();
+        enter();
         phase = 'aim';
-        plan = schedule({ r: 0, x: st.x, z: st.z });
+        plan = schedule({ r: st.r || 0, x: st.x, z: st.z });
         planT = 0;
         return;
       }
       piece = opts.chains ? (queued || chainPiece(10)) : { cells: I.randomShape().cells, c: Math.floor(Math.random() * COLORS) };
       queued = null;
       clampAim();
+      enter();
       phase = 'aim';
       plan = choose();
       planT = 0;
     }
 
+    function enter() { vis = { x: aim.x, z: aim.z }; enterT = clock; }
     function insertLayer() {
       var hs = [];
       for (var x = 0; x < W; x++) {
@@ -219,6 +222,7 @@
       phase = 'fall';
       fallY = hoverY();
       fallV = 4;
+      vis = { x: aim.x, z: aim.z };
     }
 
     function lock() {
@@ -241,8 +245,10 @@
       } else {
         phase = 'resolve';
         settle(function () {
-          anticipate(groupsFor(ids, true));
-          later(120, function () { resolve(ids, true, 1); });
+          later(110, function () {
+            anticipate(groupsFor(ids, true));
+            later(120, function () { resolve(ids, true, 1); });
+          });
         });
       }
     }
@@ -654,6 +660,8 @@
       flashS.vel += ((ftarget - flashS.v) * fw * fw - 2 * 0.45 * fw * flashS.vel) * dt;
       flashS.v += flashS.vel * dt;
       if (!reduce && !script && clock >= spin.next && clock - spin.t > spin.dur) spin = { from: spin.to, to: spin.to + Math.PI / 2, t: clock, dur: 0.7, next: clock + 2.5 };
+      var glide = reduce ? 1 : Math.min(1, dt * 20);
+      vis.x += (aim.x - vis.x) * glide; vis.z += (aim.z - vis.z) * glide;
       if (phase === 'fall') {
         fallV += (reduce ? 26 : 70) * dt;
         fallY -= fallV * dt;
@@ -788,8 +796,9 @@
         });
       }
       if (piece && (phase === 'aim' || phase === 'fall')) {
-        var py = phase === 'fall' ? fallY : hoverY() + (reduce ? 0 : Math.sin(bob * 2.4) * 0.12);
-        piece.cells.forEach(function (c) { items.push({ x: aim.x + c[0], y: py + c[1], z: aim.z + c[2], c: piece.c, k: BLK }); });
+        var hy = hoverY(), drop2 = reduce ? 0 : 1 - easeOutQ(clamp((clock - enterT) / 0.3, 0, 1));
+        var py = phase === 'fall' ? fallY : hy + drop2 * (camTop() + 1.5 - hy) + (reduce ? 0 : Math.sin(bob * 2.4) * 0.12);
+        piece.cells.forEach(function (c) { items.push({ x: vis.x + c[0], y: py + c[1], z: vis.z + c[2], c: piece.c, k: BLK }); });
       }
 
       I.cubes(ctx, items, cam);
@@ -859,6 +868,12 @@
 
     function keyFrame() {
       reset();
+      if (script.plain) {
+        piece = null;
+        phase = 'end';
+        endT = -1e9;
+        return;
+      }
       if (script.keyStreak) {
         streak = script.keyStreak;
         streakView.i = Math.min(1, streak / 6);
@@ -1171,6 +1186,38 @@
       hold: 2.2
     }
   });
+  var HOW = {
+    drop: {
+      camTop: 3.6, hoverCap: 2.2, noPoints: true,
+      script: {
+        grid: [[0, 0, [1]], [1, 0, [2]], [2, 0, [1]], [3, 0, [3]], [0, 1, [3]], [3, 1, [2]], [0, 2, [2]], [1, 3, [3]], [3, 3, [1]]],
+        steps: [{ cells: [[0, 0, 0], [1, 0, 0], [0, 0, 1]], c: 0, fx: 0, fz: 1, x: 1, z: 1, r: 1 }]
+      }
+    },
+    match: {
+      camTop: 3.4, hoverCap: 2,
+      script: {
+        grid: [[0, 0, [1]], [1, 0, [0]], [3, 0, [2]], [0, 1, [2]], [2, 1, [3]], [3, 1, [1]], [0, 3, [0]], [2, 3, [2]], [3, 3, [0]]],
+        steps: [{ cells: [[0, 0, 0]], c: 3, fx: 1, fz: 2, x: 1, z: 1 }]
+      }
+    },
+    chain: {
+      camTop: 4.6, hoverCap: 2.4,
+      script: {
+        grid: [[1, 1, [0, 1, 2, 3]], [2, 1, [1]], [1, 2, [2]], [1, 0, [3]], [0, 0, [1]], [0, 2, [3]], [2, 0, [0]], [3, 1, [2]], [2, 2, [0]], [3, 0, [3, 1]], [1, 3, [1]], [3, 3, [0]]],
+        steps: [{ cells: [[0, 0, 0]], c: 0, fx: 0, fz: 2, x: 0, z: 1 }]
+      }
+    }
+  };
+  document.querySelectorAll('canvas[data-how]').forEach(function (cv) {
+    var def = HOW[cv.getAttribute('data-how')];
+    if (!def) return;
+    def.script.pressure = 0;
+    def.script.hold = 1.6;
+    def.script.plain = true;
+    createPit({ canvas: cv, pops: cv.parentNode.querySelector('.pit-pops'), fade: cv, camTop: def.camTop, hoverCap: def.hoverCap, noPoints: def.noPoints, script: def.script });
+  });
+
   var streakCv = document.querySelector('.streak-cv');
   if (streakCv) createPit({
     canvas: streakCv,

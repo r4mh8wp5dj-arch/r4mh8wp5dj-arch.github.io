@@ -7,16 +7,16 @@
   <meta name="description" content="Match colors, trigger chain reactions, and rise from the ground to deep space. Block Pit is out now on the App Store for iPhone.">
   <meta name="theme-color" content="#000000">
   <link rel="canonical" href="https://r4mh8wp5dj-arch.github.io/">
-  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png?v=4e5523e">
-  <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon-16.png?v=4e5523e">
-  <link rel="apple-touch-icon" sizes="180x180" href="assets/img/apple-touch-icon.png?v=4e5523e">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png?v=db6954a">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon-16.png?v=db6954a">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/img/apple-touch-icon.png?v=db6954a">
   <link rel="manifest" href="site.webmanifest">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Block Pit">
   <meta property="og:url" content="https://r4mh8wp5dj-arch.github.io/">
   <meta property="og:title" content="Block Pit">
   <meta property="og:description" content="Match colors, trigger chain reactions, and rise from the ground to deep space. Block Pit is out now on the App Store for iPhone.">
-  <meta property="og:image" content="https://r4mh8wp5dj-arch.github.io/assets/img/share.jpg?v=4e5523e">
+  <meta property="og:image" content="https://r4mh8wp5dj-arch.github.io/assets/img/share.jpg?v=db6954a">
   <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -24,7 +24,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Block Pit">
   <meta name="twitter:description" content="Match colors, trigger chain reactions, and rise from the ground to deep space. Block Pit is out now on the App Store for iPhone.">
-  <meta name="twitter:image" content="https://r4mh8wp5dj-arch.github.io/assets/img/share.jpg?v=4e5523e">
+  <meta name="twitter:image" content="https://r4mh8wp5dj-arch.github.io/assets/img/share.jpg?v=db6954a">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -32,7 +32,7 @@
     "name": "Block Pit",
     "description": "Match colors, trigger chain reactions, and rise from the ground to deep space. A 3D block puzzle, out now on iPhone.",
     "url": "https://r4mh8wp5dj-arch.github.io/",
-    "image": "https://r4mh8wp5dj-arch.github.io/assets/img/share.jpg?v=4e5523e",
+    "image": "https://r4mh8wp5dj-arch.github.io/assets/img/share.jpg?v=db6954a",
     "genre": "Puzzle",
     "gamePlatform": "iOS",
     "operatingSystem": "iOS",
@@ -42,17 +42,17 @@
   }
   </script>
   <link rel="preload" href="assets/fonts/Nippo-Variable.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="styles.css?v=4e5523e">
-  <link rel="stylesheet" href="mobile.css?v=4e5523e" media="(max-width: 700px), (max-height: 500px) and (orientation: landscape)">
-  <script src="js/sky.js?v=4e5523e"></script>
-  <script src="js/iso.js?v=4e5523e" defer></script>
-  <script src="js/site.js?v=4e5523e" defer></script>
-  <script src="js/play.js?v=4e5523e" defer></script>
-  <script src="js/dock.js?v=4e5523e" defer></script>
+  <link rel="stylesheet" href="styles.css?v=db6954a">
+  <link rel="stylesheet" href="mobile.css?v=db6954a" media="(max-width: 700px), (max-height: 500px) and (orientation: landscape)">
+  <script src="js/sky.js?v=db6954a"></script>
+  <script src="js/iso.js?v=db6954a" defer></script>
+  <script src="js/site.js?v=db6954a" defer></script>
+  <script src="js/play.js?v=db6954a" defer></script>
+  <script src="js/dock.js?v=db6954a" defer></script>
 </head>
 <body class="home">
   <header class="bar">
-    <a class="mark" href="./" aria-label="Block Pit home"><img src="assets/img/favicon-64.png?v=4e5523e" alt="" width="28" height="28"><span>Block Pit</span></a>
+    <a class="mark" href="./" aria-label="Block Pit home"><img src="assets/img/favicon-64.png?v=db6954a" alt="" width="28" height="28"><span>Block Pit</span></a>
     <nav aria-label="Site">
       <a class="nav-x" href="#how">How to play</a>
       <a href="contact.html">Contact</a>
@@ -91,17 +91,17 @@
     <section class="how" id="how" aria-label="How to play">
       <div class="steps">
       <article data-ink>
-        <canvas class="scene" data-scene="drop" role="img" aria-label="A piece hovers over the pit, slides one cell, turns and drops into place."></canvas>
+        <div class="scene-stage"><canvas class="scene" data-how="drop" role="img" aria-label="A piece hovers over the pit, slides one cell, turns and drops into place."></canvas><div class="pit-pops" aria-hidden="true"></div></div>
         <h2 class="k-r">Drop</h2>
         <p>Drag a piece over the pit, tap to turn it, and let go.</p>
       </article>
       <article data-ink>
-        <canvas class="scene" data-scene="match" role="img" aria-label="A yellow block lands next to another yellow block and both burst."></canvas>
+        <div class="scene-stage"><canvas class="scene" data-how="match" role="img" aria-label="A yellow block lands next to another yellow block and both burst."></canvas><div class="pit-pops" aria-hidden="true"></div></div>
         <h2 class="k-y">Match</h2>
         <p>Two blocks of one color touching, in any direction, burst.</p>
       </article>
       <article data-ink>
-        <canvas class="scene" data-scene="chain" role="img" aria-label="A red block drops next to a red block and both burst. Each block above then falls into the gap, touches its own color and bursts: blue, then green, then yellow, for a chain of four."></canvas>
+        <div class="scene-stage"><canvas class="scene" data-how="chain" role="img" aria-label="A red block drops next to a red block and both burst. The blocks above fall into the gap one by one, each touching its own color and bursting: blue, then green, then yellow, for a chain of four."></canvas><div class="pit-pops" aria-hidden="true"></div></div>
         <h2 class="k-c">Chain</h2>
         <p>Blocks above fall into the gap and match again, setting off a chain.</p>
       </article>
@@ -147,7 +147,7 @@
 
     <section class="end">
       <div class="end-in" data-ink>
-        <img class="icon" src="assets/img/logo-320.png?v=4e5523e" alt="Block Pit app icon" width="112" height="112">
+        <img class="icon" src="assets/img/logo-320.png?v=db6954a" alt="Block Pit app icon" width="112" height="112">
         <h2>The pit is open.</h2>
         <p>On iPhone. Made by a solo developer.</p>
         <div class="cta-row">
@@ -163,9 +163,9 @@
       <div class="foot-social">
       <p>Follow us</p>
       <ul class="social" aria-label="Block Pit on social media">
-        <li><a data-social="instagram" href="https://www.instagram.com/playblockpit" target="_blank" rel="me noopener" aria-label="Block Pit on Instagram"><img src="assets/img/social/instagram.png?v=4e5523e" alt="" width="26" height="26"></a></li>
-        <li><a data-social="tiktok" href="https://www.tiktok.com/@playblockpit" target="_blank" rel="me noopener" aria-label="Block Pit on TikTok"><img src="assets/img/social/tiktok.png?v=4e5523e" alt="" width="26" height="26"></a></li>
-        <li><a data-social="facebook" href="https://www.facebook.com/share/19Y12mFhRn/" target="_blank" rel="me noopener" aria-label="Block Pit on Facebook"><img src="assets/img/social/facebook.png?v=4e5523e" alt="" width="26" height="26"></a></li>
+        <li><a data-social="instagram" href="https://www.instagram.com/playblockpit" target="_blank" rel="me noopener" aria-label="Block Pit on Instagram"><img src="assets/img/social/instagram.png?v=db6954a" alt="" width="26" height="26"></a></li>
+        <li><a data-social="tiktok" href="https://www.tiktok.com/@playblockpit" target="_blank" rel="me noopener" aria-label="Block Pit on TikTok"><img src="assets/img/social/tiktok.png?v=db6954a" alt="" width="26" height="26"></a></li>
+        <li><a data-social="facebook" href="https://www.facebook.com/share/19Y12mFhRn/" target="_blank" rel="me noopener" aria-label="Block Pit on Facebook"><img src="assets/img/social/facebook.png?v=db6954a" alt="" width="26" height="26"></a></li>
       </ul>
       </div>
       <div class="foot-mail">
@@ -184,7 +184,7 @@
   </footer>
 
   <aside class="dock" aria-label="Get Block Pit">
-    <img class="dock-icon" src="assets/img/logo-320.png?v=4e5523e" alt="" width="40" height="40">
+    <img class="dock-icon" src="assets/img/logo-320.png?v=db6954a" alt="" width="40" height="40">
     <p><b>Block Pit</b><small>Out now on iPhone</small></p>
     <a class="btn btn-primary dock-get" data-appstore href="https://apps.apple.com/app/id[APP_ID]">Get the app</a>
   </aside>
