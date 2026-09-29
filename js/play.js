@@ -117,11 +117,12 @@
           pressBurst = clock;
           insertLayer();
           if (overflow()) return doom();
+          if (capped()) return rest();
         }
       }
       if (script) {
         var st = script.steps[stepIdx++];
-        if (!st) { piece = null; plan = null; phase = 'end'; endT = 0; return; }
+        if (!st) return rest();
         piece = { cells: st.cells.map(function (c) { return c.slice(); }), c: st.c };
         aim = { x: st.x, z: st.z };
         clampAim();
@@ -177,8 +178,10 @@
       piece.cells.forEach(function (c) { base = Math.max(base, colH(aim.x + c[0], aim.z + c[2]) - c[1]); });
       return base;
     }
-    function hoverY() { return Math.min(opts.hoverCap || 1e9, Math.max(2.8, maxHeight() + 2.6)); }
-    function camTop() { return opts.camTop || Math.max(cw < 500 ? 8.8 : 9.4, maxHeight() + 4.8); }
+    function hoverY() { return Math.min(opts.hoverCap || (opts.cap ? camTop() - 2.2 : 1e9), Math.max(2.8, maxHeight() + 2.6)); }
+    function camTop() { return opts.camTop || (opts.cap ? (cw < 500 ? 9.8 : 10.2) : Math.max(cw < 500 ? 8.8 : 9.4, maxHeight() + 4.8)); }
+    function capped() { return opts.cap && maxHeight() > opts.cap; }
+    function rest() { piece = null; plan = null; phase = 'end'; endT = 0; }
     function finalCells(cells, ax, az) {
       var cols = {};
       cells.forEach(function (c) { var k = (ax + c[0]) + ',' + (az + c[2]); (cols[k] = cols[k] || []).push(c); });
@@ -237,6 +240,7 @@
     function next() {
       if (script) return spawn(false);
       if (overflow()) return doom();
+      if (capped()) return rest();
       spawn(false);
     }
     function doom() {
@@ -591,11 +595,12 @@
         wipeT += dt;
         if (wipeT > 0.95) reset();
       }
-      if (script) {
+      if (script || opts.cap) {
+        var hold = script ? script.hold : 0.9;
         if (phase === 'end') {
           endT += dt;
-          if (endT > script.hold) { reset(); wrap.style.opacity = 0; }
-          else wrap.style.opacity = (1 - clamp((endT - script.hold + 0.35) / 0.35, 0, 1)).toFixed(3);
+          if (endT > hold) { reset(); wrap.style.opacity = 0; }
+          else wrap.style.opacity = (1 - clamp((endT - hold + 0.35) / 0.35, 0, 1)).toFixed(3);
         } else if (wrap.style.opacity !== '' && +wrap.style.opacity < 1) wrap.style.opacity = Math.min(1, +wrap.style.opacity + dt / 0.35).toFixed(3);
       }
       if (score !== count.to) {
@@ -1091,6 +1096,7 @@
   createPit({
     canvas: document.getElementById('pit'),
     heights: [1, 1, 1, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 5, 5, 5],
+    cap: 6,
     score: document.getElementById('hud-score'),
     scoreCv: document.getElementById('hud-score-cv'),
     gauges: document.getElementById('hud-gauges'),
