@@ -16,7 +16,7 @@
     var grid, piece, phase, fallY, fallV, score, streak, pressure, pending, nextId, aim, frags, flashes, timers;
     var plan = null, planT = 0, shown = 0, wipeT = 0, clock = 0, bob = 0;
     var spin = { from: 0, to: 0, t: -10, next: 2.5, dur: 0.7 }, count = { from: 0, to: 0, t: -1 }, flashS = { v: 1, vel: 0, until: -1 };
-    var ghostSim = { key: '', over: false }, DANGER_RED = [230, 31, 26], GRAY = 100, CHAN_GRAY = [117, 120, 125], lift = -1;
+    var ghostSim = { key: '', over: false }, DANGER_RED = [230, 31, 26], GRAY = 100, CHAN_GRAY = [117, 120, 125], lift = -1, queued = null, fills = 0;
     var ghost = { key: '', t: -1, from: [0, 0, 0], pos: null }, pressFill = { row: -1, t: 0 }, pressBurst = -1, lastPressure = 0;
     var chan = { gain: 1, from: 1, peak: 1, t: -1, heat: 0, tier: 0, tierT: 0, flow: 0 };
     var streakView = { i: 0, v: 0, pulse: 0, pv: 0, pt: -1 };
@@ -87,7 +87,9 @@
       timers = [];
       grid = empty();
       gray = null;
-      nextId = 1; score = 0; streak = 0; pressure = 0; pending = 0; lastPressure = 0;
+      nextId = 1; streak = 0;
+      if (!opts.chains || !score || score > 20000) score = 0;
+      pressure = 0; pending = 0; lastPressure = 0;
       frags = []; flashes = [];
       aim = { x: 1, z: 1 };
       stepIdx = 0; endT = 0; drops = 0;
@@ -101,10 +103,17 @@
         hs.forEach(function (h) { top = Math.max(top, h); });
         for (var y = 0; y < top; y++) for (var x = 0; x < W; x++) for (var z = 0; z < D; z++) if (y < (hs[x * D + z] || 1)) cells.push([x, y, z]);
         noClusterFill(cells);
+        if (opts.chains) {
+          queued = chainPiece(10);
+          if (queued.d < 2 && (fills = (fills || 0) + 1) < 25) return reset();
+          fills = 0;
+        }
       }
-      shown = 0;
-      count = { from: 0, to: 0, t: -1 };
-      if (elScore) elScore.textContent = '0';
+      if (!score) {
+        shown = 0;
+        count = { from: 0, to: 0, t: -1 };
+        if (elScore) elScore.textContent = '0';
+      }
       ghost = { key: '', t: -1, from: [0, 0, 0], pos: null };
       spawn(true);
     }
@@ -131,7 +140,8 @@
         planT = 0;
         return;
       }
-      piece = { cells: I.randomShape().cells, c: Math.floor(Math.random() * COLORS) };
+      piece = opts.chains ? (queued || chainPiece(10)) : { cells: I.randomShape().cells, c: Math.floor(Math.random() * COLORS) };
+      queued = null;
       clampAim();
       phase = 'aim';
       plan = choose();
@@ -240,7 +250,7 @@
     function next() {
       if (script) return spawn(false);
       if (overflow()) return doom();
-      if (capped()) return rest();
+      if (capped() || (opts.chains && drops >= opts.chains)) return rest();
       spawn(false);
     }
     function doom() {
@@ -266,8 +276,9 @@
       wipeT = 0;
     }
 
-    function endsInOverflow(cells, c, ax, az) {
-      var saved = grid, trigger = {}, external = true, guard = 0;
+    function endsInOverflow(cells, c, ax, az) { return simulate(cells, c, ax, az).over; }
+    function simulate(cells, c, ax, az) {
+      var saved = grid, trigger = {}, external = true, guard = 0, depth = 0;
       grid = saved.map(function (col) { return col.map(function (row) { return row.slice(); }); });
       finalCells(cells, ax, az).forEach(function (f, i) {
         if (f[1] >= TOP) return;
@@ -278,6 +289,7 @@
       while (guard++ < 20) {
         var groups = groupsFor(trigger, external);
         if (!groups.length) break;
+        depth++;
         groups.forEach(function (g) { g.forEach(function (p) { grid[p[0]][p[1]][p[2]] = null; }); });
         var before = pairs();
         compact();
@@ -286,9 +298,36 @@
         trigger = fresh;
         external = false;
       }
-      var result = overflow();
+      var result = { over: overflow(), depth: depth };
       grid = saved;
       return result;
+    }
+    function bestDepth(cells, c) {
+      var best = 0, orients = {};
+      for (var r = 0; r < 4 && best < 3; r++) {
+        var ok = orientKey(cells);
+        if (!orients[ok]) {
+          orients[ok] = 1;
+          var mx = 0, mz = 0;
+          cells.forEach(function (q) { mx = Math.max(mx, q[0]); mz = Math.max(mz, q[2]); });
+          for (var ax = 0; ax <= W - 1 - mx; ax++) for (var az = 0; az <= D - 1 - mz; az++) {
+            if (finalCells(cells, ax, az).some(function (f) { return f[1] >= H; })) continue;
+            best = Math.max(best, simulate(cells, c, ax, az).depth);
+          }
+        }
+        cells = I.rotCells(cells);
+      }
+      return best;
+    }
+    function chainPiece(tries) {
+      var pick = null;
+      for (var k = 0; k < tries; k++) {
+        var cand = { cells: I.randomShape().cells, c: Math.floor(Math.random() * COLORS) };
+        cand.d = bestDepth(cand.cells, cand.c);
+        if (!pick || cand.d > pick.d) pick = cand;
+        if (pick.d >= 3) break;
+      }
+      return pick;
     }
 
     function evaluate(cells, ax, az) {
@@ -306,6 +345,7 @@
       placed.forEach(function (p) { grid[p[0]][p[1]][p[2]] = null; });
       if (!ok) return -1e9;
       if (top > H && endsInOverflow(cells, piece.c, ax, az)) return maxHeight() >= H ? 1e8 + Math.random() : -1e8 + hits;
+      if (opts.chains && hits) return simulate(cells, piece.c, ax, az).depth * 60 + hits * 2 - top + Math.random() * 4;
       var sl = clamp((drops - 8) / 10, 0, 1);
       return (hits * 10 + (hits ? 6 : 0)) * (1 - sl) - top * 1.2 * (1 - sl) + top * 1.6 * sl - (hits ? 9 : 0) * sl + Math.random() * 4;
     }
@@ -1097,6 +1137,7 @@
     canvas: document.getElementById('pit'),
     heights: [1, 1, 1, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 5, 5, 5],
     cap: 6,
+    chains: 2,
     score: document.getElementById('hud-score'),
     scoreCv: document.getElementById('hud-score-cv'),
     gauges: document.getElementById('hud-gauges'),

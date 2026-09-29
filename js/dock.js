@@ -20,11 +20,10 @@
   var queued = false;
   function mark() {
     queued = false;
-    var cards = steps.children, box = steps.getBoundingClientRect(), pad = parseFloat(getComputedStyle(steps).paddingLeft) || 0;
+    var cards = steps.children, box = steps.getBoundingClientRect(), mid = box.left + box.width / 2;
     var best = 0, bd = Infinity;
-    if (steps.scrollLeft > 0 && steps.scrollLeft + steps.clientWidth >= steps.scrollWidth - 2) best = cards.length - 1;
-    else for (var i = 0; i < cards.length; i++) {
-      var d = Math.abs(cards[i].getBoundingClientRect().left - box.left - pad);
+    for (var i = 0; i < cards.length; i++) {
+      var r = cards[i].getBoundingClientRect(), d = Math.abs(r.left + r.width / 2 - mid);
       if (d < bd) { bd = d; best = i; }
     }
     for (var k = 0; k < dots.length; k++) dots[k].classList.toggle('on', k === best);

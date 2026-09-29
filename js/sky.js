@@ -102,16 +102,16 @@
     var ctx = canvas.getContext('2d');
     var inks = Array.prototype.slice.call(document.querySelectorAll('[data-ink]'));
     var bar = document.querySelector('.bar');
-    var W = 0, H = 0, docH = 1, stars = [], last = 0, sy = 0, dirty = true;
+    var W = 0, H = 0, SH = 0, seededW = -1, docH = 1, stars = [], last = 0, sy = 0, dirty = true;
 
     function seed() {
-      var n = Math.round(Math.max(300, Math.min(2400, Math.round(W * H / 700))) * parseFloat(root.getAttribute('data-stars') || '1'));
+      var n = Math.round(Math.max(300, Math.min(2400, Math.round(W * SH / 700))) * parseFloat(root.getAttribute('data-stars') || '1'));
       stars = [];
       for (var i = 0; i < n; i++) {
         var big = Math.random() < 0.12;
         stars.push({
           x: Math.random() * W,
-          y: Math.random() * H,
+          y: Math.random() * SH,
           r: big ? 1.1 + Math.random() * 0.7 : 0.45 + Math.random() * 0.35,
           a: big ? 0.75 + Math.random() * 0.25 : 0.35 + Math.random() * 0.35,
           v: 0.2 + Math.random() * 0.3,
@@ -134,7 +134,11 @@
         GROUND = Math.max(0.5, Math.min(1, (docH - fh - cr.height * 0.45) / docH));
         paintSky();
       }
-      seed();
+      if (W !== seededW || H > SH) {
+        seededW = W;
+        SH = Math.max(H, window.screen && screen.height || 0);
+        seed();
+      }
       dirty = true;
       onScroll();
     }
@@ -157,7 +161,7 @@
         if (!reduce) {
           s.x += 0.94 * s.v * dt; s.y += 0.34 * s.v * dt;
           if (s.x > W + 2) s.x -= W + 4;
-          if (s.y > H + 2) s.y -= H + 4;
+          if (s.y > SH + 2) s.y -= SH + 4;
         }
         var bi = Math.max(0, Math.min(20, Math.round(s.y / H * 20))), band = bands[bi];
         if (s.k > band) continue;

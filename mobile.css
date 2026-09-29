@@ -56,14 +56,14 @@
   .mark span { font-size: .95rem; letter-spacing: .12em; }
   .bar nav { gap: 18px; }
   .bar nav a { font-size: .88rem; }
-  .hero { padding: 14px var(--gut) 14px; gap: 20px; }
-  .tag { margin-top: 12px; }
-  .pitch { margin-top: 12px; font-size: 1.2rem; }
-  .hero .cta-row { margin-top: 20px; }
+  .hero { padding: 40px var(--gut) 14px; gap: 32px; }
+  .tag { margin-top: 14px; }
+  .pitch { margin-top: 18px; font-size: 1.2rem; }
+  .hero .cta-row { margin-top: 28px; }
   .how { gap: 14px; }
-  .steps { display: flex; gap: 12px; margin: 0 calc(-1 * var(--gut)); padding: 0 var(--gut); overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: var(--gut); overscroll-behavior-x: contain; scrollbar-width: none; }
+  .steps { display: flex; gap: 12px; margin: 0 calc(-1 * var(--gut)); padding: 0 8vw; overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none; }
   .steps::-webkit-scrollbar { display: none; }
-  .steps article { flex: 0 0 84%; scroll-snap-align: start; }
+  .steps article { flex: 0 0 84vw; scroll-snap-align: center; scroll-snap-stop: always; }
   .steps-dots { display: flex; justify-content: center; gap: 10px; height: 10px; align-items: center; }
   .steps-dots i { width: 8px; height: 8px; border-radius: 50%; background: rgba(255, 255, 255, .3); transition: background-color .25s, transform .25s var(--ease); }
   .steps-dots i.on { transform: scale(1.25); }
@@ -97,7 +97,7 @@
   .dock.show > :nth-child(1) { transition-delay: .1s; }
   .dock.show > :nth-child(2) { transition-delay: .17s; }
   .dock.show > :nth-child(3) { transition-delay: .24s; }
-  .dock-icon { width: 40px; height: 40px; border-radius: 10px; }
+  .dock-icon { width: 40px; height: 40px; border-radius: 10px; box-shadow: 0 0 0 1.5px rgba(255, 255, 255, .3), 0 4px 12px rgba(0, 0, 0, .35); }
   .dock p { flex: 1; min-width: 0; display: grid; line-height: 1.25; }
   .dock b { font-weight: 700; font-size: .85rem; letter-spacing: .14em; text-transform: uppercase; }
   .dock small { font-size: .82rem; color: rgba(255, 255, 255, .78); }
