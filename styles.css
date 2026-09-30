@@ -62,7 +62,9 @@ button { font: inherit; }
 .on-light :focus-visible, .on-light:focus-visible { outline-color: var(--navy); }
 
 .stars { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 0; }
-.stars.stars-page { position: absolute; top: 0; right: auto; bottom: auto; left: 0; width: 100%; }
+@supports (animation-timeline: scroll()) {
+  .stars.stars-fixed { animation: starmask linear both; animation-timeline: scroll(root); }
+}
 main, .foot { position: relative; z-index: 1; }
 
 .bar {
@@ -247,7 +249,6 @@ main, .foot { position: relative; z-index: 1; }
   .band h2 { font-size: clamp(1.8rem, 3vw, 2.7rem); }
   .band p { margin-top: 18px; max-width: 30ch; font-size: clamp(1.15rem, 1.5vw, 1.35rem); }
 }
-.cp-rise { display: none; }
 .band-streak h2 { color: #FFB347; }
 .streak-gauge { width: 56px; height: 176px; }
 .steps { display: contents; }

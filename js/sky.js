@@ -104,33 +104,42 @@
     var inks = Array.prototype.slice.call(document.querySelectorAll('[data-ink]'));
     var bar = document.querySelector('.bar');
     var W = 0, H = 0, SH = 0, seededW = -1, docH = 1, stars = [], last = 0, sy = 0, dirty = true;
-    var anchored = window.matchMedia('(pointer: coarse)').matches, painted = '';
-    if (anchored) canvas.classList.add('stars-page');
+    var anchored = window.matchMedia('(pointer: coarse)').matches, painted = '', maskRule = null;
+    if (anchored) {
+      canvas.classList.add('stars-fixed');
+      maskRule = document.createElement('style');
+      document.head.appendChild(maskRule);
+    }
 
-    function paintPage() {
-      var end = 1;
-      for (var t = 0; t <= 1; t += 0.005) if (starDensity(pageU(t)) <= 0.005) { end = t; break; }
-      var RH = Math.min(docH, Math.ceil(end * docH) + 40), key = W + 'x' + RH;
-      if (key === painted) return;
-      painted = key;
-      var dpr = Math.min(window.devicePixelRatio || 1, 2);
-      while (W * RH * dpr * dpr > 12e6 && dpr > 1) dpr -= 0.25;
-      canvas.style.height = RH + 'px';
-      canvas.width = Math.round(W * dpr); canvas.height = Math.round(RH * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.clearRect(0, 0, W, RH);
-      ctx.fillStyle = '#fff';
-      var n = Math.round(W * RH / 500 * parseFloat(root.getAttribute('data-stars') || '1'));
-      for (var i = 0; i < n; i++) {
-        var x = Math.random() * W, y = Math.random() * RH, u = pageU(y / docH), d = starDensity(u), k = Math.random();
-        if (k > d) continue;
-        var big = Math.random() < 0.12, a = big ? 0.75 + Math.random() * 0.25 : 0.35 + Math.random() * 0.35;
-        ctx.globalAlpha = a * starAlpha(u) * Math.min(1, (d - k) * 12);
-        ctx.beginPath();
-        ctx.arc(x, y, big ? 1.1 + Math.random() * 0.7 : 0.45 + Math.random() * 0.35, 0, 6.2832);
-        ctx.fill();
+    function paintField() {
+      var CH = canvas.clientHeight || H, key = W + 'x' + CH;
+      if (key !== painted) {
+        painted = key;
+        var dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.round(W * dpr); canvas.height = Math.round(CH * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, W, CH);
+        ctx.fillStyle = '#fff';
+        var n = Math.round(W * CH / 500 * parseFloat(root.getAttribute('data-stars') || '1'));
+        for (var i = 0; i < n; i++) {
+          var big = Math.random() < 0.12;
+          ctx.globalAlpha = big ? 0.75 + Math.random() * 0.25 : 0.35 + Math.random() * 0.35;
+          ctx.beginPath();
+          ctx.arc(Math.random() * W, Math.random() * CH, big ? 1.1 + Math.random() * 0.7 : 0.45 + Math.random() * 0.35, 0, 6.2832);
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1;
       }
-      ctx.globalAlpha = 1;
+      var stops = [];
+      for (var s2 = 0; s2 <= 100; s2++) {
+        var u = pageU(s2 / 100), m = Math.min(1, Math.pow(starDensity(u), 0.6) * starAlpha(u));
+        stops.push('rgba(0,0,0,' + m.toFixed(3) + ') ' + s2 + '%');
+      }
+      var st = canvas.style, travel = -Math.max(0, docH - H);
+      st.webkitMaskImage = st.maskImage = 'linear-gradient(to bottom,' + stops.join(',') + ')';
+      st.webkitMaskSize = st.maskSize = '100% ' + docH + 'px';
+      st.webkitMaskRepeat = st.maskRepeat = 'no-repeat';
+      maskRule.textContent = '@keyframes starmask{from{-webkit-mask-position:0 0;mask-position:0 0}to{-webkit-mask-position:0 ' + travel + 'px;mask-position:0 ' + travel + 'px}}';
     }
 
     function seed() {
@@ -165,7 +174,7 @@
         GROUND = Math.max(0.5, Math.min(1, (docH - fh - cr.height * 0.45) / docH));
         paintSky();
       }
-      if (anchored) { paintPage(); onScroll(); return; }
+      if (anchored) { paintField(); onScroll(); return; }
       if (W !== seededW || H > SH) {
         seededW = W;
         SH = Math.max(H, window.screen && screen.height || 0);
@@ -209,6 +218,7 @@
     var lastY = 0;
     function onScroll() {
       sy = window.scrollY;
+      if (anchored) canvas.style.webkitMaskPosition = canvas.style.maskPosition = '0 ' + (-sy) + 'px';
       if (bar && Math.abs(sy - lastY) > 6) {
         bar.classList.toggle('hide', sy > lastY && sy > 200 && !bar.contains(document.activeElement));
         lastY = sy;
