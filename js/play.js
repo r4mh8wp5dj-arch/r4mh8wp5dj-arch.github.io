@@ -1224,7 +1224,7 @@
     gauges: document.querySelector('.streak-gauge'),
     pops: streakCv.parentNode.querySelector('.pit-pops'),
     pressure: false,
-    camTop: 6.4,
+    camTop: 6,
     center: true,
     gaugeBeside: 14,
     script: {

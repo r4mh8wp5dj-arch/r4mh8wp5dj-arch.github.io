@@ -171,4 +171,52 @@
   function draw() { city(); checkpoints(); }
   window.addEventListener('resize', draw);
   draw();
+
+  (function rise() {
+    var list = document.querySelector('.checkpoints');
+    if (!list) return;
+    var cv = document.createElement('canvas'), on = false, last = 0, F = null, M = I.view(Math.PI / 4 - 0.22, 0.6);
+    cv.className = 'cp-rise';
+    cv.setAttribute('aria-hidden', 'true');
+    list.parentNode.insertBefore(cv, list);
+    var R = rng(11), bits = [];
+    for (var i = 0; i < 14; i++) bits.push({ x: R(), y: R(), s: 7 + R() * 9, v: 0.012 + R() * 0.018, c: Math.floor(R() * 6), a: R() * 6.28, w: 0.3 + R() * 0.6, p: R() * 6.28 });
+    function size() {
+      if (!cv.offsetParent) { F = null; return; }
+      cv.style.top = list.offsetTop + 'px';
+      cv.style.height = list.offsetHeight + 'px';
+      F = I.fit(cv);
+    }
+    function paint(dt) {
+      if (!F) return;
+      var ctx = F.ctx, w = F.w, h = F.h;
+      ctx.clearRect(0, 0, w, h);
+      bits.forEach(function (b) {
+        b.y -= b.v * dt; if (b.y < -0.05) { b.y += 1.1; b.x = R(); }
+        b.a += b.w * dt; b.p += dt;
+        var y = b.y * h, edge = Math.min(1, Math.min(y, h - y) / 90);
+        if (edge <= 0) return;
+        ctx.save();
+        ctx.globalAlpha = 0.55 * edge;
+        I.cubes(ctx, [{ x: 0, y: 0, z: 0, c: b.c, lo: true }], { M: I.mul(M, I.rotY(b.a)), s: b.s, x: 14 + b.x * (w - 28) + Math.sin(b.p) * 6, y: y, pivot: [0.5, 0.5, 0.5] });
+        ctx.restore();
+      });
+    }
+    function frame(now) {
+      if (!on) return;
+      var dt = last ? Math.min(0.1, (now - last) / 1000) : 0;
+      last = now;
+      paint(dt);
+      requestAnimationFrame(frame);
+    }
+    window.addEventListener('resize', function () { size(); paint(0); });
+    window.addEventListener('load', function () { size(); paint(0); });
+    size();
+    paint(0);
+    if (I.reduce) return;
+    I.visible(cv, function (v) {
+      if (v && !on) { on = true; last = 0; requestAnimationFrame(frame); }
+      else if (!v) on = false;
+    });
+  })();
 })();
