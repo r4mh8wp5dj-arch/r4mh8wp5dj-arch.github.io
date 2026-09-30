@@ -10,7 +10,7 @@
   --blue: #3D70D9;
   --green: #4DB06E;
   --yellow: #F2B03B;
-  --purple: #A854CA;
+  --purple: #A854C9;
   --cyan: #2EB5C4;
   --acc-cyan: #22D3EE;
   --navy: #0A1A3D;
@@ -246,6 +246,10 @@ main, .foot { position: relative; z-index: 1; }
 .skies-head { max-width: 40rem; }
 .skies-head h2 { font-size: clamp(1.8rem, 3.2vw, 2.6rem); text-wrap: balance; }
 .skies-head p { margin-top: 12px; font-size: 1.1rem; color: var(--ink-2); }
+.unlock { display: flex; align-items: center; gap: 18px; max-width: 40rem; margin-top: 28px; }
+.unlock-art { flex: none; width: 116px; height: 64px; }
+.unlock p { font-size: 1.05rem; line-height: 1.45; color: var(--ink-2); }
+.unlock b { font-weight: 700; color: var(--ink); }
 .checkpoints { position: relative; list-style: none; margin: 44px 0 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: clamp(12px, 2vw, 24px); }
 .checkpoints::before { content: ""; position: absolute; left: 10%; right: 10%; top: calc(var(--art-h, 150px) + 16px); height: 2px; border-radius: 2px; background: var(--rule); }
 .checkpoints li { position: relative; display: grid; justify-items: center; text-align: center; }

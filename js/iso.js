@@ -1,5 +1,5 @@
 (function (g) {
-  var HEX = ['#E84D3D', '#3D70D9', '#4DB06E', '#F2B03B', '#A854CA', '#2EB5C4'];
+  var HEX = ['#E84D3D', '#3D70D9', '#4DB06E', '#F2B03B', '#A854C9', '#2EB5C4'];
   var RGB = HEX.map(function (h) {
     return [parseInt(h.substr(1, 2), 16), parseInt(h.substr(3, 2), 16), parseInt(h.substr(5, 2), 16)];
   });

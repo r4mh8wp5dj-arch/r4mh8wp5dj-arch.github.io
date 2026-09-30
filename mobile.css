@@ -60,6 +60,9 @@
   .steps-dots i.on:nth-child(2) { background: #F9C24E; }
   .steps-dots i.on:nth-child(3) { background: #3FD0DE; }
   .skies { padding: 3vh var(--gut) 8vh; }
+  .unlock { gap: 12px; margin-top: 22px; }
+  .unlock-art { width: 84px; height: 46px; }
+  .unlock p { font-size: 1rem; }
   .end { min-height: 0; padding: 6vh var(--gut) calc(clamp(150px, 30vh, 320px) + 12px); }
   .dock {
     position: fixed;

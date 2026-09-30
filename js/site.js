@@ -170,7 +170,16 @@
     });
   }
 
-  function draw() { city(); checkpoints(); }
+  function unlock() {
+    var cv = document.querySelector('.unlock-art');
+    if (!cv) return;
+    var F = I.fit(cv), s = F.h * 0.44, M = I.view(Math.PI / 4 - 0.22, 0.6);
+    F.ctx.clearRect(0, 0, F.w, F.h);
+    [[4, 0.28], [5, 0.72]].forEach(function (b) {
+      I.cubes(F.ctx, [{ x: 0, y: 0, z: 0, c: b[0], k: 0.94 }], { M: M, s: s, x: F.w * b[1], y: F.h * 0.5, pivot: [0.5, 0.5, 0.5] });
+    });
+  }
+  function draw() { city(); checkpoints(); unlock(); }
   window.addEventListener('resize', draw);
   draw();
 })();
