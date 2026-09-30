@@ -162,24 +162,13 @@
         });
         ring(false);
       }
-      g.putImageData(img, 0, 0);
-      var F = I.fit(cv), ctx = F.ctx;
-      ctx.imageSmoothingEnabled = false;
-      var scale = Math.max(F.w / PW, F.h / PH), dw = PW * scale, dh = PH * scale;
-      ctx.drawImage(off, (F.w - dw) / 2, (F.h - dh) / 2, dw, dh);
+      if (cv.width !== PW || cv.height !== PH) { cv.width = PW; cv.height = PH; }
+      cv.getContext('2d').putImageData(img, 0, 0);
+      if (!idx) cv.parentNode.parentNode.style.setProperty('--art-h', cv.clientHeight + 'px');
     });
   }
 
-  function unlock() {
-    var cv = document.querySelector('.unlock-art');
-    if (!cv) return;
-    var F = I.fit(cv), s = F.h * 0.44, M = I.view(Math.PI / 4 - 0.22, 0.6);
-    F.ctx.clearRect(0, 0, F.w, F.h);
-    [[4, 0.28], [5, 0.72]].forEach(function (b) {
-      I.cubes(F.ctx, [{ x: 0, y: 0, z: 0, c: b[0], k: 0.94 }], { M: M, s: s, x: F.w * b[1], y: F.h * 0.5, pivot: [0.5, 0.5, 0.5] });
-    });
-  }
-  function draw() { city(); checkpoints(); unlock(); }
+  function draw() { city(); checkpoints(); }
   window.addEventListener('resize', draw);
   draw();
 })();

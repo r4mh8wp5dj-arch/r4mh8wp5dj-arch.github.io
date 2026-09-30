@@ -88,7 +88,7 @@
       grid = empty();
       gray = null;
       nextId = 1; streak = 0;
-      if (!opts.chains || !score || score > 20000) score = 0;
+      score = 0;
       pressure = 0; pending = 0; lastPressure = 0;
       frags = []; flashes = [];
       aim = { x: 1, z: 1 };
@@ -109,11 +109,9 @@
           fills = 0;
         }
       }
-      if (!score) {
-        shown = 0;
-        count = { from: 0, to: 0, t: -1 };
-        if (elScore) elScore.textContent = '0';
-      }
+      shown = 0;
+      count = { from: 0, to: 0, t: -1 };
+      if (elScore) elScore.textContent = '0';
       ghost = { key: '', t: -1, from: [0, 0, 0], pos: null };
       spawn(true);
     }

@@ -104,6 +104,34 @@
     var inks = Array.prototype.slice.call(document.querySelectorAll('[data-ink]'));
     var bar = document.querySelector('.bar');
     var W = 0, H = 0, SH = 0, seededW = -1, docH = 1, stars = [], last = 0, sy = 0, dirty = true;
+    var anchored = window.matchMedia('(pointer: coarse)').matches, painted = '';
+    if (anchored) canvas.classList.add('stars-page');
+
+    function paintPage() {
+      var end = 1;
+      for (var t = 0; t <= 1; t += 0.005) if (starDensity(pageU(t)) <= 0.005) { end = t; break; }
+      var RH = Math.min(docH, Math.ceil(end * docH) + 40), key = W + 'x' + RH;
+      if (key === painted) return;
+      painted = key;
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      while (W * RH * dpr * dpr > 12e6 && dpr > 1) dpr -= 0.25;
+      canvas.style.height = RH + 'px';
+      canvas.width = Math.round(W * dpr); canvas.height = Math.round(RH * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, W, RH);
+      ctx.fillStyle = '#fff';
+      var n = Math.round(W * RH / 500 * parseFloat(root.getAttribute('data-stars') || '1'));
+      for (var i = 0; i < n; i++) {
+        var x = Math.random() * W, y = Math.random() * RH, u = pageU(y / docH), d = starDensity(u), k = Math.random();
+        if (k > d) continue;
+        var big = Math.random() < 0.12, a = big ? 0.75 + Math.random() * 0.25 : 0.35 + Math.random() * 0.35;
+        ctx.globalAlpha = a * starAlpha(u) * Math.min(1, (d - k) * 12);
+        ctx.beginPath();
+        ctx.arc(x, y, big ? 1.1 + Math.random() * 0.7 : 0.45 + Math.random() * 0.35, 0, 6.2832);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    }
 
     function seed() {
       var n = Math.round(Math.max(300, Math.min(2400, Math.round(W * SH / (W < 700 ? 500 : 700)))) * parseFloat(root.getAttribute('data-stars') || '1'));
@@ -126,8 +154,10 @@
     function resize() {
       var dpr = Math.min(window.devicePixelRatio || 1, 2);
       W = window.innerWidth; H = window.innerHeight;
-      canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      if (!anchored) {
+        canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
       docH = Math.max(1, document.documentElement.scrollHeight);
       var city = document.querySelector('.city'), foot = document.querySelector('.foot');
       if (city && R1 === 1) {
@@ -135,6 +165,7 @@
         GROUND = Math.max(0.5, Math.min(1, (docH - fh - cr.height * 0.45) / docH));
         paintSky();
       }
+      if (anchored) { paintPage(); onScroll(); return; }
       if (W !== seededW || H > SH) {
         seededW = W;
         SH = Math.max(H, window.screen && screen.height || 0);
@@ -191,7 +222,7 @@
         bar.classList.toggle('on-light', lum(colorAt((sy + br.top + br.height / 2) / docH)) > 0.18);
       }
       var t = performance.now();
-      if (reduce || t - last > 16) draw(t);
+      if (!anchored && (reduce || t - last > 16)) draw(t);
     }
 
     function loop(now) {
@@ -203,6 +234,6 @@
     window.addEventListener('load', resize);
     window.addEventListener('scroll', onScroll, { passive: true });
     resize();
-    if (!reduce) requestAnimationFrame(loop);
+    if (!reduce && !anchored) requestAnimationFrame(loop);
   });
 })();
