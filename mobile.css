@@ -1,5 +1,5 @@
 @media (max-width: 700px) {
-  .checkpoints { display: flex; flex-direction: column-reverse; align-items: center; gap: 40px; }
+  .checkpoints { display: flex; flex-direction: column-reverse; align-items: center; gap: 24px; }
   .checkpoints::before { display: none; }
   .checkpoints li { width: 100%; }
   .cp-art { width: min(64vw, 256px); border-radius: 14px; }
