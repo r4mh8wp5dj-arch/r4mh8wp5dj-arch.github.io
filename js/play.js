@@ -589,10 +589,13 @@
       inner.setAttribute('data-t', text);
       inner.appendChild(fill);
       el.appendChild(inner);
-      el.style.left = '50%';
+      var xs = [[-0.35, -0.35], [4.35, -0.35], [4.35, 4.35], [-0.35, 4.35]].map(function (q) { return I.project(cam, q[0], 0, q[1])[0]; });
+      var x0 = Math.min.apply(null, xs), x1 = Math.max.apply(null, xs), fs = Math.round(size * Math.min(1, cw / 420));
+      el.style.left = Math.round((x0 + x1) / 2) + 'px';
       el.style.top = look === 'full' ? '44%' : 'var(--banner-top, 14%)';
-      el.style.fontSize = Math.round(size * Math.min(1, cw / 420)) + 'px';
+      el.style.fontSize = fs + 'px';
       elPops.appendChild(el);
+      if (el.offsetWidth > (x1 - x0) * 0.9) el.style.fontSize = Math.max(12, Math.floor(fs * (x1 - x0) * 0.9 / el.offsetWidth)) + 'px';
       currentBanner = el;
       if (el.animate && !reduce) {
         el.animate([{ transform: 'translate(-50%,-50%) scale(.5)', opacity: 0 }, { transform: 'translate(-50%,-50%) scale(1)', opacity: 1, offset: 0.12 }, { transform: 'translate(-50%,-50%) scale(1)', opacity: 1, offset: 0.8 }, { transform: 'translate(-50%,-50%) scale(1)', opacity: 0 }], { duration: look === 'full' ? 2000 : 1500, fill: 'forwards', easing: 'ease-out' });
@@ -796,9 +799,9 @@
         });
       }
       if (piece && (phase === 'aim' || phase === 'fall')) {
-        var hy = hoverY(), drop2 = reduce ? 0 : 1 - easeOutQ(clamp((clock - enterT) / 0.3, 0, 1));
-        var py = phase === 'fall' ? fallY : hy + drop2 * (camTop() + 1.5 - hy) + (reduce ? 0 : Math.sin(bob * 2.4) * 0.12);
-        piece.cells.forEach(function (c) { items.push({ x: vis.x + c[0], y: py + c[1], z: vis.z + c[2], c: piece.c, k: BLK }); });
+        var ent = reduce ? 1 : clamp((clock - enterT) / 0.3, 0, 1), drop2 = 1 - easeOutQ(ent);
+        var py = phase === 'fall' ? fallY : hoverY() + drop2 * 1.4 + (reduce ? 0 : Math.sin(bob * 2.4) * 0.12);
+        piece.cells.forEach(function (c) { items.push({ x: vis.x + c[0], y: py + c[1], z: vis.z + c[2], c: piece.c, k: BLK, a: phase === 'fall' ? 1 : easeOutQ(ent) }); });
       }
 
       I.cubes(ctx, items, cam);
@@ -1169,8 +1172,8 @@
     gauges: document.querySelector('.band-gauge'),
     pops: band.parentNode.querySelector('.pit-pops'),
     streak: false,
-    camTop: 10.2,
-    hoverCap: 10.4,
+    camTop: 9.4,
+    hoverCap: 8.6,
     noPoints: true,
     center: true,
     gaugeBeside: 10,
