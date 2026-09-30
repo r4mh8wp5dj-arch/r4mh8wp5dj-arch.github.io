@@ -44,6 +44,9 @@
   }
   function roundPath(ctx, pts, r) {
     ctx.beginPath();
+    roundTo(ctx, pts, r);
+  }
+  function roundTo(ctx, pts, r) {
     for (var i = 0; i < pts.length; i++) {
       var p0 = pts[(i - 1 + pts.length) % pts.length], p1 = pts[i], p2 = pts[(i + 1) % pts.length];
       var d1 = Math.hypot(p1[0] - p0[0], p1[1] - p0[1]) || 1, d2 = Math.hypot(p2[0] - p1[0], p2[1] - p1[1]) || 1;
@@ -115,32 +118,70 @@
       list.push({ it: it, k: k, h: 1 - sq, w: 1 + sq * 0.55, cx: cx, cy: cy, cz: cz, d: c[2] });
     }
     list.sort(function (a, b) { return a.d - b.d; });
-    var lw = Math.max(0.6, s * 0.035);
-    ctx.lineJoin = 'round';
-    for (var n = 0; n < list.length; n++) {
-      var e = list[n], it2 = e.it;
-      var pts = new Array(8);
+    var lw = Math.max(0.6, s * 0.035), ghostDone = false;
+    function corners(e) {
+      var out = new Array(8);
       for (var q = 0; q < 8; q++) {
         var C = CORNERS[q];
         var v = tf(M, e.cx + (C[0] - 0.5) * e.k * e.w, e.cy + (C[1] - 0.5) * e.k * e.h - (1 - e.h) * 0.5 * e.k, e.cz + (C[2] - 0.5) * e.k * e.w);
-        pts[q] = [ox + v[0] * s, oy - v[1] * s];
+        out[q] = [ox + v[0] * s, oy - v[1] * s];
       }
+      return out;
+    }
+    function quadMap(P4) {
+      return function (u, v) {
+        return [P4[0][0] + (P4[1][0] - P4[0][0]) * u + (P4[2][0] - P4[0][0]) * v + (P4[3][0] - P4[1][0] - P4[2][0] + P4[0][0]) * u * v,
+                P4[0][1] + (P4[1][1] - P4[0][1]) * u + (P4[2][1] - P4[0][1]) * v + (P4[3][1] - P4[1][1] - P4[2][1] + P4[0][1]) * u * v];
+      };
+    }
+    function ghosts() {
+      var groups = {};
+      list.forEach(function (g) {
+        if (!g.it.flat || s * g.k < 14) return;
+        var rgb = g.it.rgb || RGB[g.it.c], gk = rgb.join(',');
+        (groups[gk] = groups[gk] || { rgb: rgb, a: g.it.a == null ? 1 : g.it.a, cells: [] }).cells.push(g);
+      });
+      Object.keys(groups).forEach(function (gk) {
+        var G = groups[gk], hull = new Path2D(), shades = [];
+        G.cells.forEach(function (g) {
+          var P8 = corners(g);
+          roundTo(hull, convexHull(P8), s * g.k * 0.13);
+          hull.closePath();
+          for (var f = 0; f < 6; f++) {
+            if (!fl[f].vis || (g.it.hide && g.it.hide[f])) continue;
+            var U = FACES[f].uv;
+            shades.push({ top: fl[f].top, b: fl[f].b, map: quadMap([P8[U[0]], P8[U[1]], P8[U[2]], P8[U[3]]]) });
+          }
+        });
+        ctx.globalAlpha = G.a;
+        ctx.fillStyle = css(G.rgb);
+        ctx.fill(hull);
+        ctx.save();
+        ctx.clip(hull);
+        shades.forEach(function (f) {
+          pathUV(ctx, f.map, RR.ghost);
+          var lit = Math.max(0, Math.min(1, (f.b - 0.6) / 0.58));
+          ctx.fillStyle = f.top ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,' + (0.32 - 0.26 * lit).toFixed(3) + ')';
+          ctx.fill();
+          pathUV(ctx, f.map, RR.outer);
+          ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+          ctx.lineWidth = Math.max(0.6, s * 0.025);
+          ctx.stroke();
+        });
+        ctx.restore();
+      });
+    }
+    ctx.lineJoin = 'round';
+    for (var n = 0; n < list.length; n++) {
+      var e = list[n], it2 = e.it;
+      var pts = corners(e);
       if (it2.custom) { ctx.globalAlpha = 1; it2.custom(ctx); continue; }
       var rgb = it2.rgb || RGB[it2.c];
       var key = it2.rgb ? it2.rgb.join(',') : it2.c;
       ctx.globalAlpha = it2.a == null ? 1 : it2.a;
       var small = it2.lo || s * e.k < 14, glow = (it2.f || 0) * 0.9;
       if (it2.flat && !small) {
-        for (var g0 = 0; g0 < 6; g0++) {
-          if (!fl[g0].vis || (it2.hide && it2.hide[g0])) continue;
-          var GU = FACES[g0].uv, G00 = pts[GU[0]], G10 = pts[GU[1]], G01 = pts[GU[2]], G11 = pts[GU[3]];
-          pathUV(ctx, function (u, v) {
-            return [G00[0] + (G10[0] - G00[0]) * u + (G01[0] - G00[0]) * v + (G11[0] - G10[0] - G01[0] + G00[0]) * u * v,
-                    G00[1] + (G10[1] - G00[1]) * u + (G01[1] - G00[1]) * v + (G11[1] - G10[1] - G01[1] + G00[1]) * u * v];
-          }, RR.ghost);
-          ctx.fillStyle = css(shadeRgb(rgb, fl[g0].top ? 1.08 : 0.8 + 0.2 * Math.max(0, Math.min(1, (fl[g0].b - 0.6) / 0.58))));
-          ctx.fill();
-        }
+        if (!ghostDone) { ghostDone = true; ghosts(); }
         continue;
       }
       if (it2.flat || small) {

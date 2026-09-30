@@ -1,15 +1,11 @@
 @media (max-width: 700px) {
-  .checkpoints { display: flex; flex-direction: column-reverse; align-items: center; gap: 0; }
-  .checkpoints::before { display: none; }
+  .checkpoints { display: flex; flex-direction: column-reverse; align-items: center; gap: 34px; }
+  .checkpoints::before { top: -8px; bottom: -8px; left: 0; right: 0; height: auto; border-radius: 0; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='48' viewBox='0 0 24 48'%3E%3Cpath d='M5 18 L12 11 L19 18' fill='none' stroke='%230A1A3D' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") left 2px top 0 / 24px 48px repeat-y, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='48' viewBox='0 0 24 48'%3E%3Cpath d='M5 18 L12 11 L19 18' fill='none' stroke='%230A1A3D' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") right 2px top 24px / 24px 48px repeat-y; opacity: .3; -webkit-mask-image: linear-gradient(transparent, #000 10%, #000 90%, transparent); mask-image: linear-gradient(transparent, #000 10%, #000 90%, transparent); animation: climb 2.6s linear infinite; }
+  @keyframes climb { to { background-position: left 2px top -48px, right 2px top -24px; } }
   .checkpoints li { width: 100%; }
   .cp-art { width: min(64vw, 256px); border-radius: 14px; }
   .checkpoints b { margin-top: 12px; font-size: 1.1rem; }
-  .checkpoints li::after { order: 4; width: 4px; height: 52px; margin: 14px 0 16px; border-radius: 2px; background: linear-gradient(to bottom, var(--up), var(--down)); box-shadow: 0 0 10px var(--up), 0 0 0 1px rgba(255, 255, 255, .35); }
-  .checkpoints li:first-child::after { display: none; }
-  .checkpoints li:nth-child(2) { --up: #8FB8DC; --down: #7E9C58; }
-  .checkpoints li:nth-child(3) { --up: #FA944D; --down: #8FB8DC; }
-  .checkpoints li:nth-child(4) { --up: #7A4A8C; --down: #FA944D; }
-  .checkpoints li:nth-child(5) { --up: #2A3F8F; --down: #7A4A8C; }
+  .checkpoints li::after { display: none; }
 }
 
 @media (max-width: 600px) {
