@@ -16,7 +16,7 @@
     var grid, piece, phase, fallY, fallV, score, streak, pressure, pending, nextId, aim, frags, flashes, timers;
     var plan = null, planT = 0, shown = 0, wipeT = 0, clock = 0, bob = 0;
     var spin = { from: 0, to: 0, t: -10, next: 2.5, dur: 0.7 }, count = { from: 0, to: 0, t: -1 }, flashS = { v: 1, vel: 0, until: -1 };
-    var ghostSim = { key: '', over: false }, DANGER_RED = [230, 31, 26], GRAY = 100, CHAN_GRAY = [117, 120, 125], lift = -1, queued = null, fills = 0, vis = { x: 1, z: 1 }, enterT = -10;
+    var ghostSim = { key: '', over: false }, DANGER_RED = [230, 31, 26], GRAY = 100, CHAN_GRAY = [117, 120, 125], lift = -1, narrow = false, queued = null, fills = 0, vis = { x: 1, z: 1 }, enterT = -10;
     var ghost = { key: '', t: -1, from: [0, 0, 0], pos: null }, pressFill = { row: -1, t: 0 }, pressBurst = -1, lastPressure = 0;
     var chan = { gain: 1, from: 1, peak: 1, t: -1, heat: 0, tier: 0, tierT: 0, flow: 0 };
     var streakView = { i: 0, v: 0, pulse: 0, pv: 0, pt: -1 };
@@ -609,6 +609,7 @@
     function resize() {
       var f = I.fit(canvas);
       ctx = f.ctx; cw = f.w; ch = f.h;
+      narrow = window.matchMedia('(max-width: 700px)').matches;
       var dpr = Math.min(window.devicePixelRatio || 1, 2);
       if (scoreCv) {
         var sr = scoreCv.getBoundingClientRect();
@@ -727,11 +728,12 @@
       if (opts.gaugeBeside) {
         var gx = -1e9, gy = 0, lx = 1e9;
         [[-0.35, -0.35], [4.35, -0.35], [4.35, 4.35], [-0.35, 4.35]].forEach(function (q) { var pp = I.project(cam, q[0], 0, q[1]); lx = Math.min(lx, pp[0]); if (pp[0] > gx) { gx = pp[0]; gy = pp[1]; } });
-        if (opts.center) {
-          var dx = (cw - (lx + gx + opts.gaugeBeside + gauges.offsetWidth)) / 2;
+        var gb = narrow ? opts.gaugeBeside * 0.5 : opts.gaugeBeside;
+        if (opts.center && !narrow) {
+          var dx = (cw - (lx + gx + gb + gauges.offsetWidth)) / 2;
           cam.x += dx; gx += dx;
         }
-        var gl = Math.round(gx + opts.gaugeBeside) + 'px', gt = Math.round(gy - gauges.offsetHeight) + 'px';
+        var gl = Math.round(gx + gb) + 'px', gt = Math.round(gy - gauges.offsetHeight) + 'px';
         if (gauges.style.left !== gl) gauges.style.left = gl;
         if (gauges.style.top !== gt) gauges.style.top = gt;
       }
