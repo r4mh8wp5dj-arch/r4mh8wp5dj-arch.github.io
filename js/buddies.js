@@ -61,7 +61,8 @@
   var SHAPES = {
     single: { S: 12, cells: [[0, 0]], face: 0 },
     domino: { S: 10, cells: [[0, 0], [1, 0]], face: 0 },
-    ell: { S: 10, cells: [[0, 0], [0, 1], [1, 1]], face: 1 }
+    ell: { S: 10, cells: [[0, 0], [0, 1], [1, 1]], face: 1 },
+    boulder: { S: 12, cells: [[0, 0], [1, 0], [0, 1], [1, 1]], face: 0 }
   };
   function dims(sh) {
     var cols = 0, rows = 0;
@@ -71,13 +72,13 @@
 
   function crit(P, f, pose, bx, sy, sh, o) {
     o = o || {};
-    var S = sh.S, d = dims(sh), Wb = d.W, Hb = d.H, rows = d.rows, sit = pose === 'sit', lean = o.lean || 0;
-    var hop = pose === 'hop' ? [0, 2, 4, 4, 3, 1, 0, 0][f % 8] : 0, legH = pose === 'crouch' ? 2 : 4;
+    var S = sh.S, d = dims(sh), Wb = d.W, Hb = d.H, rows = d.rows, hang = pose === 'hang', sit = pose === 'sit' || hang, lean = o.lean || 0;
+    var hop = pose === 'hop' ? [0, 2, 4, 4, 3, 1, 0, 0][f % 8] : 0, legH = o.legH != null ? o.legH : (pose === 'crouch' ? 2 : 4);
     var by = sit ? sy - Hb : sy - Hb - legH - 3 - hop, blink = f % 40 >= 38;
     var bb = bx + lean, rx = bb + Wb, sh0 = by + (rows - 1) * S + Math.round(S * 0.66), Lh, Rh;
-    if (o.hands) { var hh = o.hands(rx, sh0); Lh = hh[0]; Rh = hh[1]; }
+    if (o.hands) { var hh = o.hands(rx, sh0, by, bb); Lh = hh[0]; Rh = hh[1]; }
     else if (pose === 'wave') { Lh = [bb - 2, sh0 + 5]; Rh = [rx + 2 + [0, 1, 2, 1][Math.floor(f / 2) % 4], by + 1]; }
-    else if (pose === 'hop' || pose === 'air') { Lh = [bb - 3, by + 1]; Rh = [rx + 3, by + 1]; }
+    else if (pose === 'hop' || pose === 'air' || hang) { Lh = [bb - 3, by + 1]; Rh = [rx + 3, by + 1]; }
     else if (sit) { Lh = [bb - 1, sh0 + 4]; Rh = [rx + 1, sh0 + 4]; }
     else { Lh = [bb - 2, sh0 + 5]; Rh = [rx + 2, sh0 + 5]; }
     line(bb + 1, sh0, Lh[0], Lh[1], 2, P.limb); line(rx - 2, sh0, Rh[0], Rh[1], 2, P.limb);
@@ -85,7 +86,7 @@
     var c0 = Math.min.apply(null, bottom), c1 = Math.max.apply(null, bottom);
     var legs = [bx + c0 * S + 2, bx + c1 * S + S - 4];
     if (sit) {
-      var sw = Math.floor(f / 4) % 2;
+      var sw = pose === 'sit' ? Math.floor(f / 4) % 2 : 0;
       legs.forEach(function (lx0, i) {
         var lx = lx0 + (i ? 1 - sw : sw);
         rect(lx, sy, 2, 4, P.limb); rect(lx - 1, sy + 4, 4, 2, SHOE); rect(lx - 1, sy + 6, 4, 1, IVORY); px(lx - 1, sy + 4, SHOE_LT);
@@ -99,18 +100,29 @@
     var fc = sh.cells.filter(function (c) { return c[1] === sh.face; }).map(function (c) { return c[0]; });
     var fmin = Math.min.apply(null, fc), fmax = Math.max.apply(null, fc), fw = (fmax - fmin + 1) * S;
     var cx = bb + fmin * S + fw / 2, ft = by + sh.face * S, dx = Math.max(2, Math.round(fw * 0.2)), ey = ft + Math.round(S * 0.33);
-    var lo = pose === 'look' ? [0, 0, 1, 1, 0, 0, -1, -1][Math.floor(f / 6) % 8] : 0, happy = pose === 'hop' || pose === 'air' ? 'happy' : null;
+    var lo = pose === 'look' ? [0, 0, 1, 1, 0, 0, -1, -1][Math.floor(f / 6) % 8] : 0, happy = pose === 'hop' || pose === 'air' || hang ? 'happy' : null;
     if (o.strain) {
       rect(cx - dx - 1, ey + 1, 2, 1, INK); rect(cx + dx - 1, ey + 1, 2, 1, INK);
       rect(cx - 2, ft + Math.round(S * 0.66), 4, 2, INK); rect(cx - 2, ft + Math.round(S * 0.66), 4, 1, WHITE);
     } else {
       eye(cx - dx - 1 + lo, ey, 3, blink, happy); eye(cx + dx - 1 + lo, ey, 3, blink, happy);
-      mouth(cx - 2, ft + Math.round(S * 0.66), pose === 'wave' ? [3, 1][Math.floor(f / 3) % 2] : (pose === 'hop' || pose === 'air' ? 4 : 0));
+      mouth(cx - 2, ft + Math.round(S * 0.66), o.mouth != null ? o.mouth : (pose === 'wave' ? [3, 1][Math.floor(f / 3) % 2] : (pose === 'hop' || pose === 'air' || hang ? 4 : 0)));
     }
     rect(Math.max(bb + fmin * S + 1, cx - dx - 3), ft + Math.round(S * 0.58), 2, 1, PINK);
     rect(Math.min(bb + fmax * S + S - 3, cx + dx + 1), ft + Math.round(S * 0.58), 2, 1, PINK);
     glove(Lh[0], Lh[1]); glove(Rh[0], Rh[1]);
-    return { by: by, rx: rx, sh0: sh0 };
+    return { by: by, rx: rx, sh0: sh0, bb: bb };
+  }
+
+  function slant(x, y, s, P, sk) {
+    var inset = [2, 1, 1];
+    for (var i = 0; i < s; i++) {
+      var ins = i < 3 ? inset[i] : (i >= s - 3 ? inset[s - 1 - i] : 0), off = Math.floor((s - 1 - i) / sk), x0 = x + ins + off, x1 = x + s - 1 - ins + off;
+      var c = i === 0 ? P.b0 : (i === s - 1 ? P.b4 : (i >= s - 3 ? P.b3 : (i < 3 ? P.b1 : P.b2)));
+      rect(x0, y + i, x1 - x0 + 1, 1, c);
+      if (i > 0 && i < s - 2) { px(x0, y + i, P.b1); px(x1, y + i, P.b3); }
+    }
+    rect(x + 4 + Math.floor((s - 3) / sk), y + 2, 3, 1, P.hi);
   }
 
   function jetKid(P, f, bx, by) {
@@ -144,58 +156,129 @@
       var sit = pose === 'sit', w = d.W + 12, h = sit ? d.H + 13 : d.H + 16, sy = sit ? d.H + 6 : h;
       return { w: w, h: h, still: 1.2, draw: function (f) { crit(P, f, pose, 6, sy, sh); } };
     },
-    push: {
-      w: 54, h: 28, still: 0.55,
+    sisyphus: {
+      w: 96, h: 46, still: 3,
       draw: function (f) {
-        var P = pal('yellow'), B = pal('green'), ph = f % 20, strain = ph >= 2 && ph < 12;
-        var lean = strain ? (ph < 5 ? 1 : 2) : 0, shove = strain && ph >= 6 && ph < 10 ? 1 : 0;
-        cube(33 + shove, 12, 16, B);
-        crit(P, f, 'stand', 10, 28, SHAPES.single, { lean: lean, strain: strain, hands: function (rx, sh0) { return [[rx + 1, sh0 + 3], [rx + 2, sh0 - 1]]; } });
-        if (strain) {
-          var dy = Math.floor((ph % 6) / 2);
-          px(21 + lean, 9 + dy, '#9FD8FF'); px(21 + lean, 10 + dy, '#9FD8FF');
-          for (var i = 0; i < 3; i++) { var dx = (ph * 2 + i * 4) % 9; rect(8 - dx, 25 - i, 2, 1, 'rgba(255,255,255,' + (0.6 - dx * 0.05).toFixed(2) + ')'); }
+        var t = (f / FPS) % 10.4, Y = pal('yellow'), G = pal('green');
+        function ys(x) { return x > 78 ? 22.8 : 45 - Math.max(0, x - 4) * 0.3; }
+        for (var x = 0; x < 96; x++) {
+          var top = Math.round(ys(x));
+          rect(x, top, 1, 46 - top, '#5B4752'); px(x, top, '#8A7482');
+          if ((x * 7 + top) % 5 === 0) px(x, top + 2 + x % 3, '#46363F');
+        }
+        rect(89, 6, 1, 17, '#EDE6D6'); rect(90, 6, 5, 3, '#E5483A'); rect(90, 9, 3, 1, '#E5483A'); px(89, 5, '#FFD25A');
+        var p, phase, lean = 1;
+        if (t < 7) { phase = 'push'; p = Math.max(0, t / 7 + 0.03 * Math.sin(t * 5.2)); lean = Math.sin(t * 5.2) > 0 ? 2 : 1; }
+        else if (t < 8.1) { phase = 'top'; p = 1 + 0.01 * Math.sin(t * 30); lean = 2; }
+        else if (t < 9.5) { phase = 'slip'; var u = (t - 8.1) / 1.4; p = 1 - u * u; lean = 0; }
+        else { phase = 'rest'; p = 0; lean = 0; }
+        var xbl = lerp(26, 58, Math.min(1, p)), bxk = Math.round(xbl) - 23 - lean, yb = Math.round(ys(xbl + 12)), sy = Math.round(ys(bxk + 10));
+        SHAPES.boulder.cells.forEach(function (c) { cube(Math.round(xbl) + c[0] * 12, yb - 24 + c[1] * 12, 12, G); });
+        var opts = { lean: lean, strain: phase === 'push' || phase === 'top', hands: function (rx, sh0) { return [[rx + 1, sh0 + 3], [rx + 2, sh0 - 1]]; } };
+        if (phase === 'slip') opts.mouth = 2;
+        crit(Y, f, 'stand', bxk, sy, SHAPES.domino, opts);
+        if (phase === 'push' || phase === 'top') {
+          var dy = Math.floor((f % 6) / 2);
+          px(bxk + 21 + lean, sy - 17 + dy, '#9FD8FF'); px(bxk + 21 + lean, sy - 16 + dy, '#9FD8FF');
+          for (var i = 0; i < 3; i++) { var dd = (f * 2 + i * 4) % 9; rect(bxk - 2 - dd, sy - 1 - i, 2, 1, 'rgba(255,255,255,' + (0.6 - dd * 0.06).toFixed(2) + ')'); }
+        }
+        if (phase === 'slip') {
+          for (var j = 0; j < 4; j++) { var du = (f + j * 2) % 8; rect(bxk + 22 + du, sy - 1 - (du >> 1) - j, 2, 1, 'rgba(255,255,255,' + (0.7 - du * 0.07).toFixed(2) + ')'); }
         }
       }
     },
     ready: {
-      w: 60, h: 30, still: 0.4,
+      w: 64, h: 34, still: 0.4,
       draw: function (f) {
-        var P = pal('blue'), jit = f % 2, bx = 36 + jit, sy = 30, by = sy - 20;
-        for (var i = 0; i < 8; i++) {
-          var x = bx - 4 - i * 3, hgt = [12, 11, 10, 8, 7, 5, 4, 2][i] + (((f + i * 2) % 3) - 1);
-          rect(x, sy - hgt, 3, hgt, '#FF6B1A'); rect(x + 1, sy - hgt + 2, 2, hgt - 2, '#FF8A3D'); rect(x + 1, sy - hgt + 4, 1, Math.max(0, hgt - 4), '#FFD25A'); px(x + 1, sy - hgt - 1 - (f + i) % 2, '#FF8A3D');
+        var P = pal('blue'), sy = 34, burst = f % 18 < 4, bx = 34 + (f % 2), by = sy - 22;
+        var base = burst ? [9, 9, 8, 7, 6, 5, 3, 2, 1] : [6, 6, 5, 4, 3, 3, 2, 1, 1];
+        for (var i = 0; i < 9; i++) {
+          var x = bx - 4 - i * 3, h = base[i] + ((f + i) % 3 === 0 ? 1 : 0);
+          rect(x, sy - h, 3, h, '#FF6B1A'); rect(x + 1, sy - h + 1, 2, Math.max(0, h - 1), '#FF8A3D'); rect(x + 1, sy - h + 3, 1, Math.max(0, h - 3), '#FFD25A'); px(x + 1, sy - h - 1, '#FF8A3D');
         }
-        line(bx + 1, by + 9, bx - 5, by + 9, 2, P.limb); line(bx + 1, by + 9, bx - 3, by + 12, 2, P.limb);
+        [0, 1, 2].forEach(function (k) { rect(bx - 12 - ((f * 3 + k * 5) % 9), by + 2 + k * 4, 7, 1, 'rgba(255,255,255,0.45)'); });
+        line(bx + 4, by + 9, bx - 4, by + 14, 3, P.limb);
+        line(bx + 4, by + 6, bx - 5, by + 6, 3, P.limb);
         for (var yy = -5; yy <= 5; yy++) for (var xx = -5; xx <= 5; xx++) {
           if (xx * xx + yy * yy > 25) continue;
-          var a = Math.atan2(yy, xx) + f * 1.1, c = Math.floor(a / 1.5708) % 2 === 0 ? '#E5483A' : '#FFF4D6';
-          px(bx + 6 + xx, sy - 6 + yy, c);
+          var a = Math.atan2(yy, xx) + f * 1.1;
+          px(bx + 8 + xx, sy - 6 + yy, Math.floor(a / 1.5708) % 2 === 0 ? '#E5483A' : '#FFF4D6');
         }
-        cube(bx, by, 12, P);
-        rect(bx + 3, by + 4, 2, 3, INK); rect(bx + 8, by + 4, 2, 3, INK); px(bx + 3, by + 4, WHITE); px(bx + 8, by + 4, WHITE);
-        rect(bx + 2, by + 2, 3, 1, INK); px(bx + 5, by + 3, INK); rect(bx + 7, by + 2, 3, 1, INK); px(bx + 6, by + 3, INK);
-        rect(bx + 1, by + 7, 2, 1, PINK); rect(bx + 10, by + 7, 2, 1, PINK);
-        mouth(bx + 5, by + 8, 4);
-        glove(bx - 5, by + 9); glove(bx - 3, by + 12);
-        if (f % 6 < 2) { spark(bx + 17, by + 2, '#FFD25A'); }
+        slant(bx, by, 12, P, 4);
+        rect(bx + 5, by + 5, 2, 3, INK); rect(bx + 9, by + 5, 2, 3, INK); px(bx + 5, by + 5, WHITE); px(bx + 9, by + 5, WHITE);
+        px(bx + 4, by + 3, INK); px(bx + 5, by + 3, INK); px(bx + 6, by + 4, INK); px(bx + 11, by + 3, INK); px(bx + 10, by + 3, INK); px(bx + 9, by + 4, INK);
+        rect(bx + 3, by + 8, 2, 1, PINK); rect(bx + 11, by + 8, 2, 1, PINK);
+        mouth(bx + 6, by + 9, 4);
+        glove(bx - 5, by + 14); glove(bx - 6, by + 6);
+        if (f % 6 < 2) spark(bx + 20, by + 1, '#FFD25A');
       }
     },
     jump: {
-      dyn: true, still: 0.4,
+      dyn: true, still: 0.5,
       draw: function (f, W, H, canvas, k) {
         var steps = document.querySelectorAll('.steps article');
         if (steps.length < 3 || canvas.clientWidth < 700) return;
         var cr = canvas.getBoundingClientRect(), xs = [].map.call(steps, function (a) { var r = a.getBoundingClientRect(); return (r.left + r.width / 2 - cr.left) / k; });
-        var t = f / FPS % 5.7, P = pal('green'), sy = H, i, x, y = 0, pose = 'wave';
-        if (t < 1.2) { i = 0; if (t > 1.05) pose = 'crouch'; x = xs[0]; }
-        else if (t < 1.8) { var u = (t - 1.2) / 0.6; x = lerp(xs[0], xs[1], u); y = 4 * 13 * u * (1 - u); pose = 'air'; }
-        else if (t < 3.0) { x = xs[1]; if (t > 2.85) pose = 'crouch'; }
-        else if (t < 3.6) { var u2 = (t - 3.0) / 0.6; x = lerp(xs[1], xs[2], u2); y = 4 * 13 * u2 * (1 - u2); pose = 'air'; }
-        else if (t < 4.8) { x = xs[2]; if (t > 4.65) pose = 'crouch'; }
-        else { var u3 = (t - 4.8) / 0.9; x = lerp(xs[2], xs[0], u3); y = 4 * 22 * u3 * (1 - u3); pose = 'air'; }
-        crit(P, f, pose, Math.round(x) - 10, sy - Math.round(y), SHAPES.ell);
+        var hops = [[0, 1, 0.62, 13], [1, 2, 0.62, 13], [2, 0, 0.95, 22]], P = pal('green'), t = f / FPS, tot = 0;
+        hops.forEach(function (h) { tot += 0.9 + 0.25 + h[2] + 0.2; });
+        t = t % tot;
+        var acc = 0, sy = H, pose = 'wave', x = xs[0], y = 0, legH = 4, cur = 0, ph = 'stand', u = 0, tl = 0, pos = xs[0];
+        for (cur = 0; cur < 3; cur++) {
+          var h = hops[cur], seg = [0.9, 0.25, h[2], 0.2], names = ['stand', 'crouch', 'fly', 'land'], k0 = 0;
+          for (k0 = 0; k0 < 4; k0++) { if (t < acc + seg[k0]) { ph = names[k0]; tl = t - acc; u = tl / seg[k0]; break; } acc += seg[k0]; }
+          if (k0 < 4) break;
+        }
+        var hp = hops[Math.min(cur, 2)], x0 = xs[hp[0]], x1 = xs[hp[1]];
+        if (ph === 'stand') { x = x0; pose = 'wave'; }
+        else if (ph === 'crouch') { x = x0; pose = 'crouch'; }
+        else if (ph === 'fly') {
+          x = lerp(x0, x1, u * (2 - u) * 0.5 + u * 0.5); y = 4 * hp[3] * u * (1 - u); pose = 'air'; legH = u < 0.4 ? 6 : (u < 0.6 ? 3 : 5);
+          for (var i = 1; i <= 4; i++) {
+            var uu = u - i * 0.07;
+            if (uu <= 0) continue;
+            g.globalAlpha = 0.55 - i * 0.1;
+            rect(Math.round(lerp(x0, x1, uu * (2 - uu) * 0.5 + uu * 0.5)) - 1, sy - Math.round(4 * hp[3] * uu * (1 - uu)) - 12 + i, 2, 2, '#FFFFFF');
+          }
+          g.globalAlpha = 1;
+        } else { x = x1; pose = 'crouch'; }
+        if (ph === 'land' || (ph === 'stand' && tl < 0.2 && cur > 0)) {
+          var lu = ph === 'land' ? u : 0.5 + tl / 0.4, lx = ph === 'land' ? x1 : x0;
+          for (var d = 0; d < 3; d++) {
+            g.globalAlpha = Math.max(0, 0.7 - lu * 0.6);
+            rect(Math.round(lx - 6 - d * 3 - lu * 5), sy - 1 - d % 2, 2, 1 + (d % 2), '#E8E0F0'); rect(Math.round(lx + 6 + d * 3 + lu * 5), sy - 1 - d % 2, 2, 1 + (d % 2), '#E8E0F0');
+          }
+          g.globalAlpha = 1;
+        }
+        if (ph === 'crouch' && cur >= 0 && tl < 0.1) { spark(Math.round(x), sy - 6, '#FFD25A'); }
+        crit(P, f, pose, Math.round(x) - 10, sy - Math.round(y), SHAPES.ell, { legH: legH });
       }
+    },
+    barkid: function (canvas) {
+      var P = pal('red'), sh = SHAPES.domino, d = dims(sh), sy = d.H + 8, hidden = false, barH = 0, kk = 3, bar = null;
+      function pos(hid) { return 'translateY(' + ((hid ? 2 : barH) - sy * kk) + 'px) scaleY(' + (hid ? -1 : 1) + ')'; }
+      var def = {
+        w: d.W + 12, h: sy + 8, still: 1,
+        init: function () {
+          bar = document.querySelector('.bar');
+          if (!bar || !window.MutationObserver) return;
+          kk = parseFloat(getComputedStyle(canvas).getPropertyValue('--k')) || 3;
+          canvas.style.transformOrigin = '0 ' + sy * kk + 'px';
+          hidden = bar.classList.contains('hide'); barH = bar.offsetHeight;
+          canvas._st = hidden ? 'hang' : 'sit';
+          canvas.style.transition = 'none'; canvas.style.transform = pos(hidden);
+          requestAnimationFrame(function () { canvas.style.transition = ''; });
+          new MutationObserver(function () {
+            var h = bar.classList.contains('hide');
+            if (h === hidden) return;
+            hidden = h; barH = bar.offsetHeight;
+            canvas.style.transform = pos(h);
+            setTimeout(function () { canvas._st = h ? 'hang' : 'sit'; canvas.dispatchEvent(new Event('refresh')); }, I.reduce ? 0 : 330);
+          }).observe(bar, { attributes: true, attributeFilter: ['class'] });
+          window.addEventListener('resize', function () { barH = bar.offsetHeight; canvas.style.transition = 'none'; canvas.style.transform = pos(hidden); requestAnimationFrame(function () { canvas.style.transition = ''; }); });
+        },
+        draw: function (f) { crit(P, f, canvas._st === 'hang' ? 'hang' : 'sit', 6, sy, sh); }
+      };
+      return def;
     },
     roofs: {
       dyn: true, still: 2.5,
@@ -321,6 +404,7 @@
       last = -1;
       render(I.reduce || !on ? def.still : (performance.now() - t0) / 1000);
     }
+    canvas.addEventListener('refresh', function () { last = -1; render(I.reduce || !on ? def.still : (performance.now() - t0) / 1000); });
     function loop(now) {
       if (!on) return;
       if (!t0) t0 = now;
@@ -329,6 +413,7 @@
     }
     window.addEventListener('resize', resize);
     resize();
+    if (def.init) def.init();
     if (I.reduce) return;
     I.visible(canvas, function (v) {
       if (v && !on) { on = true; t0 = 0; requestAnimationFrame(loop); }

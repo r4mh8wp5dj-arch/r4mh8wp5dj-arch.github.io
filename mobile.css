@@ -54,6 +54,7 @@
   .title .kid { left: auto; right: 7%; }
   .buddy-push, .buddy-ready { --k: 3; left: 50%; right: auto; bottom: 14px; transform: translateX(-50%); }
   .bar-kid, .jump-cv { display: none; }
+  .how .band:not(.band-streak) { padding-bottom: 176px; }
   .climb-cv { --k: 3; top: 0; bottom: 0; left: 0; right: 0; width: 100%; height: 100%; z-index: 0; }
   .city-kids { --k: 2; height: calc(clamp(150px, 30vh, 320px) + 70px); }
   .tag { margin-top: 6px; }

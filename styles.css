@@ -262,7 +262,8 @@ main, .foot { position: relative; z-index: 1; }
 .how .band { position: relative; }
 .buddy-push { --k: 4; position: absolute; right: 48px; bottom: 20px; }
 .buddy-ready { --k: 4; position: absolute; left: 44px; bottom: 20px; }
-.bar-kid { --k: 3; position: absolute; left: 36%; bottom: calc(var(--k) * -7px); }
+.bar-kid { --k: 3; position: fixed; top: 0; left: 36%; z-index: 11; transition: transform .75s cubic-bezier(.3, 1.5, .5, 1); }
+@media (prefers-reduced-motion: reduce) { .bar-kid { transition: none; } }
 .jump-cv { --k: 3; position: absolute; left: 0; top: calc(12vh - 150px); width: 100%; height: 150px; }
 .climb { position: relative; }
 .climb-cv { --k: 4; position: absolute; right: 0; bottom: 100%; width: 60%; height: 260px; }
