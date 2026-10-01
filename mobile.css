@@ -19,11 +19,11 @@
   .how { gap: 18px; padding-top: 6vh; padding-bottom: 6vh; }
   .how article { padding: 14px 18px 24px; }
   .scene-stage { margin-bottom: 14px; max-width: 300px; }
-  .how .band { grid-template-columns: minmax(0, 1fr); justify-items: center; text-align: center; padding: 14px 18px 28px; box-shadow: inset 0 0 0 1px rgba(255, 77, 94, .28), inset 0 4px 0 #E61F1A; }
+  .how .band { grid-template-columns: minmax(0, 1fr); justify-items: center; text-align: center; padding: 14px 18px 28px; box-shadow: inset 0 0 0 1px rgba(255, 77, 94, .28); }
   .band-stage { max-width: 360px; aspect-ratio: 1 / 1; margin-bottom: 4px; }
   .band:not(.band-streak) .band-stage { aspect-ratio: 1 / 1.18; }
   .band-gauge { width: 46px; height: 126px; }
-  .how .band-streak { box-shadow: inset 0 0 0 1px rgba(255, 140, 40, .3), inset 0 4px 0 #FF6B0F; }
+  .how .band-streak { box-shadow: inset 0 0 0 1px rgba(255, 140, 40, .3); }
   .band-streak .band-stage { order: 0; }
   .streak-gauge { width: 46px; height: 148px; }
   .band p { margin-left: auto; margin-right: auto; }
