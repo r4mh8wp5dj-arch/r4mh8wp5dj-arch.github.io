@@ -28,3 +28,9 @@ Static landing page for the Block Pit iOS game, served by GitHub Pages from `mai
 - A match is two or more same-colored blocks touching; never write "three or more".
 - No level number, progress bar, next-piece preview, trophy or lives anywhere on the site.
 - The hero demo is autoplay; the streak multiplier is `min(2.4, 2.4 - 1.5 * 0.8^streak)`.
+
+## Pending (do later, owner will provide the details)
+
+- Privacy policy (`privacy.html`): fill `[DEVELOPER LEGAL NAME]`, `[POSTAL ADDRESS]` and `[ANALYTICS PROVIDER]`, confirm the ad SDK (AdMob) is really in the shipping build, then remove the four `.note` boxes. Effective and last-updated dates are set to October 1, 2026; update them on launch day.
+- App Store link: replace `[APP_ID]` in `site.config.json`, then `npm run build`.
+- No Terms page: the game has no purchases or accounts, so Apple's standard license applies.
