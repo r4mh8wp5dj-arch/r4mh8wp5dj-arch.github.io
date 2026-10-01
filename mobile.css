@@ -50,6 +50,10 @@
   .tag, .hero .cta-row { justify-content: center; }
   .pitch { margin-left: auto; margin-right: auto; }
   .skies-head h2 { font-size: min(6.3vw, 1.9rem); white-space: nowrap; }
+  .skies-top { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .buddy-jet { align-self: center; width: 128px; }
+  .end .buddy-ell { position: static; margin: 0 auto 4px; width: 150px; }
+  .end .buddy-domino { display: none; }
   .tag { margin-top: 6px; }
   .pitch { margin-top: 18px; font-size: 1.2rem; }
   .hero .cta-row { margin-top: 32px; }
