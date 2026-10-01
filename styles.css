@@ -339,7 +339,7 @@ body:not(.home) .foot { background: #1a1233; }
   color: var(--ink-2);
 }
 .todo code { font-family: "Nippo"; font-weight: 700; color: var(--ink); }
-.stack-art { width: 100%; aspect-ratio: 4 / 5; max-height: 76vh; }
+.stack-art { width: 100%; aspect-ratio: 7 / 5; max-height: 76vh; }
 
 .legal {
   display: grid;
@@ -419,7 +419,7 @@ body:not(.home) .foot { background: #1a1233; }
   .pit-wrap { max-height: 62vh; }
   .how { grid-template-columns: minmax(0, 1fr); padding: 8vh var(--gut); }
   .hello { grid-template-columns: 1fr; padding-top: 40px; align-content: start; }
-  .stack-art { max-height: 46vh; order: -1; justify-self: center; width: auto; height: 46vh; }
+  .stack-art { order: -1; justify-self: center; width: min(100%, 440px); height: auto; max-height: none; }
   .legal { grid-template-columns: minmax(0, 1fr); }
   .toc { position: static; max-height: none; }
 }

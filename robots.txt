@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://r4mh8wp5dj-arch.github.io/sitemap.xml
