@@ -146,6 +146,113 @@
     glove(bx - 4, by + 1 + up); glove(bx + 16, by + 2 - up);
   }
 
+  function rnd(n) { var v = Math.sin(n * 12.9898) * 43758.5453; return v - Math.floor(v); }
+  function ease(u) { u = Math.max(0, Math.min(1, u)); return u * u * (3 - 2 * u); }
+
+  function burstFx(x, y, col, s, n, seed, G) {
+    if (s < 0 || s > 0.85) return;
+    if (s < 0.17) {
+      rect(x - 5, y - 1, 10, 2, 'rgba(255,255,255,0.75)'); rect(x - 1, y - 5, 2, 10, 'rgba(255,255,255,0.75)');
+      spark(x - 7, y - 5, '#FFD25A'); spark(x + 7, y - 5, '#FFD25A');
+    }
+    for (var i = 0; i < n; i++) {
+      var a = rnd(seed + i * 3) * 6.2832, sp = 12 + rnd(seed + i * 3 + 1) * 22, vy = 22 + rnd(seed + i * 3 + 2) * 16, life = 0.5 + rnd(seed + i * 7) * 0.3;
+      if (s > life) continue;
+      var fx = x + Math.cos(a) * sp * s, fy = Math.min(G - 3, y - vy * s + 90 * s * s), sz = s / life < 0.55 ? 3 : 2;
+      rect(fx - 1, fy - 1, sz, sz, col); px(fx - 1, fy - 1, mix(col, '#ffffff', 0.5));
+    }
+  }
+
+  function pairAt(cx, by, e) {
+    var cy = lerp(by - 1, by - 8, e);
+    return { lx: lerp(cx - 18, cx - 6, e), rx: lerp(cx + 12, cx, e), y: cy };
+  }
+
+  function act(idx, tt, cx, rx, sh0, by, G) {
+    var rest = [[cx - 12, sh0 + 5], [rx + 2, sh0 + 5]], hands = [rest[0], rest[1]], fn = [], c, e, rb = 0, p;
+    function raise(q, b) { return [[lerp(q.lx + 3, rest[0][0], b), lerp(q.y + 8, rest[0][1], b)], [lerp(q.rx + 3, rest[1][0], b), lerp(q.y + 8, rest[1][1], b)]]; }
+    function pair(q, col) { miniCube(Math.round(q.lx), Math.round(q.y), col); miniCube(Math.round(q.rx), Math.round(q.y), col); }
+    if (idx === 0) {
+      c = tt % 4.8;
+      var hx = rx + 1, red = HEX.red;
+      if (c < 1.2 || c >= 4.2) {
+        hands[1] = [rx + 4, by + 4];
+        fn.push(function () { miniCube(hx, by - 4, red); if (c >= 4.2 && c < 4.5) spark(hx + 3, by - 8, WHITE); });
+      } else {
+        var s = c - 1.2, d = (G - 6) - (by - 4), tf = Math.sqrt(2 * d / 260);
+        hands[1] = [rx + 4, lerp(by + 4, sh0 + 5, ease(s / 0.4))];
+        fn.push(function () {
+          if (s < tf) miniCube(hx, Math.round(by - 4 + 130 * s * s), red);
+          else if (c < 2.9 || (c < 3.3 && Math.floor(c * 12) % 2 === 0)) {
+            if (s - tf < 0.17) { rect(hx - 1, G - 4, 8, 4, red); rect(hx - 1, G - 4, 8, 1, mix(red, '#ffffff', 0.45)); rect(hx - 1, G - 1, 8, 1, mix(red, '#000000', 0.3)); }
+            else miniCube(hx, G - 6, red);
+          }
+        });
+      }
+    } else if (idx === 1) {
+      c = tt % 4.8;
+      e = c < 0.6 ? 0 : c < 1.3 ? ease((c - 0.6) / 0.7) : c < 3 ? 1 : c < 3.7 ? 1 - ease((c - 3) / 0.7) : 0;
+      p = pairAt(cx, by, e); hands = raise(p, 0);
+      fn.push(function () {
+        pair(p, HEX.yellow);
+        if (e === 1) {
+          var pulse = Math.floor(c * 6) % 2;
+          rect(Math.round(p.lx) - 1, Math.round(p.y) - 1 - pulse, 14, 1, 'rgba(255,255,255,0.7)');
+          if (c < 1.45) rect(cx - 3, Math.round(p.y) + 1, 6, 4, 'rgba(255,255,255,0.8)');
+          spark(cx + (pulse ? -7 : 7), Math.round(p.y) - 3, '#FFD25A');
+        }
+      });
+    } else {
+      c = tt % 6;
+      e = c < 0.5 ? 0 : c < 1.2 ? ease((c - 0.5) / 0.7) : c < 5.2 ? 1 : 0;
+      rb = c < 3.1 ? 0 : c < 3.6 ? ease((c - 3.1) / 0.5) : c < 5.2 ? 1 : c < 5.6 ? 1 - ease((c - 5.2) / 0.4) : 0;
+      p = pairAt(cx, by, e); hands = raise(p, rb);
+      var tf2 = Math.sqrt(2 * Math.max(1, by) / 300), mid = pairAt(cx, by, 1);
+      fn.push(function () {
+        if (c < 1.2 || c >= 5.5) { pair(p, HEX.yellow); if (c >= 5.5 && c < 5.8) spark(cx, by - 12, WHITE); }
+        if (c >= 1.2 && c < 1.2 + 0.85) burstFx(cx, by - 5, HEX.yellow, c - 1.2, 8, 11, G);
+        if (c >= 1.7 && c < 2.4) {
+          var u = c - 1.7, y = u < tf2 ? -8 + 150 * u * u : mid.y;
+          g.globalAlpha = Math.max(0, Math.min(1, (y + 6) / 14));
+          pair({ lx: mid.lx, rx: mid.rx, y: Math.min(mid.y, y) }, HEX.blue);
+          g.globalAlpha = 1;
+        }
+        if (c >= 2.4 && c < 2.4 + 0.85) burstFx(cx, by - 5, HEX.blue, c - 2.4, 11, 29, G);
+      });
+    }
+    return { hands: hands, draw: function () { fn.forEach(function (d) { d(); }); } };
+  }
+
+  function hopperPhone(f, W, H, canvas, xs) {
+    var mid = W / 2, idx = 0, st = canvas._ph, bx = Math.round(mid) - 10, P = pal('green');
+    xs.forEach(function (x, i) { if (Math.abs(x - mid) < Math.abs(xs[idx] - mid)) idx = i; });
+    if (!st) st = canvas._ph = { idx: idx, h: 0, t0: f, land: -99, fr: -1 };
+    var mv = !I.reduce && performance.now() - (canvas._mv || -1e9) < 180;
+    if (st.fr !== f) {
+      st.fr = f;
+      var pv = st.h;
+      st.h += Math.max(-7, Math.min(7, (mv ? 14 : 0) - st.h));
+      if (pv > 0 && st.h === 0) { st.land = f; st.t0 = f; }
+      if (st.idx !== idx) { st.idx = idx; st.t0 = f; }
+    }
+    if (st.h > 0) {
+      var wob = st.h >= 14 ? [0, 1, 0, -1][f % 4] : 0;
+      crit(P, f, 'air', bx, H - st.h - wob, SHAPES.ell, { legH: st.h >= 14 ? (f % 2 ? 6 : 3) : 5 });
+      return;
+    }
+    var lf = f - st.land;
+    if (lf >= 0 && lf < 4) {
+      for (var d = 0; d < 3; d++) {
+        g.globalAlpha = Math.max(0, 0.7 - lf * 0.18);
+        rect(bx + 10 - 8 - d * 3 - lf * 3, H - 1 - d % 2, 2, 1 + (d % 2), '#E8E0F0'); rect(bx + 10 + 8 + d * 3 + lf * 3, H - 1 - d % 2, 2, 1 + (d % 2), '#E8E0F0');
+      }
+      g.globalAlpha = 1;
+    }
+    var tt = (f - st.t0) / FPS, fx = null;
+    crit(P, f, 'wave', bx, H, SHAPES.ell, { hands: function (rx, sh0, by, bb) { fx = act(st.idx, tt, bb + 10, rx, sh0, by, H); return fx.hands; } });
+    if (fx) fx.draw();
+  }
+
   var KIDS = [
     { at: 0.1, pat: 0.27, color: 'green', pose: 'wave', off: 0, phone: true },
     { at: 0.46, pat: 0.93, color: 'cyan', pose: 'sit', off: 3, phone: true },
@@ -240,23 +347,13 @@
       dyn: true, still: 0.5,
       init: function (canvas) {
         var box = document.querySelector('.steps');
-        if (box && I.reduce) box.addEventListener('scroll', function () { canvas.dispatchEvent(new Event('refresh')); }, { passive: true });
+        if (box) box.addEventListener('scroll', function () { if (I.reduce) canvas.dispatchEvent(new Event('refresh')); else canvas._mv = performance.now(); }, { passive: true });
       },
       draw: function (f, W, H, canvas, k) {
         var steps = document.querySelectorAll('.steps article');
         if (steps.length < 3) return;
         var cr = canvas.getBoundingClientRect(), xs = [].map.call(steps, function (a) { var r = a.getBoundingClientRect(); return (r.left + r.width / 2 - cr.left) / k; });
-        if (canvas.clientWidth < 700) {
-          var mid = W / 2, idx = 0, st = canvas._ph, t1 = f / FPS;
-          xs.forEach(function (x, i) { if (Math.abs(x - mid) < Math.abs(xs[idx] - mid)) idx = i; });
-          if (!st) st = canvas._ph = { idx: idx, x: xs[idx], from: 0, t0: -9 };
-          if (st.idx !== idx) { st.from = st.x; st.t0 = t1; st.idx = idx; }
-          var u1 = (t1 - st.t0) / 0.6, hopping = !I.reduce && u1 >= 0 && u1 < 1, hy = 0, hx = xs[idx], hp = 'wave', hl = 4;
-          if (hopping) { hx = lerp(st.from, xs[idx], u1 * (2 - u1)); hy = 4 * 12 * u1 * (1 - u1); hp = 'air'; hl = u1 < 0.4 ? 6 : (u1 < 0.6 ? 3 : 5); }
-          st.x = hx;
-          crit(pal('green'), f, hp, Math.round(hx) - 10, H - Math.round(hy), SHAPES.ell, { legH: hl });
-          return;
-        }
+        if (canvas.clientWidth < 700) { hopperPhone(f, W, H, canvas, xs); return; }
         var hops = [[0, 1, 0.62, 13], [1, 2, 0.62, 13], [2, 0, 0.95, 22]], P = pal('green'), t = f / FPS, tot = 0;
         hops.forEach(function (h) { tot += 0.9 + 0.25 + h[2] + 0.2; });
         t = t % tot;
@@ -331,13 +428,15 @@
           if (narrow && !c.phone) return;
           var target = (narrow ? c.pat : c.at) * cw, best = null;
           roofs.list.forEach(function (r) {
-            if (r.mast || r.w < (narrow ? 17 : 30) || used.indexOf(r) >= 0) return;
+            if (r.mast || r.w < (narrow ? 10 : 30) || used.indexOf(r) >= 0) return;
             var d = Math.abs(r.cx - target);
             if (!best || d < best.d) best = { r: r, d: d };
           });
           if (!best) return;
           used.push(best.r);
-          crit(pal(c.color), f + c.off * 5, c.pose, Math.round(best.r.cx / k) - 6, Math.round((ch - (roofs.h - best.r.top)) / k), SHAPES.single);
+          var rx0 = Math.round(best.r.cx / k) - 6, ry = Math.round((ch - (roofs.h - best.r.top)) / k);
+          if (best.r.w / k < 16) rect(rx0 - 2, ry, 16, 3, '#1c2a22');
+          crit(pal(c.color), f + c.off * 5, c.pose, rx0, ry, SHAPES.single);
         });
       }
     },

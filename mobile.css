@@ -16,7 +16,7 @@
   .hud-score { width: auto; }
   .pit-wrap { width: 100%; max-width: 440px; height: 440px; max-height: none; aspect-ratio: auto; margin-top: 24px; --banner-top: 28%; }
   .hud { top: -24px; left: 0; right: 0; }
-  .how { gap: 18px; padding-top: calc(6vh + 64px); padding-bottom: 6vh; }
+  .how { gap: 18px; padding-top: calc(6vh + 80px); padding-bottom: 6vh; }
   .how article { padding: 14px 18px 24px; }
   .scene-stage { margin-bottom: 14px; max-width: 300px; }
   .how .band { grid-template-columns: minmax(0, 1fr); justify-items: center; text-align: center; padding: 14px 18px 124px; box-shadow: inset 0 0 0 1px rgba(255, 77, 94, .28); }
@@ -55,11 +55,11 @@
   .title .kid { left: auto; right: 7%; }
   .buddy-push, .buddy-ready { --k: 3; left: 50%; right: auto; bottom: 14px; transform: translateX(-50%); }
   .bar-kid { display: none; }
-  .jump-cv { --k: 2; top: 0; height: calc(6vh + 64px); }
+  .jump-cv { --k: 2; top: 0; height: calc(6vh + 80px); }
   .dock-kid { --k: 2; position: absolute; right: calc(var(--gut) + 8px); bottom: calc(100% - 18px); }
   .how .band:not(.band-streak) { padding-bottom: 176px; }
   .climb-cv { --k: 3; top: 0; bottom: 0; left: 0; right: 0; width: 100%; height: 100%; z-index: 0; }
-  .city-kids { --k: 2; height: calc(clamp(150px, 30vh, 320px) + 70px); }
+  .city-kids { --k: 3; height: calc(clamp(150px, 30vh, 320px) + 70px); }
   .tag { margin-top: 6px; }
   .pitch { margin-top: 18px; font-size: 1.2rem; }
   .hero .cta-row { margin-top: 32px; }
