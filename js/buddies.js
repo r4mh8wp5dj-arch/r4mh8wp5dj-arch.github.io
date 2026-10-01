@@ -102,7 +102,7 @@
     var fc = sh.cells.filter(function (c) { return c[1] === sh.face; }).map(function (c) { return c[0]; });
     var fmin = Math.min.apply(null, fc), fmax = Math.max.apply(null, fc), fw = (fmax - fmin + 1) * S;
     var cx = bb + fmin * S + fw / 2, ft = by + sh.face * S, dx = Math.max(2, Math.round(fw * 0.2)), ey = ft + Math.round(S * 0.33);
-    var lo = pose === 'look' ? [0, 0, 1, 1, 0, 0, -1, -1][Math.floor(f / 6) % 8] : 0, happy = pose === 'hop' || pose === 'air' || hang ? 'happy' : null;
+    var lo = o.lo != null ? o.lo : pose === 'look' ? [0, 0, 1, 1, 0, 0, -1, -1][Math.floor(f / 6) % 8] : 0, happy = pose === 'hop' || pose === 'air' || hang ? 'happy' : null;
     if (o.strain) {
       rect(cx - dx - 1, ey + 1, 2, 1, INK); rect(cx + dx - 1, ey + 1, 2, 1, INK);
       rect(cx - 2, ft + Math.round(S * 0.66), 4, 2, INK); rect(cx - 2, ft + Math.round(S * 0.66), 4, 1, WHITE);
@@ -147,16 +147,34 @@
   }
 
   var KIDS = [
-    { at: 0.1, pat: 0.16, color: 'green', pose: 'wave', off: 0, phone: true },
-    { at: 0.46, pat: 0.7, color: 'cyan', pose: 'sit', off: 3, phone: true },
-    { at: 0.84, pat: 0.5, color: 'red', pose: 'hop', off: 1, phone: false }
+    { at: 0.1, pat: 0.27, color: 'green', pose: 'wave', off: 0, phone: true },
+    { at: 0.46, pat: 0.93, color: 'cyan', pose: 'sit', off: 3, phone: true },
+    { at: 0.84, pat: 0.5, color: 'red', pose: 'hop', off: 1, phone: true }
   ];
 
   var SCENES = {
     kid: function (canvas) {
       var P = pal(canvas.getAttribute('data-color') || 'blue'), pose = canvas.getAttribute('data-pose') || 'stand', sh = SHAPES[canvas.getAttribute('data-shape') || 'single'], d = dims(sh);
       var sit = pose === 'sit', w = d.W + 12, h = sit ? d.H + 13 : d.H + 16, sy = sit ? d.H + 6 : h;
-      return { w: w, h: h, still: 1.2, draw: function (f) { crit(P, f, pose, 6, sy, sh); } };
+      var def = { w: w, h: h, still: 1.2, draw: function (f) { crit(P, f, pose, 6, sy, sh); } };
+      var title = canvas.parentNode && canvas.parentNode.classList.contains('title') ? canvas.parentNode : null;
+      if (title) {
+        var place = function () {
+          var span = title.querySelector('span'), tn = span && span.firstChild;
+          if (!tn || !tn.length) return;
+          var r = document.createRange(), box = title.getBoundingClientRect();
+          r.setStart(tn, tn.length - 1); r.setEnd(tn, tn.length);
+          var b = r.getBoundingClientRect();
+          canvas.style.right = 'auto';
+          canvas.style.left = Math.round((b.left + b.right) / 2 - box.left - canvas.getBoundingClientRect().width / 2) + 'px';
+        };
+        def.init = function () {
+          place();
+          window.addEventListener('resize', place);
+          if (document.fonts && document.fonts.ready) document.fonts.ready.then(place);
+        };
+      }
+      return def;
     },
     sisyphus: {
       w: 96, h: 46, still: 3,
@@ -194,14 +212,16 @@
       w: 64, h: 34, still: 0.4,
       draw: function (f) {
         var P = pal('blue'), sy = 34, burst = f % 18 < 4, bx = 34 + (f % 2), by = sy - 22;
-        var base = burst ? [9, 9, 8, 7, 6, 5, 3, 2, 1] : [6, 6, 5, 4, 3, 3, 2, 1, 1];
+        var base = burst ? [9, 9, 8, 7, 6, 5, 3, 2, 1] : [6, 6, 5, 4, 3, 3, 2, 1, 1], sw = (f >> 1) % 2;
         for (var i = 0; i < 9; i++) {
-          var x = bx - 4 - i * 3, h = base[i] + ((f + i) % 3 === 0 ? 1 : 0);
-          rect(x, sy - h, 3, h, '#FF6B1A'); rect(x + 1, sy - h + 1, 2, Math.max(0, h - 1), '#FF8A3D'); rect(x + 1, sy - h + 3, 1, Math.max(0, h - 3), '#FFD25A'); px(x + 1, sy - h - 1, '#FF8A3D');
+          var x = bx + 1 - i * 3, h = base[i] + ((f + i) % 3 === 0 ? 1 : 0), fy = sy - 7 - Math.floor(h / 2) + 3;
+          rect(x, fy, 3, h, '#FF6B1A'); rect(x + 1, fy + 1, 2, Math.max(0, h - 1), '#FF8A3D'); rect(x + 1, fy + 3, 1, Math.max(0, h - 3), '#FFD25A'); px(x + 1, fy - 1, '#FF8A3D');
         }
         [0, 1, 2].forEach(function (k) { rect(bx - 12 - ((f * 3 + k * 5) % 9), by + 2 + k * 4, 7, 1, 'rgba(255,255,255,0.45)'); });
-        line(bx + 3, by + 9, bx - 2, by + 14, 3, P.limb); line(bx - 2, by + 14, bx - 7, by + 12, 3, P.limb);
-        line(bx + 12, by + 8, bx + 16, by + 11, 3, P.limb); line(bx + 16, by + 11, bx + 19, by + 6, 3, P.limb);
+        var fa = sw ? [bx + 12, by + 7, bx + 15, by + 12, bx + 20, by + 9] : [bx + 12, by + 7, bx + 16, by + 10, bx + 20, by + 13];
+        var ba = sw ? [bx + 3, by + 7, bx - 2, by + 9, bx - 4, by + 14] : [bx + 3, by + 7, bx - 1, by + 11, bx - 5, by + 10];
+        line(ba[0], ba[1], ba[2], ba[3], 3, P.limb); line(ba[2], ba[3], ba[4], ba[5], 3, P.limb);
+        line(fa[0], fa[1], fa[2], fa[3], 3, P.limb); line(fa[2], fa[3], fa[4], fa[5], 3, P.limb);
         for (var yy = -5; yy <= 5; yy++) for (var xx = -5; xx <= 5; xx++) {
           if (xx * xx + yy * yy > 25) continue;
           var a = Math.atan2(yy, xx) + f * 1.1;
@@ -212,16 +232,31 @@
         px(bx + 4, by + 3, INK); px(bx + 5, by + 3, INK); px(bx + 6, by + 4, INK); px(bx + 11, by + 3, INK); px(bx + 10, by + 3, INK); px(bx + 9, by + 4, INK);
         rect(bx + 3, by + 8, 2, 1, PINK); rect(bx + 11, by + 8, 2, 1, PINK);
         mouth(bx + 6, by + 9, 4);
-        glove(bx - 7, by + 12); glove(bx + 19, by + 6);
-        if (f % 6 < 2) spark(bx + 24, by + 1, '#FFD25A');
+        glove(ba[4], ba[5]); glove(fa[4], fa[5]);
+        if (f % 6 < 2) spark(bx + 25, by + 2, '#FFD25A');
       }
     },
     jump: {
       dyn: true, still: 0.5,
+      init: function (canvas) {
+        var box = document.querySelector('.steps');
+        if (box && I.reduce) box.addEventListener('scroll', function () { canvas.dispatchEvent(new Event('refresh')); }, { passive: true });
+      },
       draw: function (f, W, H, canvas, k) {
         var steps = document.querySelectorAll('.steps article');
-        if (steps.length < 3 || canvas.clientWidth < 700) return;
+        if (steps.length < 3) return;
         var cr = canvas.getBoundingClientRect(), xs = [].map.call(steps, function (a) { var r = a.getBoundingClientRect(); return (r.left + r.width / 2 - cr.left) / k; });
+        if (canvas.clientWidth < 700) {
+          var mid = W / 2, idx = 0, st = canvas._ph, t1 = f / FPS;
+          xs.forEach(function (x, i) { if (Math.abs(x - mid) < Math.abs(xs[idx] - mid)) idx = i; });
+          if (!st) st = canvas._ph = { idx: idx, x: xs[idx], from: 0, t0: -9 };
+          if (st.idx !== idx) { st.from = st.x; st.t0 = t1; st.idx = idx; }
+          var u1 = (t1 - st.t0) / 0.6, hopping = !I.reduce && u1 >= 0 && u1 < 1, hy = 0, hx = xs[idx], hp = 'wave', hl = 4;
+          if (hopping) { hx = lerp(st.from, xs[idx], u1 * (2 - u1)); hy = 4 * 12 * u1 * (1 - u1); hp = 'air'; hl = u1 < 0.4 ? 6 : (u1 < 0.6 ? 3 : 5); }
+          st.x = hx;
+          crit(pal('green'), f, hp, Math.round(hx) - 10, H - Math.round(hy), SHAPES.ell, { legH: hl });
+          return;
+        }
         var hops = [[0, 1, 0.62, 13], [1, 2, 0.62, 13], [2, 0, 0.95, 22]], P = pal('green'), t = f / FPS, tot = 0;
         hops.forEach(function (h) { tot += 0.9 + 0.25 + h[2] + 0.2; });
         t = t % tot;
@@ -256,31 +291,34 @@
         crit(P, f, pose, Math.round(x) - 10, sy - Math.round(y), SHAPES.ell, { legH: legH });
       }
     },
-    barkid: function (canvas) {
-      var P = pal('red'), sh = SHAPES.domino, d = dims(sh), sy = d.H + 8, hidden = false, barH = 0, kk = 3, bar = null;
-      function pos(hid) { return 'translateY(' + ((hid ? 2 : barH) - sy * kk) + 'px) scaleY(' + (hid ? -1 : 1) + ')'; }
+    point: function (canvas) {
+      var down = canvas.getAttribute('data-dir') === 'down', P = pal('red'), sh = SHAPES.domino, d = dims(sh), sy = d.H + 8;
       var def = {
-        w: d.W + 12, h: sy + 8, still: 1,
-        init: function () {
-          bar = document.querySelector('.bar');
-          if (!bar || !window.MutationObserver) return;
-          kk = parseFloat(getComputedStyle(canvas).getPropertyValue('--k')) || 3;
-          canvas.style.transformOrigin = '0 ' + sy * kk + 'px';
-          hidden = bar.classList.contains('hide'); barH = bar.offsetHeight;
-          canvas._st = hidden ? 'hang' : 'sit';
-          canvas.style.transition = 'none'; canvas.style.transform = pos(hidden);
-          requestAnimationFrame(function () { canvas.style.transition = ''; });
-          new MutationObserver(function () {
-            var h = bar.classList.contains('hide');
-            if (h === hidden) return;
-            hidden = h; barH = bar.offsetHeight;
-            canvas.style.transform = pos(h);
-            setTimeout(function () { canvas._st = h ? 'hang' : 'sit'; canvas.dispatchEvent(new Event('refresh')); }, I.reduce ? 0 : 330);
-          }).observe(bar, { attributes: true, attributeFilter: ['class'] });
-          window.addEventListener('resize', function () { barH = bar.offsetHeight; canvas.style.transition = 'none'; canvas.style.transform = pos(hidden); requestAnimationFrame(function () { canvas.style.transition = ''; }); });
-        },
-        draw: function (f) { crit(P, f, canvas._st === 'hang' ? 'hang' : 'sit', 6, sy, sh); }
+        w: d.W + (down ? 12 : 18), h: sy + 9, still: 1,
+        draw: function (f) {
+          var tap = Math.floor(f / 3) % 2;
+          crit(P, f, 'sit', 6, sy, sh, {
+            lo: 1,
+            hands: function (rx, sh0, by, bb) {
+              return down ? [[bb - 1, sh0 + 4], [rx + 2, sh0 + 7 + tap]] : [[bb - 1, sh0 + 4], [rx + 8 + tap, sh0 - 1]];
+            }
+          });
+        }
       };
+      if (!down) {
+        def.init = function () {
+          var bar = canvas.parentNode, btn = bar.querySelector('.bar-get');
+          if (!btn) return;
+          function place() {
+            var kk = parseFloat(getComputedStyle(canvas).getPropertyValue('--k')) || 3, br = bar.getBoundingClientRect(), r = btn.getBoundingClientRect();
+            canvas.style.left = Math.round(r.left - br.left - def.w * kk - 2) + 'px';
+            canvas.style.top = Math.round(bar.offsetHeight - sy * kk) + 'px';
+          }
+          place();
+          window.addEventListener('resize', place);
+          if (document.fonts && document.fonts.ready) document.fonts.ready.then(place);
+        };
+      }
       return def;
     },
     roofs: {
@@ -293,7 +331,7 @@
           if (narrow && !c.phone) return;
           var target = (narrow ? c.pat : c.at) * cw, best = null;
           roofs.list.forEach(function (r) {
-            if (r.mast || r.w < 30 || used.indexOf(r) >= 0) return;
+            if (r.mast || r.w < (narrow ? 17 : 30) || used.indexOf(r) >= 0) return;
             var d = Math.abs(r.cx - target);
             if (!best || d < best.d) best = { r: r, d: d };
           });
@@ -416,7 +454,7 @@
     }
     window.addEventListener('resize', resize);
     resize();
-    if (def.init) def.init();
+    if (def.init) def.init(canvas);
     if (I.reduce) return;
     I.visible(canvas, function (v) {
       if (v && !on) { on = true; t0 = 0; requestAnimationFrame(loop); }
