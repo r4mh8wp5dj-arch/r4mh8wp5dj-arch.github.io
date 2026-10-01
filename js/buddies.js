@@ -58,75 +58,112 @@
     px(x, y, 'rgba(0,0,0,0)'); px(x + 1, y + 1, mix(c, '#ffffff', 0.45)); rect(x + 5, y + 1, 1, 4, mix(c, '#000000', 0.18));
   }
 
+  function kid(P, f, pose, bx, sy) {
+    var sit = pose === 'sit', hop = pose === 'hop' ? [0, 2, 4, 4, 3, 1, 0, 0][f % 8] : 0;
+    if (pose === 'nervous' && f % 6 >= 3) bx += 1;
+    var by = sit ? sy - 12 : sy - 19 - hop, blink = f % 40 >= 38, Lh, Rh;
+    if (pose === 'wave') { Lh = [bx - 2, by + 13]; Rh = [bx + 14 + [0, 1, 2, 1][Math.floor(f / 2) % 4], by + 1]; }
+    else if (pose === 'hop') { Lh = [bx - 3, by + 1]; Rh = [bx + 15, by + 1]; }
+    else if (pose === 'nervous') { Lh = [bx + 1, by + 12]; Rh = [bx + 10, by + 12]; }
+    else if (sit) { Lh = [bx - 1, by + 12]; Rh = [bx + 13, by + 12]; }
+    else { Lh = [bx - 2, by + 13]; Rh = [bx + 14, by + 13]; }
+    line(bx + 1, by + 8, Lh[0], Lh[1], 2, P.limb); line(bx + 10, by + 8, Rh[0], Rh[1], 2, P.limb);
+    if (sit) {
+      var sw = Math.floor(f / 4) % 2;
+      [[2, sw], [8, 1 - sw]].forEach(function (l) {
+        var lx = bx + l[0] + l[1];
+        rect(lx, sy, 2, 4, P.limb); rect(lx - 1, sy + 4, 4, 2, SHOE); rect(lx - 1, sy + 6, 4, 1, IVORY); px(lx - 1, sy + 4, SHOE_LT);
+      });
+    } else {
+      [bx + 2, bx + 8].forEach(function (lx) {
+        rect(lx, by + 12, 2, 4, P.limb); rect(lx - 1, by + 16, 4, 2, SHOE); rect(lx - 1, by + 18, 4, 1, IVORY); px(lx - 1, by + 16, SHOE_LT);
+      });
+    }
+    cube(bx, by, 12, P);
+    var lo = pose === 'look' ? [0, 0, 1, 1, 0, 0, -1, -1][Math.floor(f / 6) % 8] : 0, nv = pose === 'nervous';
+    eye(bx + 3 + lo, nv ? by + 3 : by + 4, nv ? 4 : 3, blink, pose === 'hop' ? 'happy' : null); eye(bx + 7 + lo, nv ? by + 3 : by + 4, nv ? 4 : 3, blink, pose === 'hop' ? 'happy' : null);
+    rect(bx + 1, by + 7, 2, 1, PINK); rect(bx + 9, by + 7, 2, 1, PINK);
+    mouth(bx + 4, by + 8, pose === 'wave' ? [3, 1][Math.floor(f / 3) % 2] : (pose === 'hop' ? 4 : (nv ? 2 : 0)));
+    if (nv) { var dy = Math.floor((f % 6) / 2); px(bx + 12, by + 3 + dy, '#9FD8FF'); px(bx + 12, by + 4 + dy, '#9FD8FF'); }
+    if (pose === 'flame') {
+      var fa = Math.floor(f / 2) % 2;
+      rect(bx + 4, by - 2, 4, 2, '#FF8A3D'); rect(bx + 5, by - 4 + fa, 2, 3, '#FF8A3D'); rect(bx + 5 + fa, by - 6 + fa, 1, 2, '#FF8A3D'); rect(bx + 5, by - 2, 2, 2, '#FFD25A');
+    }
+    glove(Lh[0], Lh[1]); glove(Rh[0], Rh[1]);
+  }
+
+  function jetKid(P, f, bx, by) {
+    var up = Math.floor(f / 4) % 2;
+    line(bx + 1, by + 8, bx - 4, by + 1 + up, 2, P.limb); line(bx + 10, by + 8, bx + 16, by + 2 - up, 2, P.limb);
+    [bx - 3, bx + 13].forEach(function (tx, i) {
+      rect(tx, by + 2, 3, 8, '#D5DCEE'); rect(tx, by + 2, 1, 8, '#F3F6FC'); rect(tx + 2, by + 2, 1, 8, '#8E9BB8'); rect(tx, by + 1, 3, 1, '#8E9BB8');
+      var fh = (f + i) % 2 ? 6 : 4;
+      rect(tx, by + 10, 3, fh, '#FF8A3D'); rect(tx, by + 10, 3, fh - 2, '#FFD25A');
+    });
+    var kk = Math.floor(f / 3) % 2;
+    [bx + 2 + kk, bx + 8 - kk].forEach(function (lx) {
+      rect(lx, by + 12, 2, 4, P.limb); rect(lx - 1, by + 16, 4, 2, SHOE); rect(lx - 1, by + 18, 4, 1, IVORY);
+    });
+    cube(bx, by, 12, P);
+    eye(bx + 3, by + 4, 3, false, 'happy'); eye(bx + 7, by + 4, 3, false, 'happy');
+    rect(bx + 1, by + 7, 2, 1, PINK); rect(bx + 9, by + 7, 2, 1, PINK);
+    mouth(bx + 4, by + 8, 4);
+    glove(bx - 4, by + 1 + up); glove(bx + 16, by + 2 - up);
+  }
+
+  var KIDS = [
+    { at: 0.1, pat: 0.16, color: 'green', pose: 'wave', off: 0, phone: true },
+    { at: 0.46, pat: 0.7, color: 'cyan', pose: 'sit', off: 3, phone: true },
+    { at: 0.84, pat: 0.5, color: 'red', pose: 'hop', off: 1, phone: false }
+  ];
+
   var SCENES = {
-    jet: {
-      w: 54, h: 64, still: 3,
-      draw: function (f) {
-        var P = pal('green'), bob = [0, 0, -1, -2, -3, -3, -2, -1][Math.floor(f / 2) % 8], x = 15, y = 16 + bob;
-        [[4, 10], [48, 8], [7, 34], [47, 30]].forEach(function (s, i) { if ((f + i * 3) % 8 < 4) spark(s[0], s[1], WHITE); });
-        [11, 39].forEach(function (tx, i) {
-          rect(tx, y + 4, 4, 16, '#D5DCEE'); rect(tx, y + 4, 1, 16, '#F3F6FC'); rect(tx + 3, y + 4, 1, 16, '#8E9BB8');
-          rect(tx, y + 3, 4, 1, '#8E9BB8'); rect(tx + 1, y + 20, 2, 2, '#5B6680');
-          var fh = (f + i) % 2 ? 7 : 5;
-          rect(tx + 1, y + 22, 2, fh, '#FF8A3D'); rect(tx + 1, y + 22, 2, Math.max(2, fh - 3), '#FFD25A'); px(tx + 1, y + 22, WHITE);
+    kid: function (canvas) {
+      var P = pal(canvas.getAttribute('data-color') || 'blue'), pose = canvas.getAttribute('data-pose') || 'stand';
+      return { w: 24, h: 26, still: 1.2, draw: function (f) { kid(P, f, pose, 6, 26); } };
+    },
+    roofs: {
+      dyn: true, still: 2.5,
+      draw: function (f, W, H, canvas, k) {
+        var roofs = window.BP && window.BP.roofs;
+        if (!roofs || !roofs.list.length) return;
+        var cw = canvas.clientWidth, ch = canvas.clientHeight, narrow = cw < 700, used = [];
+        KIDS.forEach(function (c) {
+          if (narrow && !c.phone) return;
+          var target = (narrow ? c.pat : c.at) * cw, best = null;
+          roofs.list.forEach(function (r) {
+            if (r.mast || r.w < 30 || used.indexOf(r) >= 0) return;
+            var d = Math.abs(r.cx - target);
+            if (!best || d < best.d) best = { r: r, d: d };
+          });
+          if (!best) return;
+          used.push(best.r);
+          kid(pal(c.color), f + c.off * 5, c.pose, Math.round(best.r.cx / k) - 6, Math.round((ch - (roofs.h - best.r.top)) / k));
         });
-        for (var k = 0; k < 8; k++) {
-          var py = y + 28 + ((f * 2 + k * 5) % 26), pxx = (k % 2 ? 12 : 40) + [-1, 0, 1, 0][k % 4];
-          if (py < 62) px(pxx, py, k % 2 ? '#FFD25A' : '#FF8A3D');
-        }
-        var sw = Math.floor(f / 3) % 2 ? 1 : 0;
-        rect(19 + sw, y + 22, 3, 8, P.limb); rect(29 - sw, y + 22, 3, 8, P.limb);
-        shoe(18 + sw, y + 30); shoe(28 - sw, y + 30);
-        var up = Math.floor(f / 4) % 2;
-        line(x + 1, y + 12, 8, y + (up ? 2 : 6) + 2, 3, P.limb); line(x + 22, y + 12, 46, y + (up ? 6 : 2) + 2, 3, P.limb);
-        cube(x, y, 24, P);
-        var blink = f % 36 >= 34;
-        eye(x + 6, y + 7, 4, blink); eye(x + 16, y + 7, 4, blink);
-        cheek(x + 2, y + 14); cheek(x + 19, y + 14);
-        mouth(x + 10, y + 15, f % 12 < 6 ? 1 : 3);
-        glove(8, y + (up ? 2 : 6)); glove(46, y + (up ? 6 : 2));
       }
     },
-    ell: {
-      w: 64, h: 74, still: 0.3,
-      draw: function (f) {
-        var P = pal('yellow'), jt = [0, -2, -5, -7, -8, -8, -7, -5, -2, 0, 0, 0][f % 12], px0 = 14, py0 = 25 + jt, hot = jt < -3;
-        for (var k = 0; k < 16; k++) {
-          var s = 1 + (k % 3), cx = (k * 37 + 11) % 62, cy = ((f * s + k * 13) % 82) - 6;
-          if ((f + k) % 7 === 0) continue;
-          var col = [HEX.red, HEX.blue, HEX.green, HEX.yellow, HEX.purple, HEX.cyan][k % 6];
-          if (k % 2) rect(cx, cy, 2, 2, col); else rect(cx, cy, 1, 3, col);
+    climb: {
+      dyn: true, still: 3,
+      draw: function (f, W, H) {
+        var t = f / FPS, vertical = H > W * 1.1, cyc = vertical ? 14 : 8, P = pal('purple');
+        function at(tt) {
+          var u = (tt % cyc) / cyc, side = Math.floor(tt / cyc) % 2;
+          if (vertical) return { u: u, x: (side ? 12 : W - 12) + Math.sin(u * 18) * 1, y: lerp(H - 20, 14, u) };
+          return { u: u, x: lerp(W * 0.3, W * 0.9, u), y: lerp(H - 18, 16, u * u * (3 - 2 * u)) + Math.sin(u * 20) * 1.4 };
         }
-        shadow(px0 + 18, 72, 38 + jt);
-        [px0 + 8, px0 + 26].forEach(function (lx) { rect(lx, py0 + 34, 3, 9, P.limb); shoe(lx - 1, py0 + 43); });
-        line(px0 + 1, py0 + 9, hot ? px0 - 9 : px0 - 8, hot ? py0 - 2 : py0 + 7, 3, P.limb);
-        line(px0 + 35, py0 + 27, hot ? px0 + 45 : px0 + 44, hot ? py0 + 13 : py0 + 23, 3, P.limb);
-        [[0, 0], [0, 1], [1, 1]].forEach(function (c) { cube(px0 + c[0] * 18, py0 + c[1] * 18, 18, P); });
-        var ox = px0, oy = py0 + 18, blink = f % 40 >= 38, st = hot ? 'happy' : null;
-        eye(ox + 8, oy + 5, 3, blink, st); eye(ox + 26, oy + 5, 3, blink, st);
-        cheek(ox + 3, oy + 9); cheek(ox + 31, oy + 9);
-        mouth(ox + 16, oy + 11, hot ? 4 : 1);
-        glove(hot ? px0 - 9 : px0 - 8, hot ? py0 - 3 : py0 + 7); glove(hot ? px0 + 45 : px0 + 44, hot ? py0 + 12 : py0 + 23);
-      }
-    },
-    domino: {
-      w: 66, h: 66, still: 1.4,
-      draw: function (f) {
-        var P = pal('cyan'), x0 = 15, y0 = 28, t = f / FPS;
-        shadow(x0 + 18, 58, 40);
-        [x0 + 8, x0 + 26].forEach(function (lx) { rect(lx, y0 + 16, 3, 9, P.limb); shoe(lx - 1, y0 + 25); });
-        var a = Math.floor(f / 3) % 2, Lh = [x0 - 8, y0 + 5 - (a ? 3 : 0)], Rh = [x0 + 44, y0 + 5 - (a ? 0 : 3)];
-        line(x0 + 1, y0 + 9, Lh[0], Lh[1] + 2, 3, P.limb); line(x0 + 35, y0 + 9, Rh[0], Rh[1] + 2, 3, P.limb);
-        cube(x0, y0, 18, P); cube(x0 + 18, y0, 18, P);
-        var blink = f % 44 >= 42;
-        eye(x0 + 8, y0 + 5, 3, blink); eye(x0 + 26, y0 + 5, 3, blink);
-        cheek(x0 + 3, y0 + 9); cheek(x0 + 31, y0 + 9);
-        mouth(x0 + 16, y0 + 11, Math.floor(f / 6) % 4 === 0 ? 1 : 0);
-        glove(Lh[0], Lh[1]); glove(Rh[0], Rh[1]);
-        [HEX.red, HEX.yellow, HEX.green].forEach(function (c, k) {
-          var ph = (t / 2.4 + k / 3) % 1, n = Math.floor(ph * 2), u = ph * 2 - n, from = n % 2 ? Rh : Lh, to = n % 2 ? Lh : Rh;
-          miniCube(Math.round(lerp(from[0], to[0], u)) - 3, Math.round(lerp(from[1], to[1], u) - 4 * 22 * u * (1 - u)) - 8, c);
-        });
+        var n = Math.floor(t / cyc), p = at(t);
+        for (var i = 1; i <= 7; i++) {
+          var tt = t - i * 0.1;
+          if (tt < 0 || Math.floor(tt / cyc) !== n) continue;
+          var q = at(tt);
+          g.globalAlpha = Math.max(0.08, 0.6 - i * 0.08);
+          rect(q.x - 1 + (i % 2) * 2, q.y + 11 + i % 3, 2, 2, i < 3 ? '#FFD25A' : '#FFFFFF');
+        }
+        var a = Math.ceil(Math.min(1, p.u / 0.1, (1 - p.u) / 0.1) * 4) / 4;
+        if (a <= 0) { g.globalAlpha = 1; return; }
+        g.globalAlpha = a;
+        jetKid(P, f, Math.round(p.x) - 6, Math.round(p.y) - 10);
+        g.globalAlpha = 1;
       }
     },
     shield: {
@@ -165,9 +202,18 @@
   function setup(canvas) {
     var def = SCENES[canvas.getAttribute('data-buddy')];
     if (!def) return;
+    if (typeof def === 'function') def = def(canvas);
     var off = document.createElement('canvas');
-    off.width = def.w; off.height = def.h;
-    var og = off.getContext('2d'), main = null, last = -1, on = false, t0 = 0;
+    var og = off.getContext('2d'), main = null, last = -1, on = false, t0 = 0, k = 3, cssW = 1, cssH = 1;
+    function measure() {
+      var r = canvas.getBoundingClientRect();
+      cssW = Math.max(1, r.width); cssH = Math.max(1, r.height);
+      if (def.dyn) {
+        k = parseFloat(getComputedStyle(canvas).getPropertyValue('--k')) || 3;
+        def.w = Math.max(1, Math.ceil(cssW / k)); def.h = Math.max(1, Math.ceil(cssH / k));
+      }
+      off.width = def.w; off.height = def.h;
+    }
     function render(t) {
       if (!main) return;
       var f = Math.floor(t * FPS);
@@ -175,16 +221,24 @@
       last = f;
       g = og;
       og.setTransform(1, 0, 0, 1, 0, 0);
+      og.globalAlpha = 1;
       og.clearRect(0, 0, def.w, def.h);
-      def.draw(f);
-      var cw = canvas.width, ch = canvas.height, k = Math.max(1, Math.floor(Math.min(cw / def.w, ch / def.h)));
+      def.draw(f, def.w, def.h, canvas, k);
+      var cw = canvas.width, ch = canvas.height;
       main.setTransform(1, 0, 0, 1, 0, 0);
       main.clearRect(0, 0, cw, ch);
       main.imageSmoothingEnabled = false;
-      main.drawImage(off, Math.floor((cw - def.w * k) / 2), Math.floor((ch - def.h * k) / 2), def.w * k, def.h * k);
+      if (def.dyn) {
+        var s = cw / cssW * k;
+        main.drawImage(off, 0, 0, def.w * s, def.h * s);
+      } else {
+        var m = Math.max(1, Math.floor(Math.min(cw / def.w, ch / def.h)));
+        main.drawImage(off, Math.floor((cw - def.w * m) / 2), Math.floor((ch - def.h * m) / 2), def.w * m, def.h * m);
+      }
     }
     function resize() {
       main = I.fit(canvas).ctx;
+      measure();
       last = -1;
       render(I.reduce || !on ? def.still : (performance.now() - t0) / 1000);
     }

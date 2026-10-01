@@ -50,10 +50,11 @@
   .tag, .hero .cta-row { justify-content: center; }
   .pitch { margin-left: auto; margin-right: auto; }
   .skies-head h2 { font-size: min(6.3vw, 1.9rem); white-space: nowrap; }
-  .skies-top { flex-direction: column; align-items: flex-start; gap: 6px; }
-  .buddy-jet { align-self: center; width: 128px; }
-  .end .buddy-ell { position: static; margin: 0 auto 4px; width: 150px; }
-  .end .buddy-domino { display: none; }
+  .kid { --k: 2; }
+  .title .kid { left: auto; right: 7%; }
+  .band .kid { right: 24px; }
+  .climb-cv { --k: 2; top: 0; bottom: 0; left: 0; right: 0; width: 100%; height: 100%; z-index: 0; }
+  .city-kids { --k: 2; height: calc(clamp(150px, 30vh, 320px) + 70px); }
   .tag { margin-top: 6px; }
   .pitch { margin-top: 18px; font-size: 1.2rem; }
   .hero .cta-row { margin-top: 32px; }

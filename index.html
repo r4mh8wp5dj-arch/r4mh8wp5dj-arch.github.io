@@ -7,16 +7,16 @@
   <meta name="description" content="Match colors, trigger chain reactions, and rise from the ground to deep space. Block Pit is out now on the App Store for iPhone.">
   <meta name="theme-color" content="#000000">
   <link rel="canonical" href="https://r4mh8wp5dj-arch.github.io/">
-  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png?v=129c980">
-  <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon-16.png?v=129c980">
-  <link rel="apple-touch-icon" sizes="180x180" href="assets/img/apple-touch-icon.png?v=129c980">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png?v=36c8324">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon-16.png?v=36c8324">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/img/apple-touch-icon.png?v=36c8324">
   <link rel="manifest" href="site.webmanifest">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Block Pit">
   <meta property="og:url" content="https://r4mh8wp5dj-arch.github.io/">
   <meta property="og:title" content="Block Pit">
   <meta property="og:description" content="Match colors, trigger chain reactions, and rise from the ground to deep space. Block Pit is out now on the App Store for iPhone.">
-  <meta property="og:image" content="https://r4mh8wp5dj-arch.github.io/assets/img/share.jpg?v=129c980">
+  <meta property="og:image" content="https://r4mh8wp5dj-arch.github.io/assets/img/share.jpg?v=36c8324">
   <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -24,7 +24,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Block Pit">
   <meta name="twitter:description" content="Match colors, trigger chain reactions, and rise from the ground to deep space. Block Pit is out now on the App Store for iPhone.">
-  <meta name="twitter:image" content="https://r4mh8wp5dj-arch.github.io/assets/img/share.jpg?v=129c980">
+  <meta name="twitter:image" content="https://r4mh8wp5dj-arch.github.io/assets/img/share.jpg?v=36c8324">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -32,7 +32,7 @@
     "name": "Block Pit",
     "description": "Match colors, trigger chain reactions, and rise from the ground to deep space. A 3D block puzzle, out now on iPhone.",
     "url": "https://r4mh8wp5dj-arch.github.io/",
-    "image": "https://r4mh8wp5dj-arch.github.io/assets/img/share.jpg?v=129c980",
+    "image": "https://r4mh8wp5dj-arch.github.io/assets/img/share.jpg?v=36c8324",
     "genre": "Puzzle",
     "gamePlatform": "iOS",
     "operatingSystem": "iOS",
@@ -42,18 +42,18 @@
   }
   </script>
   <link rel="preload" href="assets/fonts/Nippo-Variable.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="styles.css?v=129c980">
-  <link rel="stylesheet" href="mobile.css?v=129c980" media="(max-width: 700px), (max-height: 500px) and (orientation: landscape)">
-  <script src="js/sky.js?v=129c980"></script>
-  <script src="js/iso.js?v=129c980" defer></script>
-  <script src="js/site.js?v=129c980" defer></script>
-  <script src="js/play.js?v=129c980" defer></script>
-  <script src="js/dock.js?v=129c980" defer></script>
-  <script src="js/buddies.js?v=129c980" defer></script>
+  <link rel="stylesheet" href="styles.css?v=36c8324">
+  <link rel="stylesheet" href="mobile.css?v=36c8324" media="(max-width: 700px), (max-height: 500px) and (orientation: landscape)">
+  <script src="js/sky.js?v=36c8324"></script>
+  <script src="js/iso.js?v=36c8324" defer></script>
+  <script src="js/site.js?v=36c8324" defer></script>
+  <script src="js/play.js?v=36c8324" defer></script>
+  <script src="js/dock.js?v=36c8324" defer></script>
+  <script src="js/buddies.js?v=36c8324" defer></script>
 </head>
 <body class="home">
   <header class="bar">
-    <a class="mark" href="./" aria-label="Block Pit home"><img src="assets/img/favicon-64.png?v=129c980" alt="" width="28" height="28"><span>Block Pit</span></a>
+    <a class="mark" href="./" aria-label="Block Pit home"><img src="assets/img/favicon-64.png?v=36c8324" alt="" width="28" height="28"><span>Block Pit</span></a>
     <nav aria-label="Site">
       <a class="nav-x" href="#how">How to play</a>
       <a href="contact.html">Contact</a>
@@ -64,7 +64,7 @@
   <main>
     <section class="hero">
       <div class="hero-copy" data-ink>
-        <h1 class="title"><span>Block Pit</span></h1>
+        <h1 class="title"><span>Block Pit</span><canvas class="buddy kid" data-buddy="kid" data-color="yellow" data-pose="look" aria-hidden="true"></canvas></h1>
         <p class="tag"><b class="k-r">Drop.</b> <b class="k-y">Match.</b> <b class="k-c">Chain.</b></p>
         <p class="pitch">Match colors, trigger chain reactions, and rise from the ground to deep space.</p>
         <div class="cta-row">
@@ -109,6 +109,7 @@
       </div>
       <div class="steps-dots" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
       <article class="band" data-ink>
+        <canvas class="buddy kid" data-buddy="kid" data-color="blue" data-pose="nervous" aria-hidden="true"></canvas>
         <div class="band-stage">
           <canvas class="band-cv" role="img" aria-label="The pressure column fills, a new row lifts the pit, the tallest column shows one, two, then three warning marks, and a chain burst brings it back down."></canvas>
           <canvas class="band-gauge" aria-hidden="true"></canvas>
@@ -120,6 +121,7 @@
         </div>
       </article>
       <article class="band band-streak" data-ink>
+        <canvas class="buddy kid" data-buddy="kid" data-color="red" data-pose="flame" aria-hidden="true"></canvas>
         <div class="band-stage">
           <canvas class="band-cv streak-cv" role="img" aria-label="Blocks drop one after another onto blocks of their own color and burst. Each scoring drop fills the streak meter and raises the multiplier, until a drop that scores nothing resets it."></canvas>
           <canvas class="band-gauge streak-gauge" aria-hidden="true"></canvas>
@@ -133,13 +135,12 @@
     </section>
 
     <section class="skies" id="skies" aria-labelledby="skies-h">
-      <div class="skies-top">
-        <div class="skies-head" data-ink>
-          <h2 id="skies-h">How high can you go?</h2>
-          <p>Every block you place lifts the pit higher, from the ground all the way to deep space.</p>
-        </div>
-        <canvas class="buddy buddy-jet" data-buddy="jet" role="img" aria-label="A pixel-art green block flies upward with a jetpack, cheering."></canvas>
+      <div class="skies-head" data-ink>
+        <h2 id="skies-h">How high can you go?</h2>
+        <p>Every block you place lifts the pit higher, from the ground all the way to deep space.</p>
       </div>
+      <div class="climb">
+      <canvas class="buddy climb-cv" data-buddy="climb" aria-hidden="true"></canvas>
       <ol class="checkpoints" data-ink aria-label="The five skies, from dawn to deep space">
         <li><canvas class="cp-art" data-theme="dawn" aria-hidden="true"></canvas><b>Dawn</b><small>Start</small></li>
         <li><canvas class="cp-art" data-theme="cumulus" aria-hidden="true"></canvas><b>Cumulus</b><small>20 drops</small></li>
@@ -147,13 +148,12 @@
         <li><canvas class="cp-art" data-theme="twilight" aria-hidden="true"></canvas><b>Twilight</b><small>100 drops</small></li>
         <li><canvas class="cp-art" data-theme="deepspace" aria-hidden="true"></canvas><b>Deep Space</b><small>170 drops</small></li>
       </ol>
+      </div>
     </section>
 
     <section class="end">
-      <canvas class="buddy buddy-ell" data-buddy="ell" role="img" aria-label="A pixel-art yellow L-shaped piece jumps for joy while confetti falls."></canvas>
-      <canvas class="buddy buddy-domino" data-buddy="domino" role="img" aria-label="A pixel-art cyan two-block piece juggles three small blocks."></canvas>
       <div class="end-in" data-ink>
-        <img class="icon" src="assets/img/logo-320.png?v=129c980" alt="Block Pit app icon" width="112" height="112">
+        <img class="icon" src="assets/img/logo-320.png?v=36c8324" alt="Block Pit app icon" width="112" height="112">
         <h2>The pit is open.</h2>
         <p>On iPhone. Made by a solo developer.</p>
         <div class="cta-row">
@@ -161,6 +161,7 @@
         </div>
       </div>
       <canvas class="city" aria-hidden="true"></canvas>
+      <canvas class="buddy city-kids" data-buddy="roofs" aria-hidden="true"></canvas>
     </section>
   </main>
 
@@ -169,9 +170,9 @@
       <div class="foot-social">
       <p>Follow us</p>
       <ul class="social" aria-label="Block Pit on social media">
-        <li><a data-social="instagram" href="https://www.instagram.com/playblockpit" target="_blank" rel="me noopener" aria-label="Block Pit on Instagram"><img src="assets/img/social/instagram.png?v=129c980" alt="" width="26" height="26"></a></li>
-        <li><a data-social="tiktok" href="https://www.tiktok.com/@playblockpit" target="_blank" rel="me noopener" aria-label="Block Pit on TikTok"><img src="assets/img/social/tiktok.png?v=129c980" alt="" width="26" height="26"></a></li>
-        <li><a data-social="facebook" href="https://www.facebook.com/share/19Y12mFhRn/" target="_blank" rel="me noopener" aria-label="Block Pit on Facebook"><img src="assets/img/social/facebook.png?v=129c980" alt="" width="26" height="26"></a></li>
+        <li><a data-social="instagram" href="https://www.instagram.com/playblockpit" target="_blank" rel="me noopener" aria-label="Block Pit on Instagram"><img src="assets/img/social/instagram.png?v=36c8324" alt="" width="26" height="26"></a></li>
+        <li><a data-social="tiktok" href="https://www.tiktok.com/@playblockpit" target="_blank" rel="me noopener" aria-label="Block Pit on TikTok"><img src="assets/img/social/tiktok.png?v=36c8324" alt="" width="26" height="26"></a></li>
+        <li><a data-social="facebook" href="https://www.facebook.com/share/19Y12mFhRn/" target="_blank" rel="me noopener" aria-label="Block Pit on Facebook"><img src="assets/img/social/facebook.png?v=36c8324" alt="" width="26" height="26"></a></li>
       </ul>
       </div>
       <div class="foot-mail">
@@ -190,7 +191,7 @@
   </footer>
 
   <aside class="dock" aria-label="Get Block Pit">
-    <img class="dock-icon" src="assets/img/logo-320.png?v=129c980" alt="" width="40" height="40">
+    <img class="dock-icon" src="assets/img/logo-320.png?v=36c8324" alt="" width="40" height="40">
     <p><b>Block Pit</b><small>Out now on iPhone</small></p>
     <a class="btn btn-primary dock-get" data-appstore href="https://apps.apple.com/app/id[APP_ID]">Get the app</a>
   </aside>

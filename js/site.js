@@ -9,10 +9,11 @@
     if (!canvas) return;
     var F = I.fit(canvas), ctx = F.ctx, w = F.w, h = F.h;
     ctx.clearRect(0, 0, w, h);
+    var roofs = [];
     [
       { col: 'rgba(120,150,150,0.45)', min: 0.3, max: 0.6, bw: [40, 90], win: 0, seed: 7 },
       { col: 'rgba(58,86,70,0.8)', min: 0.2, max: 0.75, bw: [34, 80], win: 0.08, seed: 19 },
-      { col: '#1c2a22', min: 0.14, max: 0.6, bw: [28, 70], win: 0.22, seed: 41 }
+      { col: '#1c2a22', min: 0.14, max: 0.6, bw: [28, 70], win: 0.22, seed: 41, roof: true }
     ].forEach(function (L) {
       var R = rng(L.seed), x = -10;
       while (x < w + 10) {
@@ -26,7 +27,9 @@
           sw *= 0.62; st -= sw * 0.55;
           ctx.fillRect(x + (bw - 3 - sw) / 2, st, sw, sw * 0.55 + 1);
         }
-        if (R() < 0.2) ctx.fillRect(x + (bw - 3) / 2 - 1, st - 22, 2, 22);
+        var mast = R() < 0.2;
+        if (mast) ctx.fillRect(x + (bw - 3) / 2 - 1, st - 22, 2, 22);
+        if (L.roof) roofs.push({ cx: x + (bw - 3) / 2, w: sw, top: st, mast: mast });
         if (L.win) {
           for (var wy = top + 10; wy < h - 8; wy += 13) {
             for (var wx = x + 7; wx < x + bw - 12; wx += 12) {
@@ -40,6 +43,7 @@
         x += bw + R() * 8;
       }
     });
+    window.BP.roofs = { h: h, list: roofs };
   }
 
   var CP = {
