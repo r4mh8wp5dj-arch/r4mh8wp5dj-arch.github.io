@@ -74,6 +74,10 @@
     o = o || {};
     var S = sh.S, d = dims(sh), Wb = d.W, Hb = d.H, rows = d.rows, hang = pose === 'hang', sit = pose === 'sit' || hang, lean = o.lean || 0;
     var hop = pose === 'hop' ? [0, 2, 4, 4, 3, 1, 0, 0][f % 8] : 0, legH = o.legH != null ? o.legH : (pose === 'crouch' ? 2 : 4);
+    var bottom = sh.cells.filter(function (c) { return c[1] === rows - 1; }).map(function (c) { return c[0]; });
+    var c0 = Math.min.apply(null, bottom), c1 = Math.max.apply(null, bottom);
+    var legs = [bx + c0 * S + 2, bx + c1 * S + S - 4], gnd = null;
+    if (o.ground && !sit) { gnd = legs.map(function (lx) { return Math.min(o.ground(lx - 1), o.ground(lx + 2)); }); sy = Math.min(gnd[0], gnd[1]); legH = 4; }
     var by = sit ? sy - Hb : sy - Hb - legH - 3 - hop, blink = f % 40 >= 38;
     var bb = bx + lean, rx = bb + Wb, sh0 = by + (rows - 1) * S + Math.round(S * 0.66), Lh, Rh;
     if (o.hands) { var hh = o.hands(rx, sh0, by, bb); Lh = hh[0]; Rh = hh[1]; }
@@ -82,9 +86,6 @@
     else if (sit) { Lh = [bb - 1, sh0 + 4]; Rh = [rx + 1, sh0 + 4]; }
     else { Lh = [bb - 2, sh0 + 5]; Rh = [rx + 2, sh0 + 5]; }
     line(bb + 1, sh0, Lh[0], Lh[1], 2, P.limb); line(rx - 2, sh0, Rh[0], Rh[1], 2, P.limb);
-    var bottom = sh.cells.filter(function (c) { return c[1] === rows - 1; }).map(function (c) { return c[0]; });
-    var c0 = Math.min.apply(null, bottom), c1 = Math.max.apply(null, bottom);
-    var legs = [bx + c0 * S + 2, bx + c1 * S + S - 4];
     if (sit) {
       var sw = pose === 'sit' ? Math.floor(f / 4) % 2 : 0;
       legs.forEach(function (lx0, i) {
@@ -92,8 +93,9 @@
         rect(lx, sy, 2, 4, P.limb); rect(lx - 1, sy + 4, 4, 2, SHOE); rect(lx - 1, sy + 6, 4, 1, IVORY); px(lx - 1, sy + 4, SHOE_LT);
       });
     } else {
-      legs.forEach(function (lx) {
-        rect(lx, by + Hb, 2, legH, P.limb); rect(lx - 1, by + Hb + legH, 4, 2, SHOE); rect(lx - 1, by + Hb + legH + 2, 4, 1, IVORY); px(lx - 1, by + Hb + legH, SHOE_LT);
+      legs.forEach(function (lx, i) {
+        var ll = gnd ? gnd[i] - 3 - (by + Hb) : legH;
+        rect(lx, by + Hb, 2, ll, P.limb); rect(lx - 1, by + Hb + ll, 4, 2, SHOE); rect(lx - 1, by + Hb + ll + 2, 4, 1, IVORY); px(lx - 1, by + Hb + ll, SHOE_LT);
       });
     }
     sh.cells.forEach(function (c) { cube(bb + c[0] * S, by + c[1] * S, S, P); });
@@ -160,21 +162,22 @@
       w: 96, h: 46, still: 3,
       draw: function (f) {
         var t = (f / FPS) % 10.4, Y = pal('yellow'), G = pal('green');
-        function ys(x) { return x > 78 ? 22.8 : 45 - Math.max(0, x - 4) * 0.3; }
+        function ys(x) { return x >= 76 ? 21 : 45 - 2 * Math.floor(Math.max(0, x - 4) / 6); }
         for (var x = 0; x < 96; x++) {
-          var top = Math.round(ys(x));
-          rect(x, top, 1, 46 - top, '#5B4752'); px(x, top, '#8A7482');
-          if ((x * 7 + top) % 5 === 0) px(x, top + 2 + x % 3, '#46363F');
+          var top = ys(x);
+          rect(x, top, 1, 46 - top, '#5B4752'); rect(x, top, 1, 2, '#8A7482');
+          if (x > 3 && x < 76 && (x - 4) % 6 === 0) rect(x, top, 1, 46 - top, '#46363F');
+          if ((x * 7 + top) % 5 === 0) px(x, top + 4 + x % 3, '#46363F');
         }
-        rect(89, 6, 1, 17, '#EDE6D6'); rect(90, 6, 5, 3, '#E5483A'); rect(90, 9, 3, 1, '#E5483A'); px(89, 5, '#FFD25A');
+        rect(89, 4, 1, 17, '#EDE6D6'); rect(90, 4, 5, 3, '#E5483A'); rect(90, 7, 3, 1, '#E5483A'); px(89, 3, '#FFD25A');
         var p, phase, lean = 1;
         if (t < 7) { phase = 'push'; p = Math.max(0, t / 7 + 0.03 * Math.sin(t * 5.2)); lean = Math.sin(t * 5.2) > 0 ? 2 : 1; }
         else if (t < 8.1) { phase = 'top'; p = 1 + 0.01 * Math.sin(t * 30); lean = 2; }
         else if (t < 9.5) { phase = 'slip'; var u = (t - 8.1) / 1.4; p = 1 - u * u; lean = 0; }
         else { phase = 'rest'; p = 0; lean = 0; }
-        var xbl = lerp(26, 58, Math.min(1, p)), bxk = Math.round(xbl) - 23 - lean, yb = Math.round(ys(xbl + 12)), sy = Math.round(ys(bxk + 10));
+        var xbl = lerp(26, 58, Math.min(1, p)), bxk = Math.round(xbl) - 23 - lean, yb = ys(Math.round(xbl) + 12), sy = ys(bxk + 10);
         SHAPES.boulder.cells.forEach(function (c) { cube(Math.round(xbl) + c[0] * 12, yb - 24 + c[1] * 12, 12, G); });
-        var opts = { lean: lean, strain: phase === 'push' || phase === 'top', hands: function (rx, sh0) { return [[rx + 1, sh0 + 3], [rx + 2, sh0 - 1]]; } };
+        var opts = { lean: lean, ground: ys, strain: phase === 'push' || phase === 'top', hands: function (rx, sh0) { return [[rx + 1, sh0 + 3], [rx + 2, sh0 - 1]]; } };
         if (phase === 'slip') opts.mouth = 2;
         crit(Y, f, 'stand', bxk, sy, SHAPES.domino, opts);
         if (phase === 'push' || phase === 'top') {
@@ -197,8 +200,8 @@
           rect(x, sy - h, 3, h, '#FF6B1A'); rect(x + 1, sy - h + 1, 2, Math.max(0, h - 1), '#FF8A3D'); rect(x + 1, sy - h + 3, 1, Math.max(0, h - 3), '#FFD25A'); px(x + 1, sy - h - 1, '#FF8A3D');
         }
         [0, 1, 2].forEach(function (k) { rect(bx - 12 - ((f * 3 + k * 5) % 9), by + 2 + k * 4, 7, 1, 'rgba(255,255,255,0.45)'); });
-        line(bx + 4, by + 9, bx - 4, by + 14, 3, P.limb);
-        line(bx + 4, by + 6, bx - 5, by + 6, 3, P.limb);
+        line(bx + 3, by + 9, bx - 2, by + 14, 3, P.limb); line(bx - 2, by + 14, bx - 7, by + 12, 3, P.limb);
+        line(bx + 12, by + 8, bx + 16, by + 11, 3, P.limb); line(bx + 16, by + 11, bx + 19, by + 6, 3, P.limb);
         for (var yy = -5; yy <= 5; yy++) for (var xx = -5; xx <= 5; xx++) {
           if (xx * xx + yy * yy > 25) continue;
           var a = Math.atan2(yy, xx) + f * 1.1;
@@ -209,8 +212,8 @@
         px(bx + 4, by + 3, INK); px(bx + 5, by + 3, INK); px(bx + 6, by + 4, INK); px(bx + 11, by + 3, INK); px(bx + 10, by + 3, INK); px(bx + 9, by + 4, INK);
         rect(bx + 3, by + 8, 2, 1, PINK); rect(bx + 11, by + 8, 2, 1, PINK);
         mouth(bx + 6, by + 9, 4);
-        glove(bx - 5, by + 14); glove(bx - 6, by + 6);
-        if (f % 6 < 2) spark(bx + 20, by + 1, '#FFD25A');
+        glove(bx - 7, by + 12); glove(bx + 19, by + 6);
+        if (f % 6 < 2) spark(bx + 24, by + 1, '#FFD25A');
       }
     },
     jump: {

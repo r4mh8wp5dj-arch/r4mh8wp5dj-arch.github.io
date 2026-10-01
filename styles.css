@@ -242,10 +242,11 @@ main, .foot { position: relative; z-index: 1; }
 .band-streak .band-stage { order: 2; }
 @media (min-width: 701px) {
   .how .band { grid-template-columns: minmax(0, 32rem) minmax(0, 1fr); gap: 12px 40px; }
-  .how .band:not(.band-streak) .band-stage { aspect-ratio: 1 / 1; }
+  .how .band:not(.band-streak) .band-stage { aspect-ratio: 1 / .92; }
   .how .band:not(.band-streak) p { max-width: 42ch; }
   .how .band-streak { grid-template-columns: minmax(0, 30rem) minmax(0, 30rem); gap: 12px 24px; }
-  .band-stage { aspect-ratio: 10 / 9; }
+  .band-stage { aspect-ratio: 10 / 8.4; }
+  .band-copy { align-self: start; margin-top: 52px; }
   .band h2 { font-size: clamp(1.8rem, 3vw, 2.7rem); }
   .band p { margin-top: 18px; max-width: 30ch; font-size: clamp(1.15rem, 1.5vw, 1.35rem); }
 }
