@@ -269,11 +269,15 @@
         var place = function () {
           var span = title.querySelector('span'), tn = span && span.firstChild;
           if (!tn || !tn.length) return;
-          var r = document.createRange(), box = title.getBoundingClientRect();
+          var r = document.createRange(), box = title.getBoundingClientRect(), cs = getComputedStyle(span);
           r.setStart(tn, tn.length - 1); r.setEnd(tn, tn.length);
-          var b = r.getBoundingClientRect();
-          canvas.style.right = 'auto';
-          canvas.style.left = Math.round((b.left + b.right) / 2 - box.left - canvas.getBoundingClientRect().width / 2) + 'px';
+          var b = r.getBoundingClientRect(), cx = document.createElement('canvas').getContext('2d');
+          cx.font = cs.fontStyle + ' ' + cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily;
+          var ch = tn.data.charAt(tn.length - 1), m = cx.measureText(cs.textTransform === 'uppercase' ? ch.toUpperCase() : ch), kr = canvas.getBoundingClientRect();
+          var inkTop = b.top + m.fontBoundingBoxAscent - m.actualBoundingBoxAscent, inkMid = b.left + (m.actualBoundingBoxRight - m.actualBoundingBoxLeft) / 2;
+          canvas.style.right = 'auto'; canvas.style.bottom = 'auto';
+          canvas.style.left = Math.round(inkMid - box.left - kr.width / 2) + 'px';
+          canvas.style.top = Math.round(inkTop - box.top - kr.height + 1) + 'px';
         };
         def.init = function () {
           place();
