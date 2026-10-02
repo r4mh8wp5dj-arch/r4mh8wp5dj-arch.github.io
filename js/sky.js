@@ -1,5 +1,19 @@
 (function () {
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  (function () {
+    var nav = window.performance && performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+    var reloaded = nav ? nav.type === 'reload' : (performance.navigation && performance.navigation.type === 1);
+    function top() {
+      if (location.hash && history.replaceState) history.replaceState(null, '', location.pathname + location.search);
+      document.documentElement.style.scrollBehavior = 'auto';
+      window.scrollTo(0, 0);
+      document.documentElement.style.scrollBehavior = '';
+    }
+    if (reloaded) {
+      window.addEventListener('load', function () { top(); setTimeout(top, 120); });
+    }
+    window.addEventListener('pageshow', function (e) { if (e.persisted) top(); });
+  })();
   var PATH = [
     [0.00, '#4E6B30'], [0.06, '#7E9C58'], [0.15, '#6FA0D4'],
     [0.28, '#8FB8DC'], [0.37, '#E8B77A'],
