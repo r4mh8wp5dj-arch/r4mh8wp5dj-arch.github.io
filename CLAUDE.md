@@ -25,10 +25,10 @@ Static landing page for the Block Pit iOS game, served by GitHub Pages from `mai
 
 ## Languages
 
-- English pages in the repo root are the source. `npm run build` runs `tools/i18n.js`, which writes the other languages into folders (`tr/`) and fills the language menus, `hreflang` links and `og:locale` tags. Never edit `tr/` by hand; it is regenerated.
+- English pages in the repo root are the source. `npm run build` runs `tools/i18n.js`, which writes the other languages into folders (`tr/`) and fills the header language menu, `hreflang` links and `og:locale` tags. Never edit `tr/` by hand; it is regenerated.
 - Every visible string and every `aria-label`/`alt`/meta text in a source page carries `data-i18n="key"` (inner HTML) or `data-i18n-attr="attr:key;attr2:key2"`. Add the key to `i18n/<code>/strings.json` for every language; the build lists missing and unused keys.
 - The privacy policy body and its contents list live as whole fragments in `i18n/<code>/privacy.article.html` and `privacy.toc.html`. Keep section ids identical to English.
-- To add a language: add it to `i18n/langs.json`, copy `i18n/tr` to `i18n/<code>`, translate, run `npm run build`. The menu, footer list, sitemap and `hreflang` pick it up. Check that `Nippo` has the glyphs.
+- To add a language: add it to `i18n/langs.json`, copy `i18n/tr` to `i18n/<code>`, translate, run `npm run build`. The menu (a scrolling dropdown, so many languages fit), sitemap and `hreflang` pick it up. Do not add language links to the footer. Check that `Nippo` has the glyphs.
 - Brand name elements carry `lang="en"` so `text-transform: uppercase` never turns "Pit" into "PİT". Banner strings in the demo come from `data-t-*` attributes on `<body>`.
 - `js/lang.js` remembers the choice in `localStorage` (`bpLang`) and, on a first visit to an English page, follows the browser language. A saved choice wins everywhere.
 - The 404 page and the share image (`share.jpg`) stay English for now.

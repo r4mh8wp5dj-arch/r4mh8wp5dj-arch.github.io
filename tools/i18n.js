@@ -30,21 +30,16 @@ function closeOf(html, name, from) {
   throw new Error('Unclosed <' + name + '>');
 }
 
-const GLOBE = '<svg class="lang-ico" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18"/></svg>';
+const GLOBE = '<svg class="lang-ico" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.25"/><ellipse cx="12" cy="12" rx="4.1" ry="9.25"/><path d="M2.75 12h18.5M4.4 7.2h15.2M4.4 16.8h15.2"/></svg>';
+const CHEV = '<svg class="lang-chev" viewBox="0 0 12 12" width="10" height="10" aria-hidden="true" focusable="false"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg>';
+const TICK = '<svg class="lang-tick" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="m3.5 8.5 3 3 6-7"/></svg>';
 
 function langMenu(cur, page, t) {
   const items = langs.map(l => {
     const here = l.code === cur.code;
-    return `<li><a href="${here ? (page === 'index.html' ? './' : page) : relTo(cur, l, page)}" lang="${l.code}" hreflang="${l.code}" data-lang="${l.code}"${here ? ' aria-current="true"' : ''}>${l.name}</a></li>`;
+    return `<li><a href="${here ? (page === 'index.html' ? './' : page) : relTo(cur, l, page)}" lang="${l.code}" hreflang="${l.code}" data-lang="${l.code}"${here ? ' aria-current="true"' : ''}><span>${l.name}</span>${here ? TICK : ''}</a></li>`;
   }).join('');
-  return `<details><summary aria-label="${esc(t['lang.label'])}">${GLOBE}<span>${cur.short}</span></summary><ul>${items}</ul></details>`;
-}
-
-function langList(cur, page) {
-  return langs.map(l => {
-    if (l.code === cur.code) return `<span lang="${l.code}" aria-current="true">${l.name}</span>`;
-    return `<a href="${relTo(cur, l, page)}" lang="${l.code}" hreflang="${l.code}" data-lang="${l.code}">${l.name}</a>`;
-  }).join('');
+  return `<details><summary aria-label="${esc(t['lang.label'])}">${GLOBE}<span class="lang-code">${cur.short}</span>${CHEV}</summary><ul>${items}</ul></details>`;
 }
 
 function build(source, page, cur, dict, fallback, issues) {
@@ -68,8 +63,8 @@ function build(source, page, cur, dict, fallback, issues) {
     const kAttr = /\sdata-i18n-attr="([^"]*)"/.exec(attrs);
     const kText = /\sdata-i18n="([^"]*)"/.exec(attrs);
     const kFile = /\sdata-i18n-file="([^"]*)"/.exec(attrs);
-    const isMenu = /\sdata-lang-menu(\s|$|=)/.test(attrs), isList = /\sdata-lang-list(\s|$|=)/.test(attrs);
-    if (!kAttr && !kText && !kFile && !isMenu && !isList) continue;
+    const isMenu = /\sdata-lang-menu(\s|$|=)/.test(attrs);
+    if (!kAttr && !kText && !kFile && !isMenu) continue;
     let innerNew = null;
     if (kAttr && cur.code !== def.code) {
       kAttr[1].split(';').forEach(pair => {
@@ -83,7 +78,6 @@ function build(source, page, cur, dict, fallback, issues) {
       });
     }
     if (isMenu) innerNew = langMenu(cur, page, dict['lang.label'] ? dict : fallback);
-    else if (isList) innerNew = langList(cur, page);
     else if (kFile && cur.code !== def.code) {
       const f = path.join(ROOT, 'i18n', cur.code, kFile[1] + '.html');
       if (fs.existsSync(f)) innerNew = '\n' + fs.readFileSync(f, 'utf8').replace(/\n+$/, '\n');

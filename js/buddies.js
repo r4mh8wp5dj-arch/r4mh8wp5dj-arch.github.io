@@ -223,29 +223,26 @@
     return { hands: hands, draw: function () { fn.forEach(function (d) { d(); }); } };
   }
 
-  function hopperPhone(f, W, H, canvas, xs) {
-    var mid = W / 2, idx = 0, st = canvas._ph, bx = Math.round(mid) - 10, P = pal('green');
+  function hopperPhone(f, W, H, canvas, xs, t) {
+    var mid = W / 2, idx = 0, st = canvas._ph, bx = Math.round(mid) - 10, P = pal('green'), h = 0, hop = 0;
     xs.forEach(function (x, i) { if (Math.abs(x - mid) < Math.abs(xs[idx] - mid)) idx = i; });
-    if (!st) st = canvas._ph = { idx: idx, h: 0, t0: f, land: -99, fr: -1, hs: -1, was: false };
-    var mv = !I.reduce && performance.now() - (canvas._mv || -1e9) < 180, arc = [6, 12, 14, 10, 5];
-    if (st.fr !== f) {
-      st.fr = f;
-      if (mv && !st.was && st.hs < 0) st.hs = f;
-      st.was = mv;
-      var pv = st.h;
-      st.h = 0;
-      if (st.hs >= 0) {
-        var hi = f - st.hs;
-        if (hi < arc.length) st.h = arc[hi]; else st.hs = -1;
-      }
-      if (pv > 0 && st.h === 0) { st.land = f; st.t0 = f; }
-      if (st.idx !== idx) { st.idx = idx; if (st.h === 0) st.t0 = f; }
+    if (!st) st = canvas._ph = { idx: idx, t0: t, land: -99, hs: -1, was: false };
+    var mv = !I.reduce && performance.now() - (canvas._mv || -1e9) < 180;
+    if (mv && !st.was && st.hs < 0) st.hs = t;
+    st.was = mv;
+    if (st.hs >= 0) {
+      hop = (t - st.hs) / 0.56;
+      if (hop < 1) h = 15 * Math.sin(Math.PI * hop);
+      else { st.hs = -1; st.land = t; st.t0 = t; }
     }
-    if (st.h > 0) {
-      crit(P, f, 'air', bx, H - st.h, SHAPES.ell, { legH: st.h >= 12 ? (f % 2 ? 6 : 3) : 5 });
+    if (st.idx !== idx) { st.idx = idx; if (st.hs < 0) st.t0 = t; }
+    if (st.hs >= 0) {
+      var air = Math.round(h);
+      crit(P, f, 'air', bx, H - air, SHAPES.ell, { legH: hop < 0.25 ? 6 : (hop < 0.7 ? 3 : 5) });
+      canvas._sub = [0, air - h];
       return;
     }
-    var lf = f - st.land;
+    var lf = (t - st.land) * FPS;
     if (lf >= 0 && lf < 4) {
       for (var d = 0; d < 3; d++) {
         g.globalAlpha = Math.max(0, 0.7 - lf * 0.18);
@@ -253,7 +250,7 @@
       }
       g.globalAlpha = 1;
     }
-    var tt = (f - st.t0) / FPS, fx = null;
+    var tt = t - st.t0, fx = null;
     crit(P, f, 'wave', bx, H, SHAPES.ell, { hands: function (rx, sh0, by, bb) { fx = act(st.idx, tt, bb + 10, rx, sh0, by, H); return fx.hands; } });
     if (fx) fx.draw();
   }
@@ -356,54 +353,58 @@
       }
     },
     jump: {
-      dyn: true, still: 0.5,
+      dyn: true, still: 0.5, fps: 60,
       init: function (canvas) {
         var box = document.querySelector('.steps');
         if (box) box.addEventListener('scroll', function () { if (I.reduce) canvas.dispatchEvent(new Event('refresh')); else canvas._mv = performance.now(); }, { passive: true });
       },
-      draw: function (f, W, H, canvas, k) {
+      draw: function (f, W, H, canvas, k, tNow) {
         var steps = document.querySelectorAll('.steps article');
         if (steps.length < 3) return;
         var cr = canvas.getBoundingClientRect(), xs = [].map.call(steps, function (a) { var r = a.getBoundingClientRect(); return (r.left + r.width / 2 - cr.left) / k; });
-        if (canvas.clientWidth < 700) { hopperPhone(f, W, H, canvas, xs); return; }
-        var hops = [[0, 1, 0.62, 13], [1, 2, 0.62, 13], [2, 0, 0.95, 22]], dur = [4.8, 4.8, 6], P = pal('green'), t = f / FPS, tot = 0;
-        hops.forEach(function (h, i) { tot += dur[i] + 0.25 + h[2] + 0.2; });
+        if (canvas.clientWidth < 700) { hopperPhone(f, W, H, canvas, xs, tNow); return; }
+        var hops = [[0, 1, 0.8, 14], [1, 2, 0.8, 14], [2, 0, 1.1, 22]], dur = [4.8, 4.8, 6], P = pal('green'), t = tNow, tot = 0;
+        hops.forEach(function (h, i) { tot += dur[i] + 0.3 + h[2] + 0.22; });
         t = t % tot;
-        var acc = 0, sy = H, pose = 'wave', x = xs[0], y = 0, legH = 4, cur = 0, ph = 'stand', u = 0, tl = 0, pos = xs[0];
+        var acc = 0, sy = H, pose = 'wave', x = xs[0], y = 0, legH = 4, cur = 0, ph = 'stand', u = 0, tl = 0;
         for (cur = 0; cur < 3; cur++) {
-          var h = hops[cur], seg = [dur[cur], 0.25, h[2], 0.2], names = ['stand', 'crouch', 'fly', 'land'], k0 = 0;
+          var h = hops[cur], seg = [dur[cur], 0.3, h[2], 0.22], names = ['stand', 'crouch', 'fly', 'land'], k0 = 0;
           for (k0 = 0; k0 < 4; k0++) { if (t < acc + seg[k0]) { ph = names[k0]; tl = t - acc; u = tl / seg[k0]; break; } acc += seg[k0]; }
           if (k0 < 4) break;
         }
         var hp = hops[Math.min(cur, 2)], x0 = xs[hp[0]], x1 = xs[hp[1]];
+        function glide(q) { return lerp(x0, x1, q * 0.82 + 0.18 * q * q * (3 - 2 * q)); }
+        function lift(q) { return 4 * hp[3] * q * (1 - q); }
         if (ph === 'stand') { x = x0; pose = 'wave'; }
         else if (ph === 'crouch') { x = x0; pose = 'crouch'; }
         else if (ph === 'fly') {
-          x = lerp(x0, x1, u * (2 - u) * 0.5 + u * 0.5); y = 4 * hp[3] * u * (1 - u); pose = 'air'; legH = u < 0.4 ? 6 : (u < 0.6 ? 3 : 5);
-          for (var i = 1; i <= 4; i++) {
-            var uu = u - i * 0.07;
+          x = glide(u); y = lift(u); pose = 'air'; legH = u < 0.3 ? 6 : (u < 0.7 ? 3 : 5);
+          for (var i = 1; i <= 5; i++) {
+            var uu = u - i * 0.05;
             if (uu <= 0) continue;
-            g.globalAlpha = 0.55 - i * 0.1;
-            rect(Math.round(lerp(x0, x1, uu * (2 - uu) * 0.5 + uu * 0.5)) - 1, sy - Math.round(4 * hp[3] * uu * (1 - uu)) - 12 + i, 2, 2, '#FFFFFF');
+            g.globalAlpha = 0.5 - i * 0.08;
+            rect(Math.round(glide(uu)) - 1, sy - Math.round(lift(uu)) - 12 + i, 2, 2, '#FFFFFF');
           }
           g.globalAlpha = 1;
         } else { x = x1; pose = 'crouch'; }
-        if (ph === 'land' || (ph === 'stand' && tl < 0.2 && cur > 0)) {
-          var lu = ph === 'land' ? u : 0.5 + tl / 0.4, lx = ph === 'land' ? x1 : x0;
+        if (ph === 'land' || (ph === 'stand' && tl < 0.3 && cur > 0)) {
+          var lu = ph === 'land' ? u : 0.5 + tl / 0.6, lx = ph === 'land' ? x1 : x0;
           for (var d = 0; d < 3; d++) {
             g.globalAlpha = Math.max(0, 0.7 - lu * 0.6);
             rect(Math.round(lx - 6 - d * 3 - lu * 5), sy - 1 - d % 2, 2, 1 + (d % 2), '#E8E0F0'); rect(Math.round(lx + 6 + d * 3 + lu * 5), sy - 1 - d % 2, 2, 1 + (d % 2), '#E8E0F0');
           }
           g.globalAlpha = 1;
         }
-        if (ph === 'crouch' && cur >= 0 && tl < 0.1) { spark(Math.round(x), sy - 6, '#FFD25A'); }
+        if (ph === 'crouch' && tl < 0.1) { spark(Math.round(x), sy - 6, '#FFD25A'); }
         if (ph === 'stand') {
           var fx = null;
           crit(P, f, 'wave', Math.round(x) - 10, sy, SHAPES.ell, { hands: function (rx, sh0, by, bb) { fx = act(cur, tl, bb + 10, rx, sh0, by, sy); return fx.hands; } });
           if (fx) fx.draw();
           return;
         }
-        crit(P, f, pose, Math.round(x) - 10, sy - Math.round(y), SHAPES.ell, { legH: legH });
+        var xi = Math.round(x), yi = Math.round(y);
+        crit(P, f, pose, xi - 10, sy - yi, SHAPES.ell, { legH: legH });
+        canvas._sub = [x - xi, yi - y];
       }
     },
     point: function (canvas) {
@@ -536,21 +537,23 @@
     }
     function render(t) {
       if (!main) return;
-      var f = Math.floor(t * FPS);
-      if (f === last) return;
-      last = f;
+      var key = Math.floor(t * (def.fps || FPS)), f = Math.floor(t * FPS);
+      if (key === last) return;
+      last = key;
+      canvas._sub = null;
       g = og;
       og.setTransform(1, 0, 0, 1, 0, 0);
       og.globalAlpha = 1;
       og.clearRect(0, 0, def.w, def.h);
-      def.draw(f, def.w, def.h, canvas, k);
+      def.draw(f, def.w, def.h, canvas, k, t);
       var cw = canvas.width, ch = canvas.height;
       main.setTransform(1, 0, 0, 1, 0, 0);
       main.clearRect(0, 0, cw, ch);
       main.imageSmoothingEnabled = false;
       if (def.dyn) {
         var s = cw / cssW * k;
-        main.drawImage(off, 0, 0, def.w * s, def.h * s);
+        var sub = canvas._sub || [0, 0];
+        main.drawImage(off, sub[0] * s, sub[1] * s, def.w * s, def.h * s);
       } else {
         var m = Math.max(1, Math.floor(Math.min(cw / def.w, ch / def.h)));
         main.drawImage(off, Math.floor((cw - def.w * m) / 2), Math.floor((ch - def.h * m) / 2), def.w * m, def.h * m);
