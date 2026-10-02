@@ -290,7 +290,7 @@ main, .foot { position: relative; z-index: 1; }
 .icon { width: 112px; height: auto; border-radius: 23%; box-shadow: 0 18px 44px rgba(10, 26, 61, .3); }
 .end h2 { margin-top: 12px; font-size: clamp(2rem, 5vw, 3.6rem); }
 .end p { color: var(--ink-2); }
-.end .cta-row { justify-content: center; }
+.end .cta-row { justify-content: center; margin-top: 0; }
 .end .appstore img { height: 62px; }
 .city { position: absolute; left: 0; bottom: 0; width: 100%; height: clamp(150px, 30vh, 320px); pointer-events: none; }
 

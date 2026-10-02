@@ -50,6 +50,7 @@
   .hero-copy { text-align: center; }
   .tag, .hero .cta-row { justify-content: center; }
   .pitch { margin-left: auto; margin-right: auto; }
+  .hero-copy .title, .hero-copy .tag, .hero-copy .pitch { text-shadow: 0 0 3px #03051a, 0 0 8px #03051a, 0 0 16px #03051a, 0 0 28px rgba(3, 5, 26, .9); }
   .skies-head h2 { font-size: min(6.3vw, 1.9rem); white-space: nowrap; }
   .kid { --k: 2; }
   .title .kid { left: auto; right: 7%; }

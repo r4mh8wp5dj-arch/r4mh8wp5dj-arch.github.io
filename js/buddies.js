@@ -334,14 +334,11 @@
           rect(x, fy, 3, h, '#FF6B1A'); rect(x + 1, fy + 1, 2, Math.max(0, h - 1), '#FF8A3D'); rect(x + 1, fy + 3, 1, Math.max(0, h - 3), '#FFD25A'); px(x + 1, fy - 1, '#FF8A3D');
         }
         [0, 1, 2].forEach(function (k) { rect(bx - 12 - ((f * 3 + k * 5) % 9), by + 2 + k * 4, 7, 1, 'rgba(255,255,255,0.45)'); });
-        var ph = Math.floor(f / 2) % 4, sf = [bx + 12, by + 7], sb = [bx + 3, by + 7];
-        var poseF = [[4, 3, 8, -1], [1, 5, 5, 6], [2, 5, 3, 11], [1, 5, 5, 6]], poseB = [[-4, 3, -7, 7], [-2, 5, -1, 11], [4, 3, 8, -1], [-2, 5, -1, 11]];
+        var ph = Math.floor(f / 3) % 2, sf = [bx + 12, by + 10], sb = [bx + 3, by + 10];
+        var poseF = [[4, 1, 7, -3], [1, 3, -1, 7]], poseB = [[-3, 1, -6, 5], [2, 3, 5, 7]];
         var ap = poseF[ph], bp = poseB[ph];
         var fa = [sf[0], sf[1], sf[0] + ap[0], sf[1] + ap[1], sf[0] + ap[2], sf[1] + ap[3]];
         var ba = [sb[0], sb[1], sb[0] + bp[0], sb[1] + bp[1], sb[0] + bp[2], sb[1] + bp[3]];
-        line(ba[0], ba[1], ba[2], ba[3], 3, P.limb); line(ba[2], ba[3], ba[4], ba[5], 3, P.limb);
-        line(fa[0], fa[1], fa[2], fa[3], 3, P.limb); line(fa[2], fa[3], fa[4], fa[5], 3, P.limb);
-        glove(ba[4], ba[5]); glove(fa[4], fa[5]);
         for (var yy = -5; yy <= 5; yy++) for (var xx = -5; xx <= 5; xx++) {
           if (xx * xx + yy * yy > 25) continue;
           var a = Math.atan2(yy, xx) + f * 1.1;
@@ -352,6 +349,9 @@
         px(bx + 4, by + 3, INK); px(bx + 5, by + 3, INK); px(bx + 6, by + 4, INK); px(bx + 11, by + 3, INK); px(bx + 10, by + 3, INK); px(bx + 9, by + 4, INK);
         rect(bx + 3, by + 8, 2, 1, PINK); rect(bx + 11, by + 8, 2, 1, PINK);
         mouth(bx + 6, by + 9, 4);
+        line(ba[0], ba[1], ba[2], ba[3], 2, P.limb); line(ba[2], ba[3], ba[4], ba[5], 2, P.limb);
+        line(fa[0], fa[1], fa[2], fa[3], 2, P.limb); line(fa[2], fa[3], fa[4], fa[5], 2, P.limb);
+        glove(ba[4], ba[5]); glove(fa[4], fa[5]);
         if (f % 6 < 2) spark(bx + 25, by + 2, '#FFD25A');
       }
     },
