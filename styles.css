@@ -362,6 +362,7 @@ body:not(.home) .foot { background: #1a1233; }
 .hello h1 { font-size: clamp(4rem, 14vw, 12rem); line-height: .82; }
 .hello h1 span { display: block; }
 .hello h1 span + span { color: transparent; -webkit-text-stroke: clamp(1.5px, .28vw, 3px) var(--ink); margin-left: .5em; }
+html:not([lang="en"]) .tag { flex-wrap: nowrap; }
 html:not([lang="en"]) .hello h1 { font-size: clamp(2.8rem, 12.5vw, 7rem); }
 .hello .lead { margin-top: 28px; font-size: clamp(1.1rem, 2vw, 1.4rem); color: var(--ink-2); }
 .mail {

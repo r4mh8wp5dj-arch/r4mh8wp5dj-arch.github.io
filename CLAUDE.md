@@ -31,6 +31,7 @@ Static landing page for the Block Pit iOS game, served by GitHub Pages from `mai
 - To add a language: add it to `i18n/langs.json`, copy `i18n/tr` to `i18n/<code>`, translate, run `npm run build`. The menu (a scrolling dropdown, so many languages fit), sitemap and `hreflang` pick it up. Do not add language links to the footer. Check that `Nippo` has the glyphs.
 - Brand name elements carry `lang="en"` so `text-transform: uppercase` never turns "Pit" into "PİT". Banner strings in the demo come from `data-t-*` attributes on `<body>`.
 - `js/lang.js` remembers the choice in `localStorage` (`bpLang`) and, on a first visit to an English page, follows the browser language. A saved choice wins everywhere.
+- Write each language natively, never as a sentence-by-sentence translation of the English. Turkish: keep "pit" (the play area) and "Block Pit" untranslated, wrapping "Pit" in `lang="en"` where it can be uppercased; "drop" in counts is "hamle"; the last sky is "Uzay".
 - The 404 page and the share image (`share.jpg`) stay English for now.
 
 ## Game rules the site must match
