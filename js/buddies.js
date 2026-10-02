@@ -366,12 +366,12 @@
         if (steps.length < 3) return;
         var cr = canvas.getBoundingClientRect(), xs = [].map.call(steps, function (a) { var r = a.getBoundingClientRect(); return (r.left + r.width / 2 - cr.left) / k; });
         if (canvas.clientWidth < 700) { hopperPhone(f, W, H, canvas, xs); return; }
-        var hops = [[0, 1, 0.62, 13], [1, 2, 0.62, 13], [2, 0, 0.95, 22]], P = pal('green'), t = f / FPS, tot = 0;
-        hops.forEach(function (h) { tot += 0.9 + 0.25 + h[2] + 0.2; });
+        var hops = [[0, 1, 0.62, 13], [1, 2, 0.62, 13], [2, 0, 0.95, 22]], dur = [4.8, 4.8, 6], P = pal('green'), t = f / FPS, tot = 0;
+        hops.forEach(function (h, i) { tot += dur[i] + 0.25 + h[2] + 0.2; });
         t = t % tot;
         var acc = 0, sy = H, pose = 'wave', x = xs[0], y = 0, legH = 4, cur = 0, ph = 'stand', u = 0, tl = 0, pos = xs[0];
         for (cur = 0; cur < 3; cur++) {
-          var h = hops[cur], seg = [0.9, 0.25, h[2], 0.2], names = ['stand', 'crouch', 'fly', 'land'], k0 = 0;
+          var h = hops[cur], seg = [dur[cur], 0.25, h[2], 0.2], names = ['stand', 'crouch', 'fly', 'land'], k0 = 0;
           for (k0 = 0; k0 < 4; k0++) { if (t < acc + seg[k0]) { ph = names[k0]; tl = t - acc; u = tl / seg[k0]; break; } acc += seg[k0]; }
           if (k0 < 4) break;
         }
@@ -397,6 +397,12 @@
           g.globalAlpha = 1;
         }
         if (ph === 'crouch' && cur >= 0 && tl < 0.1) { spark(Math.round(x), sy - 6, '#FFD25A'); }
+        if (ph === 'stand') {
+          var fx = null;
+          crit(P, f, 'wave', Math.round(x) - 10, sy, SHAPES.ell, { hands: function (rx, sh0, by, bb) { fx = act(cur, tl, bb + 10, rx, sh0, by, sy); return fx.hands; } });
+          if (fx) fx.draw();
+          return;
+        }
         crit(P, f, pose, Math.round(x) - 10, sy - Math.round(y), SHAPES.ell, { legH: legH });
       }
     },
