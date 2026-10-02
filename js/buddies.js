@@ -236,7 +236,9 @@
       else { st.hs = -1; st.land = t; st.t0 = t; }
     }
     if (st.idx !== idx) { st.idx = idx; if (st.hs < 0) st.t0 = t; }
+    canvas._rate = 24;
     if (st.hs >= 0) {
+      canvas._rate = 60;
       var air = Math.round(h);
       crit(P, f, 'air', bx, H - air, SHAPES.ell, { legH: hop < 0.25 ? 6 : (hop < 0.7 ? 3 : 5) });
       canvas._sub = [0, air - h];
@@ -353,16 +355,28 @@
       }
     },
     jump: {
-      dyn: true, still: 0.5, fps: 60,
+      dyn: true, still: 0.5, adaptive: true,
       init: function (canvas) {
         var box = document.querySelector('.steps');
-        if (box) box.addEventListener('scroll', function () { if (I.reduce) canvas.dispatchEvent(new Event('refresh')); else canvas._mv = performance.now(); }, { passive: true });
+        function measure() {
+          var steps = document.querySelectorAll('.steps article');
+          if (steps.length < 3) { canvas._xs = null; return; }
+          var cr = canvas.getBoundingClientRect();
+          canvas._xs = [].map.call(steps, function (a) { var r = a.getBoundingClientRect(); return r.left + r.width / 2 - cr.left; });
+          canvas._cw = canvas.clientWidth;
+        }
+        measure();
+        window.addEventListener('resize', measure);
+        window.addEventListener('load', measure);
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
+        if (window.ResizeObserver) new ResizeObserver(measure).observe(document.querySelector('.how'));
+        if (box) box.addEventListener('scroll', function () { measure(); if (I.reduce) canvas.dispatchEvent(new Event('refresh')); else canvas._mv = performance.now(); }, { passive: true });
       },
       draw: function (f, W, H, canvas, k, tNow) {
-        var steps = document.querySelectorAll('.steps article');
-        if (steps.length < 3) return;
-        var cr = canvas.getBoundingClientRect(), xs = [].map.call(steps, function (a) { var r = a.getBoundingClientRect(); return (r.left + r.width / 2 - cr.left) / k; });
-        if (canvas.clientWidth < 700) { hopperPhone(f, W, H, canvas, xs, tNow); return; }
+        if (!canvas._xs) return;
+        var xs = canvas._xs.map(function (x) { return x / k; });
+        canvas._rate = FPS;
+        if (canvas._cw < 700) { hopperPhone(f, W, H, canvas, xs, tNow); return; }
         var hops = [[0, 1, 0.8, 14], [1, 2, 0.8, 14], [2, 0, 1.1, 22]], dur = [4.8, 4.8, 6], P = pal('green'), t = tNow, tot = 0;
         hops.forEach(function (h, i) { tot += dur[i] + 0.3 + h[2] + 0.22; });
         t = t % tot;
@@ -378,6 +392,7 @@
         if (ph === 'stand') { x = x0; pose = 'wave'; }
         else if (ph === 'crouch') { x = x0; pose = 'crouch'; }
         else if (ph === 'fly') {
+          canvas._rate = 60;
           x = glide(u); y = lift(u); pose = 'air'; legH = u < 0.3 ? 6 : (u < 0.7 ? 3 : 5);
           for (var i = 1; i <= 5; i++) {
             var uu = u - i * 0.05;
@@ -398,6 +413,7 @@
         if (ph === 'crouch' && tl < 0.1) { spark(Math.round(x), sy - 6, '#FFD25A'); }
         if (ph === 'stand') {
           var fx = null;
+          canvas._rate = 24;
           crit(P, f, 'wave', Math.round(x) - 10, sy, SHAPES.ell, { hands: function (rx, sh0, by, bb) { fx = act(cur, tl, bb + 10, rx, sh0, by, sy); return fx.hands; } });
           if (fx) fx.draw();
           return;
@@ -537,9 +553,15 @@
     }
     function render(t) {
       if (!main) return;
-      var key = Math.floor(t * (def.fps || FPS)), f = Math.floor(t * FPS);
-      if (key === last) return;
-      last = key;
+      var f = Math.floor(t * FPS);
+      if (def.adaptive) {
+        var rate = canvas._rate || FPS;
+        if (last >= 0 && t >= last && t - last < 1 / rate - 0.002) return;
+        last = t;
+      } else {
+        if (f === last) return;
+        last = f;
+      }
       canvas._sub = null;
       g = og;
       og.setTransform(1, 0, 0, 1, 0, 0);
