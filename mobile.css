@@ -61,6 +61,9 @@
   .how .band:not(.band-streak) { padding-bottom: 176px; }
   .climb-cv { --k: 3; top: 0; bottom: 0; left: 0; right: 0; width: 100%; height: 100%; z-index: 0; }
   .city-kids { --k: 3; height: calc(clamp(150px, 30vh, 320px) + 70px); }
+  .legal-top .meta span { display: block; }
+  .legal-top .meta .meta-dot { display: none; }
+  .legal-top .meta span + .meta-dot + span { margin-top: 6px; }
   .tag { margin-top: 6px; }
   .pitch { margin-top: 18px; font-size: 1.2rem; }
   .hero .cta-row { margin-top: 32px; }
@@ -118,6 +121,8 @@
   :root { --gut: max(clamp(16px, 5vw, 64px), env(safe-area-inset-left), env(safe-area-inset-right)); }
   .bar { grid-template-columns: auto auto; padding-top: 6px; padding-bottom: 6px; }
   .hero { min-height: 0; padding-top: 20px; }
+  .legal-top .meta span { display: block; }
+  .legal-top .meta .meta-dot { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
