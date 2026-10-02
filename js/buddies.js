@@ -226,18 +226,23 @@
   function hopperPhone(f, W, H, canvas, xs) {
     var mid = W / 2, idx = 0, st = canvas._ph, bx = Math.round(mid) - 10, P = pal('green');
     xs.forEach(function (x, i) { if (Math.abs(x - mid) < Math.abs(xs[idx] - mid)) idx = i; });
-    if (!st) st = canvas._ph = { idx: idx, h: 0, t0: f, land: -99, fr: -1 };
-    var mv = !I.reduce && performance.now() - (canvas._mv || -1e9) < 180;
+    if (!st) st = canvas._ph = { idx: idx, h: 0, t0: f, land: -99, fr: -1, hs: -1, was: false };
+    var mv = !I.reduce && performance.now() - (canvas._mv || -1e9) < 180, arc = [6, 12, 14, 10, 5];
     if (st.fr !== f) {
       st.fr = f;
+      if (mv && !st.was && st.hs < 0) st.hs = f;
+      st.was = mv;
       var pv = st.h;
-      st.h += Math.max(-7, Math.min(7, (mv ? 14 : 0) - st.h));
+      st.h = 0;
+      if (st.hs >= 0) {
+        var hi = f - st.hs;
+        if (hi < arc.length) st.h = arc[hi]; else st.hs = -1;
+      }
       if (pv > 0 && st.h === 0) { st.land = f; st.t0 = f; }
-      if (st.idx !== idx) { st.idx = idx; st.t0 = f; }
+      if (st.idx !== idx) { st.idx = idx; if (st.h === 0) st.t0 = f; }
     }
     if (st.h > 0) {
-      var wob = st.h >= 14 ? [0, 1, 0, -1][f % 4] : 0;
-      crit(P, f, 'air', bx, H - st.h - wob, SHAPES.ell, { legH: st.h >= 14 ? (f % 2 ? 6 : 3) : 5 });
+      crit(P, f, 'air', bx, H - st.h, SHAPES.ell, { legH: st.h >= 12 ? (f % 2 ? 6 : 3) : 5 });
       return;
     }
     var lf = f - st.land;
@@ -323,16 +328,20 @@
       w: 64, h: 34, still: 0.4,
       draw: function (f) {
         var P = pal('blue'), sy = 34, burst = f % 18 < 4, bx = 34 + (f % 2), by = sy - 22;
-        var base = burst ? [9, 9, 8, 7, 6, 5, 3, 2, 1] : [6, 6, 5, 4, 3, 3, 2, 1, 1], sw = (f >> 1) % 2;
+        var base = burst ? [9, 9, 8, 7, 6, 5, 3, 2, 1] : [6, 6, 5, 4, 3, 3, 2, 1, 1];
         for (var i = 0; i < 9; i++) {
           var x = bx + 1 - i * 3, h = base[i] + ((f + i) % 3 === 0 ? 1 : 0), fy = sy - 7 - Math.floor(h / 2) + 3;
           rect(x, fy, 3, h, '#FF6B1A'); rect(x + 1, fy + 1, 2, Math.max(0, h - 1), '#FF8A3D'); rect(x + 1, fy + 3, 1, Math.max(0, h - 3), '#FFD25A'); px(x + 1, fy - 1, '#FF8A3D');
         }
         [0, 1, 2].forEach(function (k) { rect(bx - 12 - ((f * 3 + k * 5) % 9), by + 2 + k * 4, 7, 1, 'rgba(255,255,255,0.45)'); });
-        var fa = sw ? [bx + 12, by + 7, bx + 15, by + 12, bx + 20, by + 9] : [bx + 12, by + 7, bx + 16, by + 10, bx + 20, by + 13];
-        var ba = sw ? [bx + 3, by + 7, bx - 2, by + 9, bx - 4, by + 14] : [bx + 3, by + 7, bx - 1, by + 11, bx - 5, by + 10];
+        var ph = Math.floor(f / 2) % 4, sf = [bx + 12, by + 7], sb = [bx + 3, by + 7];
+        var poseF = [[4, 3, 8, -1], [1, 5, 5, 6], [2, 5, 3, 11], [1, 5, 5, 6]], poseB = [[-4, 3, -7, 7], [-2, 5, -1, 11], [4, 3, 8, -1], [-2, 5, -1, 11]];
+        var ap = poseF[ph], bp = poseB[ph];
+        var fa = [sf[0], sf[1], sf[0] + ap[0], sf[1] + ap[1], sf[0] + ap[2], sf[1] + ap[3]];
+        var ba = [sb[0], sb[1], sb[0] + bp[0], sb[1] + bp[1], sb[0] + bp[2], sb[1] + bp[3]];
         line(ba[0], ba[1], ba[2], ba[3], 3, P.limb); line(ba[2], ba[3], ba[4], ba[5], 3, P.limb);
         line(fa[0], fa[1], fa[2], fa[3], 3, P.limb); line(fa[2], fa[3], fa[4], fa[5], 3, P.limb);
+        glove(ba[4], ba[5]); glove(fa[4], fa[5]);
         for (var yy = -5; yy <= 5; yy++) for (var xx = -5; xx <= 5; xx++) {
           if (xx * xx + yy * yy > 25) continue;
           var a = Math.atan2(yy, xx) + f * 1.1;
@@ -343,7 +352,6 @@
         px(bx + 4, by + 3, INK); px(bx + 5, by + 3, INK); px(bx + 6, by + 4, INK); px(bx + 11, by + 3, INK); px(bx + 10, by + 3, INK); px(bx + 9, by + 4, INK);
         rect(bx + 3, by + 8, 2, 1, PINK); rect(bx + 11, by + 8, 2, 1, PINK);
         mouth(bx + 6, by + 9, 4);
-        glove(ba[4], ba[5]); glove(fa[4], fa[5]);
         if (f % 6 < 2) spark(bx + 25, by + 2, '#FFD25A');
       }
     },
