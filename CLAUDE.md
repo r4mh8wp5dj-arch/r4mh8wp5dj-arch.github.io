@@ -23,6 +23,16 @@ Static landing page for the Block Pit iOS game, served by GitHub Pages from `mai
 - `npm run serve` starts a server on `0.0.0.0:8765` for testing from a phone on the same Wi-Fi.
 - `npm run capture` saves desktop, mobile and Safari screenshots to `tools/out/`.
 
+## Languages
+
+- English pages in the repo root are the source. `npm run build` runs `tools/i18n.js`, which writes the other languages into folders (`tr/`) and fills the language menus, `hreflang` links and `og:locale` tags. Never edit `tr/` by hand; it is regenerated.
+- Every visible string and every `aria-label`/`alt`/meta text in a source page carries `data-i18n="key"` (inner HTML) or `data-i18n-attr="attr:key;attr2:key2"`. Add the key to `i18n/<code>/strings.json` for every language; the build lists missing and unused keys.
+- The privacy policy body and its contents list live as whole fragments in `i18n/<code>/privacy.article.html` and `privacy.toc.html`. Keep section ids identical to English.
+- To add a language: add it to `i18n/langs.json`, copy `i18n/tr` to `i18n/<code>`, translate, run `npm run build`. The menu, footer list, sitemap and `hreflang` pick it up. Check that `Nippo` has the glyphs.
+- Brand name elements carry `lang="en"` so `text-transform: uppercase` never turns "Pit" into "PİT". Banner strings in the demo come from `data-t-*` attributes on `<body>`.
+- `js/lang.js` remembers the choice in `localStorage` (`bpLang`) and, on a first visit to an English page, follows the browser language. A saved choice wins everywhere.
+- The 404 page and the share image (`share.jpg`) stay English for now.
+
 ## Game rules the site must match
 
 - A match is two or more same-colored blocks touching; never write "three or more".
@@ -33,4 +43,6 @@ Static landing page for the Block Pit iOS game, served by GitHub Pages from `mai
 
 - Privacy policy (`privacy.html`): fill `[DEVELOPER LEGAL NAME]`, `[POSTAL ADDRESS]` and `[ANALYTICS PROVIDER]`, confirm the ad SDK (AdMob) is really in the shipping build, then remove the four `.note` boxes. Effective and last-updated dates are set to October 1, 2026; update them on launch day.
 - App Store link: replace `[APP_ID]` in `site.config.json`, then `npm run build`.
+- Turkish copy and the Turkish privacy policy (`i18n/tr`) were machine-drafted: have a native reviewer, and for the policy a lawyer, read them before launch. Placeholders such as `[DEVELOPER LEGAL NAME]` are identical in every language, so replace them everywhere.
+- Localized App Store badge: Apple supplies a Turkish badge; until `assets/img/badges` has it, every language shows the English badge.
 - No Terms page: the game has no purchases or accounts, so Apple's standard license applies.

@@ -1,6 +1,7 @@
 (function () {
   var I = window.BP && window.BP.iso;
   if (!I) return;
+  var TXT = document.body ? document.body.dataset : {};
 
   var W = 4, D = 4, H = 8, TOP = H + 4, COLORS = 4, PRESSURE_MAX = 8;
   var YAW0 = Math.PI / 4 - 0.22, ELEV = 0.6, VIEW = I.view(YAW0, ELEV), BLK = 0.94;
@@ -273,7 +274,7 @@
       gray.end = Math.max(2, gray.end + 0.7);
       popNext = 0;
       while (elPops.firstChild) elPops.removeChild(elPops.firstChild);
-      banner('Pit full', 'full', 34);
+      banner(TXT.tFull || 'Pit full', 'full', 34);
     }
     function wipe() {
       phase = 'wipe';
@@ -464,7 +465,7 @@
         if (pending > 0) {
           streak += 1;
           streakView.pt = clock;
-          if (streak === 6 || streak === 12 || streak === 18) banner('On fire!', 'fire', 40);
+          if (streak === 6 || streak === 12 || streak === 18) banner(TXT.tFire || 'On fire!', 'fire', 40);
           score += Math.round(pending * multiplier(streak) * 6);
           pending = 0;
         }
@@ -489,7 +490,7 @@
         popScore(Math.round(value * 6), c);
       });
       squashNeighbors(gone);
-      if (chain >= 2) banner('Chain x' + chain + '!', chain >= 6 ? 'c3' : chain >= 4 ? 'c2' : 'c1', 28 * (1 + (Math.min(chain, 6) - 2) * 0.15));
+      if (chain >= 2) banner((TXT.tChain || 'Chain x{n}!').replace('{n}', chain), chain >= 6 ? 'c3' : chain >= 4 ? 'c2' : 'c1', 28 * (1 + (Math.min(chain, 6) - 2) * 0.15));
       pulseChannel(chain >= 4 ? 3 : chain >= 2 ? 2 : 1);
       later(200, function () {
         var before = pairs();

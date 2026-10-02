@@ -1,0 +1,7 @@
+{
+  "default": "en",
+  "languages": [
+    { "code": "en", "name": "English", "short": "EN", "locale": "en_US", "dir": "" },
+    { "code": "tr", "name": "Türkçe", "short": "TR", "locale": "tr_TR", "dir": "tr/" }
+  ]
+}

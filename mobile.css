@@ -43,8 +43,11 @@
   .bar nav .bar-get { display: none; }
   .home .bar nav .nav-x { display: inline-flex; }
   .mark img { width: 30px; height: 30px; border-radius: 8px; }
-  .mark span { font-size: .95rem; letter-spacing: .12em; }
-  .bar nav { gap: 18px; }
+  .mark span { font-size: .95rem; letter-spacing: .12em; white-space: nowrap; }
+  .bar nav { gap: 14px; }
+  .bar nav a { white-space: nowrap; }
+  .lang summary span { display: none; }
+  .lang summary { padding: 6px; }
   .bar nav a { font-size: .88rem; }
   .hero { padding: 40px var(--gut) 14px; gap: 20px; }
   .hero-copy { text-align: center; }
@@ -52,6 +55,7 @@
   .pitch { margin-left: auto; margin-right: auto; }
   .hero-copy .title, .hero-copy .tag, .hero-copy .pitch { text-shadow: 0 0 3px #03051a, 0 0 8px #03051a, 0 0 16px #03051a, 0 0 28px rgba(3, 5, 26, .9); }
   .skies-head h2 { font-size: min(6.3vw, 1.9rem); white-space: nowrap; }
+  html:not([lang="en"]) .skies-head h2 { font-size: min(5.6vw, 1.7rem); white-space: normal; text-wrap: balance; }
   .kid { --k: 2; }
   .title .kid { left: auto; right: 7%; }
   .buddy-push, .buddy-ready { --k: 3; left: 50%; right: auto; bottom: 14px; transform: translateX(-50%); }
@@ -111,8 +115,11 @@
   .dock-get { height: 40px; padding: 0 18px; font-size: .9rem; }
 }
 
-@media (max-width: 359px) {
+@media (max-width: 399px) {
   .mark span { display: none; }
+}
+
+@media (max-width: 359px) {
   .bar nav { gap: 20px; }
   .pit-wrap { height: auto; aspect-ratio: 1 / 1.1; }
 }

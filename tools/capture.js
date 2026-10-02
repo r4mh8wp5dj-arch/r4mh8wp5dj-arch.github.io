@@ -34,7 +34,7 @@ async function shoot(page, target, file, errors) {
   page.on('pageerror', e => errors.push(`${target.name} ${file}: ${e.message}`));
   await page.goto(`http://localhost:${PORT}/${file}`, { waitUntil: target.engine === 'webkit' ? 'networkidle' : 'networkidle0' });
   await new Promise(r => setTimeout(r, 1500));
-  const base = path.join(OUT, `${file.replace(/\.html$/, '')}-${target.name}`);
+  const base = path.join(OUT, `${file.replace(/\.html$/, '').replace(/\//g, '-')}-${target.name}`);
   await page.screenshot({ path: `${base}-top.png` });
   await page.screenshot({ path: `${base}-full.png`, fullPage: true });
 }

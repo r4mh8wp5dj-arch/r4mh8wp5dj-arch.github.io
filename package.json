@@ -7,7 +7,8 @@
     "capture": "node tools/capture.js",
     "config": "node tools/config.js",
     "stamp": "node tools/stamp.js",
-    "build": "node tools/config.js && node tools/stamp.js"
+    "i18n": "node tools/i18n.js",
+    "build": "node tools/i18n.js && node tools/config.js && node tools/stamp.js"
   },
   "devDependencies": {
     "playwright-core": "1.48.2",
