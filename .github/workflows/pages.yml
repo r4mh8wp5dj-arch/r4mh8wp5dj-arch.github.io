@@ -25,7 +25,7 @@ jobs:
       - name: Collect the files that ship
         run: |
           mkdir _site
-          cp index.html 404.html contact.html privacy.html styles.css mobile.css site.webmanifest robots.txt sitemap.xml .nojekyll _site/
+          cp index.html 404.html contact.html privacy.html styles.css mobile.css site.webmanifest robots.txt sitemap.xml favicon.ico .nojekyll _site/
           cp -r assets js tr _site/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

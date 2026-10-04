@@ -16,6 +16,22 @@
   }
 
   var steps = document.querySelector('.steps'), dots = document.querySelectorAll('.steps-dots i');
+  if (steps && window.matchMedia) {
+    var narrow = window.matchMedia('(max-width: 700px)'), howSec = document.getElementById('how');
+    var label = function () {
+      if (narrow.matches) {
+        steps.setAttribute('role', 'region');
+        steps.setAttribute('tabindex', '0');
+        steps.setAttribute('aria-label', howSec ? howSec.getAttribute('aria-label') || '' : '');
+      } else {
+        steps.removeAttribute('role');
+        steps.removeAttribute('tabindex');
+        steps.removeAttribute('aria-label');
+      }
+    };
+    label();
+    if (narrow.addEventListener) narrow.addEventListener('change', label);
+  }
   if (!steps || !dots.length) return;
   var queued = false;
   function mark() {
