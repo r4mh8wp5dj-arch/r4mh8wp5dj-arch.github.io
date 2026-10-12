@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Block Pit coming soon badge</title>
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    html, body { margin: 0; width: 432px; height: 144px; overflow: hidden; background: transparent; }
+    .badge { box-sizing: border-box; width: 432px; height: 144px; border-radius: 27px; background: #000; border: 3px solid #A6A6A6; display: flex; align-items: center; gap: 22px; padding: 0 30px 0 22px; color: #fff; }
+    .badge img { width: 94px; height: 94px; border-radius: 22px; }
+    .badge p { margin: 0; display: flex; flex-direction: column; line-height: 1; }
+    .badge small { font-size: 27px; font-weight: 300; letter-spacing: .12em; text-transform: uppercase; }
+    .badge b { margin-top: 10px; font-size: 52px; font-weight: 700; letter-spacing: .01em; white-space: nowrap; }
+  </style>
+</head>
+<body>
+  <div class="badge">
+    <img src="../assets/img/logo-320.png" alt="">
+    <p><small id="top"></small><b id="main"></b></p>
+  </div>
+  <script>
+    (function () {
+      var copy = { en: ['Coming soon', 'on iPhone'], tr: ['Yakında', "iPhone'da"] };
+      var lang = new URLSearchParams(location.search).get('lang') || 'en';
+      document.getElementById('top').textContent = copy[lang][0];
+      document.getElementById('main').textContent = copy[lang][1];
+      document.body.setAttribute('data-ready', '1');
+    })();
+  </script>
+</body>
+</html>

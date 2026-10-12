@@ -42,8 +42,8 @@ Static landing page for the Block Pit iOS game, served by GitHub Pages from `mai
 
 ## Pending (do later, owner will provide the details)
 
-- Privacy policy (`privacy.html`): fill `[DEVELOPER LEGAL NAME]`, `[POSTAL ADDRESS]` and `[ANALYTICS PROVIDER]`, confirm the ad SDK (AdMob) is really in the shipping build, then remove the four `.note` boxes. Effective and last-updated dates are set to October 1, 2026; update them on launch day.
-- App Store link: replace `[APP_ID]` in `site.config.json`, then `npm run build`.
-- Turkish copy and the Turkish privacy policy (`i18n/tr`) were machine-drafted: have a native reviewer, and for the policy a lawyer, read them before launch. Placeholders such as `[DEVELOPER LEGAL NAME]` are identical in every language, so replace them everywhere.
-- Localized App Store badge: Apple supplies a Turkish badge; until `assets/img/badges` has it, every language shows the English badge.
+- The site is in "coming soon" mode: every App Store badge is replaced by `assets/img/badges/coming-soon-<lang>.png` (made with `tools/soon-badge.html` and `tools/soon-badge.js`), and the "Get the app" buttons say "Follow" and open Instagram. On launch day, restore the App Store badges and buttons, fill `[APP_ID]` in `site.config.json`, regenerate `share.jpg` with the App Store badge, and run `npm run build`.
+- Privacy policy (`privacy.html` and `i18n/tr/privacy.article.html`): the developer is Emir Kaladağ (shown only in the privacy policy). Before launch add a postal address in Sections 2 and 14, rewrite Section 6 once Firebase Analytics and Crashlytics are really in the build, and update Section 5 if ads are ever added. Effective date is October 1, 2026 and last updated October 12, 2026; update both on launch day.
+- Turkish copy and the Turkish privacy policy (`i18n/tr`) were machine-drafted: have a native reviewer, and for the policy a lawyer, read them before launch.
 - No Terms page: the game has no purchases or accounts, so Apple's standard license applies.
+- The project folder sits in iCloud Drive; `node_modules` files can be evicted and time out on read. Run the npm tools from a copy outside iCloud or keep the folder downloaded.
