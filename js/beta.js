@@ -31,6 +31,7 @@
     var data = new FormData(form);
     data.set('email', email);
     data.set('language', document.documentElement.lang || 'en');
+    data.set('submitted_at', new Date().toISOString());
     fetch(form.action, { method: 'POST', body: data, headers: { Accept: 'application/json' } })
       .then(function (res) {
         if (!res.ok) throw new Error(String(res.status));

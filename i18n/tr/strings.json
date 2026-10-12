@@ -88,7 +88,7 @@
   "beta.label": "E-posta adresi",
   "beta.ph": "ornek@eposta.com",
   "beta.go": "Katıl",
-  "beta.note": "E-postanı sadece beta davetini göndermek için kullanırız. <a href=\"privacy.html#beta-signup\">Gizlilik Politikası</a>",
+  "beta.note": "Katılarak 16 yaş veya üzerinde olduğunu ve TestFlight davetini ve kapalı betayla ilgili mesajları e-postayla almayı kabul edersin. Reklam e-postası göndermeyiz. Rızanı dilediğin zaman geri alabilirsin. <a href=\"privacy.html#beta-signup\">Gizlilik Politikası</a>",
   "beta.ok": "Teşekkürler! TestFlight davetini e-postayla göndereceğiz.",
   "beta.bad": "Lütfen geçerli bir e-posta adresi yaz.",
   "beta.fail": "Bir sorun oldu. Lütfen tekrar dene.",
