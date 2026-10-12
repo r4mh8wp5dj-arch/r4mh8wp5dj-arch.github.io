@@ -314,7 +314,7 @@ main, .foot { position: relative; z-index: 1; }
 .checkpoints small { order: 3; font-size: .86rem; color: var(--ink-2); }
 
 .end { position: relative; min-height: 88vh; display: grid; justify-items: center; align-content: start; padding: 10vh var(--gut) calc(clamp(150px, 30vh, 320px) + 24px); text-align: center; }
-.end-in { position: relative; z-index: 1; display: grid; justify-items: center; gap: 14px; }
+.end-in { scroll-margin-top: 96px; position: relative; z-index: 1; display: grid; justify-items: center; gap: 14px; }
 .icon { width: 112px; height: auto; border-radius: 23%; box-shadow: 0 18px 44px rgba(10, 26, 61, .3); }
 .end h2 { margin-top: 12px; font-size: clamp(2rem, 5vw, 3.6rem); }
 .end p { color: var(--ink-2); }
@@ -435,7 +435,7 @@ html:not([lang="en"]) .legal-top h1 span + span { margin-left: .3em; }
   line-height: 1.15;
   margin: 3.2em 0 .9em;
   color: #fff;
-  scroll-margin-top: 110px;
+ 
   display: flex;
   gap: .7em;
   align-items: baseline;
@@ -481,7 +481,7 @@ html:not([lang="en"]) .legal-top h1 span + span { margin-left: .3em; }
   *, *::before, *::after { animation-duration: .001s !important; animation-iteration-count: 1 !important; transition-duration: .001s !important; scroll-behavior: auto !important; }
 }
 
-.beta { width: min(100%, 600px); margin-top: 30px; scroll-margin-top: 110px; display: grid; justify-items: center; gap: 10px; }
+.beta { width: min(100%, 600px); margin-top: 30px; display: grid; justify-items: center; gap: 10px; }
 .beta h3 { font-size: 1.15rem; letter-spacing: .08em; }
 .beta p { margin: 0; text-wrap: balance; }
 .beta-row { position: relative; display: flex; gap: 8px; width: 100%; max-width: 460px; }
