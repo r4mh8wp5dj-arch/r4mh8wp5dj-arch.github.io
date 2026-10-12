@@ -56,6 +56,7 @@
   <script src="../js/play.js?v=5167295" defer></script>
   <script src="../js/dock.js?v=5167295" defer></script>
   <script src="../js/buddies.js?v=5167295" defer></script>
+  <script src="../js/beta.js" defer></script>
 </head>
 <body class="home" data-i18n-attr="data-t-full:t.full;data-t-fire:t.fire;data-t-chain:t.chain" data-t-full="Pit doldu!" data-t-fire="Alev aldı!" data-t-chain="Zincir x{n}!">
   <header class="bar">
@@ -168,6 +169,19 @@
         <div class="cta-row">
           <span class="appstore"><img src="../assets/img/badges/coming-soon-tr.png" data-i18n-attr="src:badge.src;alt:badge.alt" alt="Block Pit yakında iPhone'da" width="144" height="48"></span>
         </div>
+        <form class="beta" data-beta action="https://formspree.io/f/mbgdawja" method="POST" novalidate data-i18n-attr="data-ok:beta.ok;data-bad:beta.bad;data-fail:beta.fail;data-busy:beta.busy;data-done:beta.done" data-ok="Teşekkürler! TestFlight davetini e-postayla göndereceğiz." data-bad="Lütfen geçerli bir e-posta adresi yaz." data-fail="Bir sorun oldu. Lütfen tekrar dene." data-busy="Gönderiliyor…" data-done="Katıldın">
+          <h3 data-i18n="beta.h">Kapalı betaya katıl</h3>
+          <p data-i18n="beta.p">TestFlight daveti al, Block Pit'i yayından önce iPhone'unda oyna.</p>
+          <div class="beta-row">
+            <label class="beta-label" for="beta-email" data-i18n="beta.label">E-posta adresi</label>
+            <input id="beta-email" type="email" name="email" required autocomplete="email" inputmode="email" spellcheck="false" data-i18n-attr="placeholder:beta.ph" placeholder="ornek@eposta.com">
+            <input class="beta-trap" type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true">
+            <input type="hidden" name="_subject" value="Block Pit beta signup">
+            <button class="btn btn-primary" type="submit" data-i18n="beta.go">Katıl</button>
+          </div>
+          <p class="beta-note" data-i18n="beta.note">E-postanı sadece beta davetini göndermek için kullanırız. <a href="privacy.html#beta-signup">Gizlilik Politikası</a></p>
+          <p class="beta-msg" role="status" aria-live="polite"></p>
+        </form>
       </div>
       <canvas class="city" aria-hidden="true"></canvas>
       <canvas class="buddy city-kids" data-buddy="roofs" aria-hidden="true"></canvas>
