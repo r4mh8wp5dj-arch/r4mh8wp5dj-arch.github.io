@@ -481,10 +481,10 @@ html:not([lang="en"]) .legal-top h1 span + span { margin-left: .3em; }
   *, *::before, *::after { animation-duration: .001s !important; animation-iteration-count: 1 !important; transition-duration: .001s !important; scroll-behavior: auto !important; }
 }
 
-.beta { width: min(100%, 460px); margin-top: 30px; display: grid; justify-items: center; gap: 10px; }
+.beta { width: min(100%, 600px); margin-top: 30px; scroll-margin-top: 110px; display: grid; justify-items: center; gap: 10px; }
 .beta h3 { font-size: 1.15rem; letter-spacing: .08em; }
-.beta p { margin: 0; }
-.beta-row { position: relative; display: flex; gap: 8px; width: 100%; }
+.beta p { margin: 0; text-wrap: balance; }
+.beta-row { position: relative; display: flex; gap: 8px; width: 100%; max-width: 460px; }
 .beta-label, .beta-trap { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 .beta input[type="email"] { flex: 1; min-width: 0; height: var(--btn-h); box-sizing: border-box; padding: 0 20px; border-radius: 999px; border: 2px solid rgba(10, 26, 61, .2); background: rgba(255, 255, 255, .92); color: var(--navy); font: inherit; font-size: 1rem; }
 .beta input[type="email"]::placeholder { color: rgba(10, 26, 61, .45); }
